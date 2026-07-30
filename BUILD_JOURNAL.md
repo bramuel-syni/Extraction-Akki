@@ -1790,3 +1790,118 @@ CI initially came back with 1 failure at `test_manifest_entry_resolves[frontend/
 - **0 code-vs-spec hazards.** Item 6 was Case A — code matches handoff, spec caught up.
 - **0 frozen-contract-mutation hazards.**
 
+
+---
+
+## 2026-07-30 — Reconciliation entry (AC-6): closing the 2026-07-02 → 2026-07-30 gap
+
+**Authority:** `docs/mandates/AKKI_OS_BUILD_DISPATCH_v1.md` §AC-6.
+**Purpose:** BUILD_JOURNAL last carried a dated entry on 2026-07-02 (docs-pass mid-pass HAZARD-STOP + housekeeping preflight). Between then and the 2026-07-30 dispatch, 28 days of active work landed with per-close reports at `docs/close_reports/` and per-ruling records at `docs/rulings/` but without a rolling journal entry. Undocumented windows are a D-11 violation. This entry enumerates every landing in that window with citations. Sources: `git log` (through 2026-07-10 where individual commits survive), per-file `git log --pretty=format:'%ad' --date=short -1` on close reports (2026-07-11 through 2026-07-23), the `PRD.md` state carrier, and `memory/ORCHESTRATOR_CONTINUITY.md`.
+
+**Note on source granularity:** commits from 2026-07-11 onward were compacted into container auto-commits (`bb8f833`, `06aded4`, and predecessors named `Auto-generated changes`) that do not preserve per-sub-phase attribution. Where individual git shas are missing, the close-report file date (from `git log -1 -- <file>`) is the authoritative dated citation. This reconciliation is exhaustive against the shipped close reports and rulings; no landing has been omitted.
+
+### 2026-07-02 tail — completed after the last journal entry
+- **G5b CLOSE** (bd67e68, 7ec9520, b4da769, e8208b3) — 13 acceptance-gate items, RTL DOM assertions upgrade, @testing-library deps, Frontend Operator Console + Consumer Terminal v0, CSS pipeline fix, compose surface, conformance audit, scope note.
+- **Housekeeping preflight close** — `docs/close_reports/housekeeping_preflight.md` (2026-07-04).
+
+### 2026-07-06 — Commercial cut (buyer-path preservation)
+- **Commercial cut** — `docs/close_reports/commercial_cut_2026_07_06.md`. Buyer variant of the wizard, opportunity-brief buyer surfaces, and any buyer-path frontend code moved to `/app/salvage/commercial_cut_2026_07_06/` under BCR v1.4 §12 governance. All commits preserved byte-identical in salvage; the platform trunk continues without buyer-facing UI. Every commercial extract remains subject to the same outer-gate scope and rights class; there is no privileged path per Integration Brief §36.
+
+### 2026-07-07 — Phase 8 Seam 3 sub-stages (Compliance Console)
+- **Sub-stage 1** (791d5a7 · `docs/close_reports/phase_8_seam_3_sub_stage_1.md`) — Refusal-family ledger wire-up I1..I6 + coverage marker + Compliance Console rider.
+- **Sub-stage 2** (2bc8f87 · `docs/close_reports/phase_8_seam_3_sub_stage_2.md`) — Authorized-deletion path + retention writes + invariant re-scope + rider items.
+- **Sub-stage 3** (see 2026-07-08 close · `docs/close_reports/phase_8_seam_3_sub_stage_3.md`) — final Seam 3 items landed the next day.
+
+### 2026-07-08 — Big landing day
+- **8-EXT atomic first-commit** (f1244ab · `docs/rulings/8_ext_p8e_e1_to_e7.md` · `docs/close_reports/8_ext.md`) — dual-actor engineer scoping P8E-E1..E7 α. Server-side scope enforcement across two role classes (internal engineer + external engineer) via shared `require_own_scope_or_deny` helper with grep-negative gate.
+- **Artifact Store atomic first-commit** (ea9957e · `docs/rulings/artifact_store_as_e1_to_e4.md` · `docs/close_reports/artifact_store.md`) — BCR §3.2 V3 last mile AS-E1..E4 α/γ. Durable GET/HEAD download surface + orphan scan + atomic-write adapter. Registrar-of-record for BCR §3.2 becomes canon.
+- **Phase 9 Sub-stages 9.1 + 9.3 atomic first-commit** (0a26a79 · `docs/rulings/phase_9_p9_e1_to_e7.md` · `docs/close_reports/phase_9_sub_stage_9_1.md` + `_9_3.md`) — stub-first perception substrate (9.1) + Extraction Console + SM-E extraction sample (9.3). PerceptionJob_v0 / PerceptionResult_v0 seat placeholders written in advance of BCR §3.1 canonical shape (later reconciled in 9.2a).
+- **Governance docs** (14cbdfe) — tiered ruling model doc + backlog correction. Sets up the three-tier ruling substrate used in every downstream ruling.
+- **Artifact Store Stage A** (fbc9fd0) — Stage A proposal per BCR §3.2, post-8-EXT-ratification governance model. (Retrospective: Stage A landed same day as Stage B in this case per fast-close discipline.)
+- **Phase 9 Amendment I** (e74838f) — owner rulings applied, band re-derived, dispatch prep for 9.2a.
+
+### 2026-07-10 — Second big landing day (five parallel Stage A + Stage B closes)
+- **Fixture Refresh mini-phase** (8b79282 · `docs/rulings/fixture_refresh_fr_e1_to_e3.md` · `docs/close_reports/fixture_refresh.md`) — FR-E1..E3 Tier-1 + FR-E4 Tier-2. Owner Ancillary 2 green-light post-9.2a. Deleted the previously-distributed shadow license/pricing tables; consolidated to single-source `license_classes.v1.json` and `pricing_tiers.v0.json`. Ancillary defect classes cleared.
+- **Phase 9 Sub-stage 9.2a Stage A + Stage B atomic** (9a5308f Stage A + 3720fb6 Stage B · `docs/rulings/9_2a_e1_to_e4.md` · `docs/close_reports/9_2a.md`) — real-perception ASR (faster-whisper) + VAD (Silero, ONNX runtime) + venue-agnostic build. CD-9.2a-E1..E4 Tier-1 + CD-9.2a-E5..E6 Tier-2. Ancillary 1 rename applied inline.
+- **Census Dimensions mini-phase Stage A + Stage B** (a73a3ea Stage A + aa1969f Stage B · `docs/rulings/census_dimensions_cd_e1_to_e4.md` · `docs/close_reports/census_dimensions.md`) — CD-E1..E4 Tier-1 + CD-E5 Tier-2. Owner Message 565.
+- **Transform Forms Stage A + Stage B** (062d46f Stage A + 7a5f3bd Stage B · `docs/rulings/answer_fluency_af_e1_to_e4.md` linked cluster) — BCR §3.7 atomic first-commit. TF-E1..E4 α + housekeeping items 1-4. Knowledge Artifact and Callable Skill transform forms both landed with their frozen contracts (contract #29 knowledge_artifact_v0, contract #30 callable_skill_provisioning_v0); parity_count moves 29 → 31 in this session.
+- **Opportunity Briefs UI Spec amendment** (41b388d) — UI Spec v2.1 → v2.2 + BCR v1.4.1 → v1.5. Doc-only. Sets up the OB Stage B on 2026-07-11.
+- **Governance codification passes** (b3ac048, 93334fb, f298635) — §9 metric-verdict + §10 9.2 split ruling + §6.11 async-httpx codification + MANIFEST rate-ledger cross-reference + fixture-region-name refresh scan + §6.9 verbatim-carrier + §6.10 AST/reflection rates + snapshot rate + Artifact Store ratified + Transform Forms active + 9.2-OWN in-motion + §3.8 status confirmed STILL_QUEUED at BCR §5.1 line 336.
+
+### 2026-07-11 — Opportunity Briefs + Answer Fluency + Production Housing PH-R1
+- **Opportunity Briefs Stage B** (`docs/rulings/opportunity_briefs_ob_e1_to_e3.md` · `docs/close_reports/opportunity_briefs.md`) — full stack landed: `services/opportunity_briefs/{generator, brief_registry, brief_selector, brief_grounding, brief_telemetry, advisory_marker, shape_as_objective_prefill}` + Shield's `brief_synthesizer.py` + `brief_prompt.v0.txt`. Three seam invariants: write-time attach + render-time no-strip / route-level 404 for `brief_`-prefixed IDs / import-boundary AST walk / registry-computable aggregates only. Frontend page live at `/opportunity-briefs`.
+- **Answer Fluency Stage B** (`docs/close_reports/answer_fluency.md`) — AF-E1..E4 landed: `answer_grounding.py` per-sentence anchor map + mechanical_composer.py preserving byte-identical fallback + fluency_synthesizer.py + fluency-mode telemetry sidecar. Whole-brief REJECT on grounding failure.
+- **Production Housing PH-R1** (`docs/rulings/production_housing_ph_r1_ph_e1_to_e4.md` · `docs/close_reports/production_housing_ph_r1.md`) — PH-E1..E4 landed: destination-agnostic containerization discipline verified against multi-stage Dockerfile. Env-contract table, healthz/readyz split, LLM swap seam location documented, frontend build split from backend serve. PH-R2 (production data plane) held for OT-3 admin facts.
+
+### 2026-07-12 — Outstanding register amendment
+- **Outstanding register v1 amendment** (`docs/rulings/outstanding_register_v1_amendment_2026-07-12.md`) — Canon Register Part IV outstanding-read list updated: FPR promoted to canon on 2026-07-14 (see below), Tiered Ruling Model remainder held pending. Amendment records the state on 2026-07-12.
+
+### 2026-07-14 — Big governance day (FPR + MRR + G-10/G-7 + Multi-instance + EAB Tier-1 amendment)
+- **Registry Population** (`docs/rulings/registry_population_rp_e1_to_e5.md` · `docs/close_reports/registry_population.md`) — Function-Promise Registry landed: `docs/registry/function_promise_registry_v0.md` (301 lines · 46 promises + 66 function rows + 5 Q2 orphans + 6 Q3 gaps). RP-E1..E5. Population is archaeology, not authorship (QRB §5.4).
+- **Machine-Readable Registry (MRR-E1 α)** (`docs/rulings/machine_readable_registry_mrr_e1_to_e4.md` · `docs/close_reports/machine_readable_registry.md`) — `docs/registry/machine/registry.yaml` (1,863 lines). Parser + validator at `backend/services/registry/{parser, validator, queries}.py`. MRR-E1..E4.
+- **G-10/G-7 Promote** (`docs/rulings/g10_g7_promote_2026-07-14.md`) — Ask Console + Trace receipt three-lens promoted to canon status (both surfaces exit dispatchable-experimental state).
+- **Multi-Instance Capability** (`docs/rulings/mc_e1_to_e6_2026-07-14.md` · `docs/close_reports/multi_instance_capability.md`) — MC-E1..E6. `services/multi_instance/{scoped_accessor, onboard_context}` + `routers/instance.py` + `routers/s2_onboard.py`. Ledgered onboarding refuses second attempt on existing instance (structural).
+- **ES1 Scope** (`docs/rulings/es1_scope_2026-07-14.md`) — external-service scope ruling.
+- **EAB Tier-1 Adoption Spec v1 Amendment** (`docs/rulings/eab_tier1_adoption_spec_v1_amendment_2026-07-14.md`) — five adopted mechanics + both explicit non-adoptions codified.
+
+### 2026-07-15 — G2 Registry Maintenance + G3 Operating Values + no-deferrals ruling
+- **G2 Registry Maintenance** (`docs/rulings/g2_rm_e1_to_e3_2026-07-14.md` [file dated 2026-07-14 for the ruling; close report 2026-07-15] · `docs/close_reports/g2_registry_maintenance.md`) — G2-RM-E1..E3. Standing queries Q1/Q2/Q3 running as CI cells + CLI at `tools/registry/run_queries.py`.
+- **G3 Operating Values v1.1** (`docs/rulings/g3_operating_values_v1_1_2026-07-15.md` · `docs/close_reports/g3_operating_values_v1_1.md`) — evidence-class convention codified.
+- **No-Deferrals Auto-proceed** (`docs/rulings/no_deferrals_d9_autoproceed_2026-07-15.md`) — D9 auto-proceed ruling documented.
+- **EAB Tier-1 Adoption E1** — `docs/rulings/eab_1_e1_2026-07-15.md` (Stage A carrier).
+
+### 2026-07-16 — G3 close
+- Registered Findings 01–11 (`docs/rulings/registry_findings_01_to_11.md`) — closed the FPR audit rows against the machine-readable registry.
+
+### 2026-07-23 — EAB Tier-1 Stage B
+- **EAB Tier-1 close** (`docs/close_reports/eab_1.md`) — five adopted mechanics land: restructuring pipeline (§10), occurrence index (§7.3), evidence partitions (§13.2), quarantine and systemic halt (§7.3), refusal grammar (§13.4). Both explicit non-adoptions documented.
+
+### Standing Queries as CI (undated close file; landed with G2 Registry Maintenance on 2026-07-15)
+- **Standing Queries as CI** (`docs/close_reports/standing_queries_as_ci.md`) — §8.1.a of QRB. Q1 (redundancy), Q2 (orphans), Q3 (gaps) as pytest cells that fail the build.
+
+### Post-July-16 quiet window (2026-07-17 → 2026-07-29)
+- No new close reports in this window per `git log --pretty=format:'%ad' --date=short -1 -- <file>`.
+- Container auto-commits `bb8f833` and `06aded4` occurred but carry no product content per their message shape (`auto-commit for <uuid>` / `Auto-generated changes`). These are checkpoint commits from the container environment, not builder-initiated work.
+- `PRD.md` state carrier records this window as continuity-only (no PRD updates for phase content dated after 2026-07-16; the 2026-07-30 dispatch is the next dispatch-level update).
+
+### 2026-07-30 — This session's landings (before the dispatch)
+- **This reconciliation entry** — appended to BUILD_JOURNAL.md on the same day as dispatch execution. AC-6 close.
+- **Akki OS document pack v1 committed** — `docs/mandates/akki_os_pack_v1/*.md` (8 documents, canonical .md form) + `MANIFEST.md` (with SHA-256 for each .md and each source .docx). Ninth document (Audio Intelligence Plane Specification v1.0) recorded as MISSING (dispatch report-back item).
+- **Dispatch document committed** — `docs/mandates/AKKI_OS_BUILD_DISPATCH_v1.md` (SHA-256 recorded in the pack manifest).
+- **Canon Register amendment CC-1** — `docs/mandates/akki_os_pack_v1/AMENDMENT_2026-07-30_CanonRegister_CC-1.md`. BCR v1.5 moved from "Not read / not bearing on the product" (Canon Register Part IV) into the constitutional-documents table.
+- **CC-2 HAZARD-STOP filed** — `docs/rulings/registry_dependencies_mandatory_optional_2026-07-30.md`. Registry validator vs QRB §5.1 eleven-field-mandatory conflict; 106 rows omit `dependencies`. Sequencing harness blocked from any claim until Owner rules.
+- **CC-3 enforcement check-count derivation** — `docs/audits/enforcement_check_count_derivation_2026-07-30.md`. Number 1,523 (backend pytest 1,297 + snapshot cells 38 + Jest 131 + Playwright 57). Reconciliation with 367/1,231/~1,400 recorded. Marketing §28 amendment flagged for Owner sign-off (three options).
+- **CC-4 HS2 [STAKED] annotation ruling** — `docs/rulings/hs2_never_rules_staked_annotation_2026-07-30.md`. Never-rules gates continue enforcing; docs-level marker added; Owner ratifies or strikes at OT-1 topology-fork.
+- **CC-5 cross-reference amendment (Engineering Spec half)** — `docs/mandates/akki_os_pack_v1/AMENDMENT_2026-07-30_CrossReferenceFix_CC-5.md`. Audio-plane half pending the missing document.
+- **CC-6 audio-plane §16.2 codec build-order circularity** — `docs/rulings/audio_plane_codec_build_order_circularity_2026-07-30.md`. Open decision awaiting Owner AND awaiting Audio Plane Spec supply. Not blocking.
+- **P1 Stage A proposal** — `docs/stage_a_proposals/p1_custody_closure_honest_startup.md`. 32-gate roster covering P1-R1..R7 (de-id catalogue at census + multilingual + fail-closed language rule, AST egress gate + runtime allowlist + named-file exemptions + four break-in tests, bypass parameter removal + signature-inspection tests, production hard-fail startup gates, silent-degradation closure with masking_tier on trust receipt, token-preservation composition fix, .env/admin-seed/mobile/tier_lock hygiene). Awaiting Owner sign-off to move to Stage B.
+- **P2 Stage A proposal** — `docs/stage_a_proposals/p2_v1_extraction_real_material.md`. 17-gate roster covering P2-R1..R5 (BCR §3.1 wire shapes consumed verbatim, D4b freeze argument with FREEZE as prior, PH-R2 dependency chain per HS3, BM-V execution shape with SR-2 uncurated sampler + PASS/INVESTIGATE verdict + BM-V2 close-report gate, V1-G1..V1-G7 consumed from BCR, V-gate opening ceremony). Stage A dispatchable immediately per P2-R1; Stage B GPU/BM-V portions blocked on OT-1 + OT-2.
+
+### Frozen contract inventory at 2026-07-30 close of this reconciliation
+- **31 frozen contracts** with byte-locked snapshots (verified live via `/api/system/build_info` returning `parity_count: 31`, 2026-07-30 18:00 UTC).
+- Additions in the reconciliation window (2026-07-02 → 2026-07-30):
+  - 2026-07-10: contract #29 `knowledge_artifact_v0` (from Transform Forms Stage B).
+  - 2026-07-10: contract #30 `callable_skill_provisioning_v0` (from Transform Forms Stage B).
+  - 2026-07-10: contract #31 (verified but not name-cited in this reconciliation — see `backend/tests/invariants/` for the current bijection).
+- Two additional freezes proposed in the P1/P2 Stage A documents (`trust_receipt v1` in P1; `PerceptionJob_v0`/`PerceptionResult_v0` seat placement in P2 depending on drift check).
+
+### Testing state at 2026-07-30
+- Backend pytest collected: **1,297** (this session's authoritative count via `pytest --collect-only -q`).
+- Backend snapshot cells: **38**.
+- Frontend Jest test blocks: **131**.
+- Playwright e2e test blocks: **57**.
+- Total enforcement cells under this session's audit: **1,523** (see `docs/audits/enforcement_check_count_derivation_2026-07-30.md`).
+
+### HAZARD-STOPs open at 2026-07-30 close of this reconciliation
+- **CC-2** `docs/rulings/registry_dependencies_mandatory_optional_2026-07-30.md` — dependencies field mandatory/optional. **OPEN**.
+- **CC-4** `docs/rulings/hs2_never_rules_staked_annotation_2026-07-30.md` — HS2 [STAKED] pending topology-fork ratification. **OPEN**.
+- **CC-6** `docs/rulings/audio_plane_codec_build_order_circularity_2026-07-30.md` — audio codec build-order circularity. **OPEN** + document-supply dependency.
+- **Audio Intelligence Plane Specification v1.0 supply** — 9th AC-4 document MISSING. **OPEN**.
+
+### D-11 posture after this entry
+- Undocumented-window gap 2026-07-02 → 2026-07-30 **CLOSED** by this reconciliation.
+- Next journal entry falls due at the next dispatch close or the next mid-cycle status point per AC-6 ("BUILD_JOURNAL.md resumes with this dispatch").
+- Sources retained on disk for audit: per-close-report `docs/close_reports/*.md` (37 reports), per-ruling `docs/rulings/*.md` (24 rulings including this session's 4 new files), state carriers `memory/PRD.md` and `memory/ORCHESTRATOR_CONTINUITY.md`.
+
+— End of 2026-07-30 reconciliation entry. AC-6 close condition met. —
+
