@@ -1,48 +1,19 @@
-# RMS Intelligence — Test Credentials
+# Test Credentials (updated 2026-07-30 P1 close)
 
-**Warning:** dev-only test credentials. Rotate before ship.
+## Admin login
+- **Email:** `admin@rms.example.com`
+- **Password:** `admin-b1-test-pw`
+- **Roles:** admin, operator, engineer, buyer, master_admin, dpo
+- **Seed vehicle:** `services/auth/user_store.seed_admin_if_absent` — idempotent, only creates when absent, never overwrites.
 
-## Phase 8 Stage B-1 (2026-07-05) — auth landing
+## Environment posture
+- `AKKI_ENV=development` (dev fallback active; Shield trust-receipt master secret is set in .env; dev echo mode remains functional under Owner scoping).
+- `EMERGENT_LLM_KEY` is loaded from `/app/backend/.env`.
 
-Seeded via `services/auth/user_store.seed_admin_if_absent(...)` at backend startup, reading ADMIN_EMAIL + ADMIN_PASSWORD from `/app/backend/.env`.
+## How to demo
+1. `curl http://localhost:8001/api/health` — expect `status: ok`.
+2. `POST /api/auth/login` with the JSON body `{"email":"admin@rms.example.com","password":"admin-b1-test-pw"}`; expect 200 + JWT.
+3. Frontend at `http://localhost:3000/auth/login` — same credentials.
 
-| Field | Value |
-|---|---|
-| Email | `admin@rms.example.com` |
-| Password | `admin-b1-test-pw` |
-| Roles | admin, operator, engineer, buyer, master_admin, dpo |
-| Key grants | 1 (external / live_query / floor=utterance / scope=estate) |
-
-**Auth flow for testing:**
-
-```
-# Login
-curl -X POST "$REACT_APP_BACKEND_URL/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@rms.example.com","password":"admin-b1-test-pw"}'
-# → {"access_token":"...","refresh_token":"...","identity":{...}}
-
-# Introspect
-curl -H "Authorization: Bearer <access_token>" "$REACT_APP_BACKEND_URL/api/auth/me"
-# → Identity JSON
-
-# Refresh
-curl -X POST -H "Authorization: Bearer <refresh_token>" "$REACT_APP_BACKEND_URL/api/auth/refresh"
-# → new {access_token, refresh_token, identity}
-```
-
-**Registration:**
-
-```
-curl -X POST "$REACT_APP_BACKEND_URL/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"someone@example.com","password":"testpass123","name":"Someone"}'
-# → 201 + tokens; default role `ask_console_user`, no key_grants
-```
-
-**Auth-denial shape (Owner E2 non-negotiable):**
-
-- 401 / 403 body: `{"reason": <code>, "detail": <string>}`
-- 4-code bounded set: `auth_missing`, `auth_expired`, `auth_scope_insufficient`, `auth_identity_mismatch_for_wizard_session`
-- NEVER contains `outcome` key
-- NEVER routed via RefusalCard
+## Refusal taxonomy note (Owner E2 non-negotiable)
+- Access-control denial (bad credentials, missing token, expired token, scope insufficient, identity mismatch) returns `{reason, detail}` with HTTP 401/403. **NEVER `outcome=refused`.** Governed refusal is the platform's V2/V3 concern; auth denial is a taxonomy-separate class.

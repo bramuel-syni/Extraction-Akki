@@ -1,0 +1,17 @@
+{
+  "schema_version": "tier_lock_manifest_v0",
+  "authored": "2026-07-30",
+  "authored_ruling": "docs/rulings/P1_stage_a_owner_approval_2026-07-30.md",
+  "governance": {
+    "authority": "Owner",
+    "class": "rule-history archive manifest",
+    "reason": "Each rule bump per BCR §3.11 CK-B writes a new tier_lock version. Preserving 727 files in the live tree is legitimate but noisy; this manifest tracks each version's SHA so old versions can move to archive while remaining byte-identical and audit-reachable."
+  },
+  "policy": {
+    "retain_last_n_in_live_tree": 30,
+    "archive_directory": "backend/services/economics/archive/tier_lock/",
+    "immutability_guard": "archived files' SHAs land here; CI cell fails on mutation."
+  },
+  "versions_note": "The full version-by-SHA list is populated by the archival job (out of scope for P1 close). This manifest ships with policy + governance; SHA-population runs at first archival window per BCR §3.11 effective delay.",
+  "versions": []
+}

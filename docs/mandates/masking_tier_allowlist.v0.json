@@ -1,0 +1,42 @@
+{
+  "schema_version": "masking_tier_allowlist_v0",
+  "governance": {
+    "authority": "Owner",
+    "class": "positive list — nothing appears by default",
+    "change_process": "BCR §3.11 CK-B governed change (Owner + effective delay + objection path). Adding a new tier requires a dated ruling in docs/rulings/ and a supplementary snapshot in tests/invariants/.",
+    "authored": "2026-07-30",
+    "authored_ruling": "docs/rulings/P1_stage_a_owner_approval_2026-07-30.md §Condition (ii)"
+  },
+  "entries": [
+    {
+      "tier": "full_deid",
+      "meaning": "Standard operating mode: all three de-id layers (regex + tenant catalogue + spaCy NER) applied and PASSED. No degradation.",
+      "admissible_under_env": ["development", "sandbox", "production"],
+      "receipt_stamp": "masking_tier: full_deid"
+    },
+    {
+      "tier": "llm_dev_echo_fallback",
+      "meaning": "LLM absent or SYNISENSE_LLM_MODE=mock; Shield returns the de-identified content unchanged through the reidentify pass. Preserves round-trip semantics for tests without burning provider budget.",
+      "admissible_under_env": ["development", "sandbox"],
+      "receipt_stamp": "masking_tier: llm_dev_echo_fallback"
+    },
+    {
+      "tier": "regex_only_language_unsupported",
+      "meaning": "Layer 3 (spaCy NER) has no model for the detected language AND the tenant catalogue (layer 2) has no hits for this call. If proper-noun density is below threshold, this tier lands; if above, the call fails-closed with ServiceUnavailable per language_dispatch.fail_closed_language_guard.",
+      "admissible_under_env": ["development", "sandbox"],
+      "receipt_stamp": "masking_tier: regex_only_language_unsupported"
+    },
+    {
+      "tier": "perception_asr_fallback_whisper_tiny",
+      "meaning": "Faster-whisper unavailable; pipeline fell back to whisper-tiny variant per perception_fallback_allowlist. Trust receipt records the fallback so downstream verification can class the result.",
+      "admissible_under_env": ["development", "sandbox", "production"],
+      "receipt_stamp": "masking_tier: perception_asr_fallback_whisper_tiny"
+    },
+    {
+      "tier": "dev_fallback",
+      "meaning": "Umbrella tier for any dev-mode degradation not otherwise classed. Emitted only under AKKI_ENV=development; production emissions of this tier are refused at write time.",
+      "admissible_under_env": ["development", "sandbox"],
+      "receipt_stamp": "masking_tier: dev_fallback"
+    }
+  ]
+}

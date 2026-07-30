@@ -1,0 +1,27 @@
+{
+  "schema_version": "tenant_catalogue_v0",
+  "governance": {
+    "authority": "Owner",
+    "class": "harvestable-vocabulary catalogue — census-populated",
+    "seed_rationale": "P1-R1 fail-closed enforcement requires a non-empty catalogue path even before real census runs against real estate audio. This seed carries a hand-curated sample vocabulary structured identically to what census.emit_tenant_entity_catalogue will produce at Phase 2 close on real broadcast material.",
+    "populated_by": "tests + services/mtafiti/census.emit_tenant_entity_catalogue (Phase 2)",
+    "authored": "2026-07-30"
+  },
+  "tenants": {
+    "default": {
+      "presenters": [
+        {"surface_form": "John Smith", "variant_forms": ["Smith"], "source_ref": "seed:dev-fixture"},
+        {"surface_form": "Jane Doe", "variant_forms": ["Doe"], "source_ref": "seed:dev-fixture"}
+      ],
+      "stations": [
+        {"surface_form": "RMS Radio", "variant_forms": ["RMS"], "source_ref": "seed:dev-fixture"}
+      ],
+      "programmes": [
+        {"surface_form": "Morning Briefing", "variant_forms": [], "source_ref": "seed:dev-fixture"}
+      ],
+      "advertisers": [
+        {"surface_form": "Example Corp", "variant_forms": ["ExampleCo"], "source_ref": "seed:dev-fixture"}
+      ]
+    }
+  }
+}

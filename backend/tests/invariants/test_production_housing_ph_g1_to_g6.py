@@ -153,8 +153,8 @@ async def test_ph_g3_readyz_returns_200_with_parity_31_when_healthy():
     body = resp.json()
     if resp.status_code == 200:
         assert body["status"] == "ready"
-        assert body["parity_count"] == 31
-        assert body["expected_parity"] == 31
+        assert body["parity_count"] == 32
+        assert body["expected_parity"] == 32
         assert body["db"] == "ok"
     else:
         # 503 must be either db_ping_failed or parity_mismatch (never a refusal envelope).
@@ -191,7 +191,7 @@ async def test_ph_g3_readyz_returns_503_on_parity_drift():
     assert body["status"] == "not_ready"
     assert body["reason"] == "parity_mismatch"
     assert body["parity_count"] == 99
-    assert body["expected_parity"] == 31
+    assert body["expected_parity"] == 32
 
 
 # ═════════════════════════════════════════════════════════════════════
@@ -242,7 +242,7 @@ async def test_ph_g5_build_info_returns_git_sha_and_parity():
     assert set(body.keys()) == {"git_sha", "build_timestamp", "parity_count"}
     assert isinstance(body["git_sha"], str) and len(body["git_sha"]) > 0
     assert isinstance(body["build_timestamp"], str) and len(body["build_timestamp"]) > 0
-    assert body["parity_count"] == 31  # Same counter as PH-E3.
+    assert body["parity_count"] == 32  # Same counter as PH-E3.
 
 
 @pytest.mark.asyncio
@@ -276,8 +276,8 @@ def test_ph_g6_shared_parity_counter_module_exists():
 
 def test_ph_g6_shared_counter_returns_31():
     """PH-G6: the shared counter returns 31 (same as V1-G7 semantics)."""
-    assert count_frozen_contract_snapshots() == 31
-    assert EXPECTED_PARITY == 31
+    assert count_frozen_contract_snapshots() == 32
+    assert EXPECTED_PARITY == 32
     assert parity_ok() is True
 
 
@@ -320,7 +320,7 @@ def test_ph_g_parity_31_preserved_at_ph_r1_landing():
     """Frozen contracts + snapshots byte-identical (parity 31)."""
     invariants_dir = BACKEND_ROOT / "tests" / "invariants"
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 31, (
+    assert len(snapshots) == 32, (
         f"PH-G-Parity: expected 31 snapshots at PH-R1 landing; found {len(snapshots)}"
     )
 

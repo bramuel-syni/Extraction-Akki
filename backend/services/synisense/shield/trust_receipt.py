@@ -111,8 +111,20 @@ def build_trust_receipt(
     exposure_reduction_score: float,
     request_hash: str,
     response_hash: str,
+    masking_tier: str = "full_deid",
 ) -> Dict[str, Any]:
-    """Build a v1 trust receipt, sign it, return the signed dict."""
+    """Build a v1 trust receipt, sign it, return the signed dict.
+
+    P1-R5 (Owner ruling 2026-07-30, conditions i + ii):
+      * `masking_tier` is a REQUIRED field on every emission; default is
+        `full_deid` for the standard operating path.
+      * Values are validated against the positive allowlist at
+        `docs/mandates/masking_tier_allowlist.v0.json` (Owner condition ii).
+      * The frozen contract at `backend/contracts/trust_receipt_v1.py`
+        (parity seat #32) mirrors this shape and is snapshot-locked.
+    """
+    from services.synisense.shield import masking_tier as _mt
+    _mt.validate_tier(masking_tier)
     receipt: Dict[str, Any] = {
         "receipt_id": receipt_id,
         "audit_id": audit_id,
@@ -128,6 +140,7 @@ def build_trust_receipt(
         "exposure_reduction_score": exposure_reduction_score,
         "request_hash": request_hash,
         "response_hash": response_hash,
+        "masking_tier": masking_tier,
     }
     receipt["signature"] = sign(receipt, tenant_id=tenant_id)
     return receipt

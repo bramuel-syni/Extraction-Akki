@@ -203,6 +203,11 @@ async def _startup() -> None:
         await auth_session_binding.ensure_indexes()
         # Census-dimensions mini-phase (Owner Message 565) — unique index on feed_id.
         await db["census_content_dimensions"].create_index("feed_id", unique=True)
+        # P1-R4 (Owner ruling 2026-07-30, production-scoped) — startup guards.
+        # Under AKKI_ENV=production, refuses to boot on missing secrets. Under
+        # development/sandbox, logs structured warnings and continues.
+        from services.synisense.startup_guard import enforce_startup_guards
+        enforce_startup_guards()
         # Idempotent admin seed for local/dev + testing agent.
         import os as _os
         _admin_email = _os.environ.get("ADMIN_EMAIL")

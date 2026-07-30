@@ -226,7 +226,7 @@ def parse_function_table(rows: list[list[str]], source_label: str) -> list[Funct
                 surface=record.get("surface", ""),
                 enforcement=record.get("enforcement", ""),
                 cost=record.get("cost", ""),
-                dependencies=record.get("dependencies", ""),
+                dependencies=record.get("dependencies", "").strip() or "none",
                 ladder_rung=record.get("ladder_rung", ""),
                 owner=record.get("owner", ""),
                 source=source_label,

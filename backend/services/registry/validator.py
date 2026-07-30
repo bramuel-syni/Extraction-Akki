@@ -185,8 +185,10 @@ def check_mrr_g1_schema_conformance(model: Any) -> tuple[bool, list[str]]:
         if not isinstance(p.functions_that_cite, int):
             errs.append(f"promise[{p.promise_id!r}]: functions_that_cite must be int")
     required = ["function_id", "governor", "mandate", "promise", "service_trace",
-                "surface", "enforcement", "cost", "ladder_rung", "owner"]
-    optional = {"dependencies"}  # per Stage A §5.1 "may be empty"
+                "surface", "enforcement", "cost", "dependencies", "ladder_rung", "owner"]
+    # CC-2 Owner ruling (option B, 2026-07-30): `dependencies` is presence-mandatory.
+    # `none`/`unknown` are legal explicit values where source evidences no ordering.
+    # See docs/rulings/CC-2_owner_ruling_option_b_2026-07-30.md.
     for f in model.functions:
         for field_name in required:
             val = getattr(f, field_name, None)
@@ -310,10 +312,10 @@ def check_mrr_g_parity(model: Any) -> tuple[bool, list[str]]:
     errs: list[str] = []
     contract_count = len(list(CONTRACTS_DIR.glob("*.py")))
     snapshot_count = len(list(SNAPSHOTS_DIR.glob("*.contract_snapshot.json")))
-    if contract_count != 31:
-        errs.append(f"contract count {contract_count} ≠ 31")
-    if snapshot_count != 31:
-        errs.append(f"snapshot count {snapshot_count} ≠ 31")
+    if contract_count != 32:
+        errs.append(f"contract count {contract_count} ≠ 32")
+    if snapshot_count != 32:
+        errs.append(f"snapshot count {snapshot_count} ≠ 32")
     return (len(errs) == 0), errs
 
 

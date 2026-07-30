@@ -236,7 +236,7 @@ def test_operator_router_untouched_at_7b_2():
 def test_frozen_contract_snapshot_parity_now_28_post_9_1():
     """Block C — parity invariant maps 29 contracts post-Artifact-Store (AS-E1 α additive)."""
     from tests.invariants.test_frozen_contract_snapshot_parity import CONTRACT_TO_SNAPSHOT
-    assert len(CONTRACT_TO_SNAPSHOT) == 31
+    assert len(CONTRACT_TO_SNAPSHOT) == 32
 
 
 def test_no_caller_cancelled_or_async_queue_saturated_code_at_7b_2():

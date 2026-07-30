@@ -155,3 +155,47 @@ Per doctrine §3.4 Q1 (Redundancy: two or more functions, same promise, same sur
 ═══════════════════════════════════════════════════════════════════
 
 *End of consolidation log v0. Standing Rule v3 · on-disk canonical. RP-E1 α + tie-break-toward-distinct applied at 4 borderline pairs. Under-merge self-correction available via future dispatched Q1 query run.*
+
+
+═══════════════════════════════════════════════════════════════════
+
+## §5. CC-2 Owner ruling execution (2026-07-30) — dependencies field backfill
+
+**Authority:** `docs/rulings/CC-2_owner_ruling_option_b_2026-07-30.md` (Owner ruling option B, RP-E4 α precedent).
+**Executed:** 2026-07-30 in the P1 close cycle.
+
+### Drift row
+
+At CC-2 rule time, the machine registry (`docs/registry/machine/registry.yaml`) carried 147 function rows. Of those, **77 rows** had `dependencies: ""` (empty-string value) reflecting source-cell empties in the v1.md + supplements .md files. Per Owner ruling option B (verbatim: *"`dependencies` is presence-mandatory; `none`/`unknown` are legal explicit values where the source evidences no ordering. Backfill the 106 rows mechanically, tighten the validator to require presence, log the drift row"*), the mechanical backfill was applied:
+
+**Rule applied:** at parser time (`backend/services/registry/parser.py::_parse_function_table`), an empty `dependencies` cell renders to the explicit value `"none"`. This is deterministic (identical inputs → identical outputs); it preserves source-.md byte-identity (v0.md locked SHA unchanged); and it makes the "no ordering evidenced" state auditable.
+
+**Rows changed by the mechanical rule:** 77 (all rows with `dependencies: ""` before the rule; 0 with `dependencies: ""` after).
+
+**Rows carrying `unknown`:** 0 (no rows in the current source carry a "not yet determinable" annotation; the mechanical default `"none"` covers all empty cells).
+
+**Discrepancy vs dispatch language ("106 rows"):** the dispatch cited 106 as the count of rows omitting the field. The measured count of empty-cell rows at execution time was 77. Two candidate reasons:
+- (a) between the CC-2 filing (2026-07-30 morning) and its execution (2026-07-30 evening), no rows were touched; the 106 vs 77 delta is measurement-scope (the dispatch may have counted across v0.md + all supplements before parser-composition; the parser applies late-supplement precedence which can overwrite earlier empties). Not investigated further as the mechanical rule is agnostic to the count.
+- (b) the dispatch figure was the count from an earlier snapshot; the intervening machine-registry regenerations reduced the count.
+
+**Under either interpretation, the mechanical backfill is complete:** post-regen count of `dependencies: ""` in the machine YAML is **zero**. Every function row carries an explicit non-empty `dependencies` value.
+
+### Validator tightening
+
+`backend/services/registry/validator.py::check_mrr_g1_schema_conformance` — `dependencies` moved from the `optional` set (previously `optional = {"dependencies"}`) into the `required` list. Empty string / null now fails the gate. All 7 MRR-G# gates green after the change:
+
+```
+MRR-G1: GREEN
+MRR-G2: GREEN
+MRR-G3: GREEN
+MRR-G4: GREEN
+MRR-G-Parity: GREEN
+MRR-G-DataBlind: GREEN
+MRR-G-SourceSHA: GREEN
+```
+
+### Standing queries Q1/Q2/Q3 unblocked
+
+Sequencing-harness claims are unblocked per Owner ruling. Q1/Q2/Q3 mechanical scans re-ran successfully at `2026-07-30T19:36:12+00:00` after the backfill; outputs at `docs/registry/queries/q{1,2,3}_mechanical.md`. All three are report-level, never build-failing per doctrine.
+
+═══════════════════════════════════════════════════════════════════

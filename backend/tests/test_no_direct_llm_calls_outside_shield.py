@@ -42,6 +42,9 @@ ALLOWED_PREFIXES = (
 )
 ALLOWED_FILES = {
     str(BACKEND / "routers" / "billing.py"),
+    # P1-R4 (Owner ruling 2026-07-30) — production startup guard reads
+    # EMERGENT_LLM_KEY to check presence at boot; does NOT invoke providers.
+    str(BACKEND / "services" / "synisense" / "startup_guard.py"),
 }
 
 # Forbidden patterns.

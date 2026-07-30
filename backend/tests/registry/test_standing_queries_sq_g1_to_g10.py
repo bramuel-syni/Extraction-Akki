@@ -273,8 +273,8 @@ def test_sq_g_rung1_no_llm_imports():
 def test_sq_g_parity_31():
     contracts_dir = REPO_ROOT / "backend" / "contracts"
     snapshots_dir = REPO_ROOT / "backend" / "tests" / "invariants"
-    assert len(list(contracts_dir.glob("*.py"))) == 31
-    assert len(list(snapshots_dir.glob("*.contract_snapshot.json"))) == 31
+    assert len(list(contracts_dir.glob("*.py"))) == 32
+    assert len(list(snapshots_dir.glob("*.contract_snapshot.json"))) == 32
 
 
 # ---------------------------------------------------------------------------

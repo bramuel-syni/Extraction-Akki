@@ -406,12 +406,12 @@ def test_v1_g7_attestation_parity_31_at_9_2a_close() -> None:
     from services.health import count_frozen_contract_snapshots, EXPECTED_PARITY
 
     parity = count_frozen_contract_snapshots()
-    assert parity == 31, (
+    assert parity == 32, (
         f"V1-G7 at 9.2a close: expected 31 snapshots (unchanged). "
         f"Actual: {parity}."
     )
     # Cross-attest: shared counter's canonical expected value matches.
-    assert EXPECTED_PARITY == 31
+    assert EXPECTED_PARITY == 32
 
 
 # ===== Standing constraints re-attest =====

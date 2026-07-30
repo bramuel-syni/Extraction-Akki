@@ -74,6 +74,6 @@ This request states positions and consequences. It does **not** propose a prefer
 
 Owner writes a dated ruling to `docs/rulings/` naming this file, choosing A/B/C, and (if B or C) stating the effective-delay window for the tightening change. This file's "Status" line below is updated in the ruling's close pass — not before.
 
-**Status:** OPEN · awaiting Owner ruling.
+**Status:** CLOSED · Owner ruled option B on 2026-07-30. See `docs/rulings/CC-2_owner_ruling_option_b_2026-07-30.md` for the ruling and execution record. Sequencing-harness claims UNBLOCKED.
 
-— End of ruling request. —
+— End of ruling request (superseded by 2026-07-30 Owner ruling). —

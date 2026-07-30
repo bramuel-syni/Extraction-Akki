@@ -80,6 +80,41 @@ def _provider_for(preference: ModelPreference) -> Tuple[str, str]:
 
 
 # ─────────────────────────────────────────────────────────────────────
+# P1-R6 (Owner ruling 2026-07-30) — token-preservation clause LEADS the
+# composed system prompt. Callers CANNOT strip the token clause even
+# when they supply their own `system_msg` — this helper prepends the
+# clause unconditionally. The caller's prompt follows AFTER a delimiter
+# that carries a load-bearing statement.
+#
+# Break-in test: attempt to pass a system_msg that omits the token clause
+# and observe that the composed message still leads with it.
+# ─────────────────────────────────────────────────────────────────────
+_TOKEN_PRESERVATION_CLAUSE = (
+    "You are a privacy-governed assistant. The user message contains "
+    "opaque tokens of the shape [[ENT_XXX_NNN]] — preserve them "
+    "verbatim. Do not invent meanings for them."
+)
+
+_CALLER_PROMPT_DELIMITER = (
+    "\n\n--- Caller-supplied context follows. Opaque tokens above MUST "
+    "be preserved verbatim in your output. ---\n\n"
+)
+
+
+def _compose_system_message(caller_prompt: Optional[str]) -> str:
+    """Compose the system message with the token-preservation clause LEADING.
+
+    When `caller_prompt` is None, only the token clause + a short
+    concise-response instruction ships. When `caller_prompt` is provided,
+    the token clause LEADS, followed by the delimiter, followed by the
+    caller's prompt. The caller cannot strip the token clause.
+    """
+    if caller_prompt is None:
+        return _TOKEN_PRESERVATION_CLAUSE + " Respond concisely."
+    return _TOKEN_PRESERVATION_CLAUSE + _CALLER_PROMPT_DELIMITER + caller_prompt
+
+
+# ─────────────────────────────────────────────────────────────────────
 # Deterministic echo fallback. Used when EMERGENT_LLM_KEY is missing OR
 # when SYNISENSE_LLM_MODE=mock. Smoke tests opt into this so they don't
 # burn LLM budget. The fallback intentionally echoes the de-identified
@@ -122,7 +157,6 @@ async def invoke_with_metering(
     timeout_seconds: float = 20.0,
     system_msg: Optional[str] = None,
     tenant_id: str = "default",
-    _shielded: bool = True,
 ) -> Tuple[str, str, str, Dict[str, Any]]:
     """Same contract as `invoke()` but additionally returns a usage dict.
 
@@ -144,12 +178,14 @@ async def invoke_with_metering(
     to the mechanical arm per AF-E2 amended boundary.
 
     Tenant layer: `services.synisense.shield.tenant_entities.lookup_in_text`
-    returns an empty catalogue (S2.onboard-era seat); regex + spaCy layers
-    carry alone until estate vocabulary populates.
+    reads the catalogue at `tenant_catalogue.v0.json` (P1-R1 backfilled).
+    Empty catalogues fall through to spaCy layer per the fail-closed rule.
 
-    Bypass flag `_shielded=False` is test-only (e.g. tests that intentionally
-    exercise the mock/echo path with raw prompts). Production callers keep
-    the default.
+    P1-R3 (Owner ruling 2026-07-30) — the previous `_shielded: bool = True`
+    bypass parameter has been REMOVED from this function's signature.
+    Tests that need to exercise the de-id-off path MUST monkeypatch
+    `deidentifier.deidentify` at the module boundary (see the P1
+    signature-inspection gate).
 
     `usage` shape:
       - Live SDK call: `{"input_tokens": int, "output_tokens": int, "method": "exact"}`
@@ -158,21 +194,20 @@ async def invoke_with_metering(
     Phase 14 (2026-06-05) — `system_msg` kwarg. When provided, REPLACES
     the built-in privacy-governed system prompt for this call. When
     None (default for the 90+ existing call sites), the built-in
-    prompt is preserved. This is how `routers/chat.py` injects the
-    AKKI editorial persona + token-shape fluency guard rails without
-    rippling into every other shield_invoke consumer.
+    prompt is preserved.
+
+    P1-R6 (Owner ruling 2026-07-30) — even when the caller supplies its
+    own `system_msg`, the token-preservation clause LEADS the composed
+    prompt. Callers CANNOT strip the token clause; `_compose_system_message`
+    always prepends it (see helper below).
     """
     provider, model = _provider_for(model_preference)
 
-    # ── IF-1 chokepoint · deidentify inbound ──
-    de_id = None
-    token_map: Dict[str, str] = {}
-    llm_input = content
-    if _shielded:
-        from services.synisense.shield import deidentifier, reidentifier
-        de_id = await deidentifier.deidentify(content, tenant_id=tenant_id)
-        llm_input = de_id.redacted_text
-        token_map = de_id.token_map
+    # ── IF-1 chokepoint · deidentify inbound (P1-R3: always shielded) ──
+    from services.synisense.shield import deidentifier, reidentifier
+    de_id = await deidentifier.deidentify(content, tenant_id=tenant_id)
+    llm_input = de_id.redacted_text
+    token_map = de_id.token_map
 
     # Mock mode — explicit opt-in OR no key configured.
     llm_mode = os.environ.get("SYNISENSE_LLM_MODE", "").lower()
@@ -181,14 +216,12 @@ async def invoke_with_metering(
         if not emergent_key and llm_mode != "mock":
             log.info("synisense.shield.llm_router: EMERGENT_LLM_KEY absent — using echo fallback")
         mock_text = _mock_invoke(llm_input)
-        if _shielded:
-            from services.synisense.shield import reidentifier
-            try:
-                mock_text = reidentifier.reidentify(mock_text, token_map)
-            except Exception as exc:  # noqa: BLE001 — fail-closed: never return raw response
-                raise ServiceUnavailable(
-                    f"reidentifier failure at chokepoint: {type(exc).__name__}: {str(exc)[:200]}"
-                ) from exc
+        try:
+            mock_text = reidentifier.reidentify(mock_text, token_map)
+        except Exception as exc:  # noqa: BLE001 — fail-closed: never return raw response
+            raise ServiceUnavailable(
+                f"reidentifier failure at chokepoint: {type(exc).__name__}: {str(exc)[:200]}"
+            ) from exc
         return (mock_text, provider + ":mock", model + ":mock", {})
 
     # Live mode — call litellm directly so we can keep the ModelResponse
@@ -203,14 +236,12 @@ async def invoke_with_metering(
             _LITELLM_IMPORT_ERROR or "ok",
         )
         mock_text = _mock_invoke(llm_input)
-        if _shielded:
-            from services.synisense.shield import reidentifier
-            try:
-                mock_text = reidentifier.reidentify(mock_text, token_map)
-            except Exception as exc:  # noqa: BLE001 — fail-closed
-                raise ServiceUnavailable(
-                    f"reidentifier failure at chokepoint: {type(exc).__name__}: {str(exc)[:200]}"
-                ) from exc
+        try:
+            mock_text = reidentifier.reidentify(mock_text, token_map)
+        except Exception as exc:  # noqa: BLE001 — fail-closed
+            raise ServiceUnavailable(
+                f"reidentifier failure at chokepoint: {type(exc).__name__}: {str(exc)[:200]}"
+            ) from exc
         return (mock_text, provider + ":mock", model + ":mock", {})
 
     try:
@@ -224,11 +255,7 @@ async def invoke_with_metering(
             "messages": [
                 {
                     "role": "system",
-                    "content": system_msg if system_msg else (
-                        "You are a privacy-governed assistant. The user message contains "
-                        "opaque tokens of the shape [[ENT_XXX_NNN]] — preserve them "
-                        "verbatim. Do not invent meanings for them. Respond concisely."
-                    ),
+                    "content": _compose_system_message(system_msg),
                 },
                 {"role": "user", "content": llm_input},
             ],
@@ -250,8 +277,7 @@ async def invoke_with_metering(
         # Pure regex; hard-PII classes render as [LABEL_••••last4]
         # or [LABEL_REDACTED], contextual classes rehydrate. See
         # `reidentifier._VISIBLE_STRATEGY` for the mapping.
-        if _shielded:
-            from services.synisense.shield import reidentifier
+        if _shielded_marker := True:  # unified reidentify path
             text = reidentifier.reidentify(text, token_map)
         usage: Dict[str, Any] = {}
         try:

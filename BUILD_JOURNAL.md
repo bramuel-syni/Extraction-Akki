@@ -1905,3 +1905,61 @@ CI initially came back with 1 failure at `test_manifest_entry_resolves[frontend/
 
 — End of 2026-07-30 reconciliation entry. AC-6 close condition met. —
 
+
+---
+
+## 2026-07-30 — P1 CLOSE · Custody Closure & Honest Startup
+
+**Authority:** `docs/mandates/AKKI_OS_BUILD_DISPATCH_v1.md` §3 + Owner ruling `docs/rulings/P1_stage_a_owner_approval_2026-07-30.md`.
+**Close report:** `docs/close_reports/p1_custody_closure_honest_startup.md`.
+
+### Landed
+
+- **32 P1 gates green** (P1-R1..R7): tenant catalogue backfilled + language dispatch fail-closed; AST egress gate + runtime firewall + named-file exemption list; bypass parameter removed from production signature + signature-inspection gates; production-scoped hard-fail startup guards + dev echo mode functional; trust_receipt_v1 sibling contract with masking_tier + positive allowlist; token-preservation clause leads composed prompt; .env/admin-seed/mobile/tier_lock hygiene.
+- **Parity 31 → 32 seal event.** trust_receipt_v1 sibling contract at `backend/contracts/trust_receipt_v1.py` + byte-locked snapshot at `backend/tests/invariants/trust_receipt_v1.contract_snapshot.json`. 14 downstream `== 31` assertions rewritten to `== 32`.
+- **Owner conditions (i) + (ii) confirmed** — see P1 close report §4.
+- **4 amendment notes** propagating corrected custody claims to Engineering Spec §6.1/Appendix A, Governance Brief §14–15, Marketing §28, Canon Register Part II — all on disk in `docs/mandates/akki_os_pack_v1/`.
+- **Full suite: 1,332 backend pytest passed + 1 skipped, 0 regressions.**
+- **Enforcement-cell re-measure = 1,559** (per CC-3 practice).
+- **Demo verified live** at 2026-07-30T19:59+00:00: `/api/health` 200, `/api/system/build_info` reports `parity_count: 32`, admin login (`admin@rms.example.com` / `admin-b1-test-pw`) returns HTTP 200 with JWT tokens.
+
+### Also landed in this session (before P1 code work)
+
+- **Audio Intelligence Plane Specification v1.0** committed to `docs/mandates/akki_os_pack_v1/` (AC-4 closes at 9/9).
+- **Companion docs** (Builder Prompt, Surfaces v2 Amendment) committed to `docs/mandates/`; demo HTML relocated to `docs/product/` per Owner clarification with detailed content analysis at `docs/product/akki_v4_demo_frontend_analysis_2026-07-30.md`.
+- **CC-1 ruling:** BCR v1.5 promoted to canon table (Canon Register amended via `docs/mandates/akki_os_pack_v1/AMENDMENT_2026-07-30_CanonRegister_CC-1.md`).
+- **CC-2 ruling (option B) EXECUTED:** parser + validator tightening; machine registry regenerated; 77 empty-cell `dependencies` rows backfilled to `none`; Q1/Q2/Q3 standing queries re-ran green; drift row logged at `docs/registry/consolidation_log_v0.md` §5.
+- **CC-3 ruling (option a):** derivation on disk; Marketing §28 amendment landed; re-measure practice instituted at every phase close.
+- **CC-4 ruling filed:** HS2 [STAKED] annotation ruling; awaits Owner ratification at OT-1 topology-fork.
+- **CC-5 CLOSED:** Engineering Spec §16.3 half + Audio Plane §4.4 half (§6.4 → §6.2 fix); both dated amendment notes on disk.
+- **CC-6 substantive analysis** written now that Audio Plane is in-hand; three dispositions recorded; decision remains OPEN pending Owner ruling (per SR-3, not self-resolved).
+
+### HAZARD-STOPs raised in this session
+
+- **FRONTEND_BRIEF_v2.md missing** — filed at `docs/rulings/frontend_brief_v2_missing_2026-07-30.md`. Blocks Phase 3 Stage A only; does NOT block Phase 1 (custody + startup) or Phase 2 (V1 extraction). Awaits Owner supply.
+
+### HAZARD-STOPs open at close
+
+- **CC-4** HS2 [STAKED] — awaits OT-1 topology-fork ruling.
+- **CC-6** audio codec build-order — awaits Owner ruling.
+- **FRONTEND_BRIEF_v2 missing** — awaits Owner supply.
+
+### Frozen contract inventory at close
+
+**32 frozen contracts** with byte-locked snapshots. `/api/system/build_info` returns `parity_count: 32` at 2026-07-30T19:59+00:00. New at this close: `trust_receipt_v1` (Owner condition i).
+
+### Blocks/dependencies at close
+
+- **P2 Stage B** blocked on OT-1 (topology + archive access + HS2) + OT-2 (Hour A + 300-unit slice, uncurated per D-7 from same hour per Owner confirmation) + OT-3 (PH-R2 admin facts).
+- **P3 Stage A** blocked on FRONTEND_BRIEF_v2.md supply.
+- **CC-2 sequencing-harness claims UNBLOCKED** (Owner-ruled option B executed).
+
+### Test discipline (AC-5/AC-6)
+
+- 1,332 backend pytest, 39 snapshot cells, 131 Jest, 57 Playwright = **1,559 enforcement cells** (re-measured per CC-3 practice; will re-measure at every future close).
+- 0 regressions.
+- 0 new HAZARD-STOPs from code work.
+- 0 frozen-contract-mutation hazards (Owner condition (i) landed as SIBLING seat, never as in-place edit).
+
+— End of 2026-07-30 P1 close entry. —
+

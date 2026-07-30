@@ -1,0 +1,41 @@
+{
+  "schema_version": "shield_egress_exemptions_v0",
+  "governance": {
+    "authority": "Owner",
+    "class": "named-file exemption list — replaces directory-scoped exemption",
+    "reason": "CC-2 canon correction (single-egress guard was regex-pattern with directory exemption; four evasion classes passed). Named-file list is auditable per-file.",
+    "change_process": "Any addition or removal requires a dated ruling in docs/rulings/ AND regeneration of the AST egress gate's exemption set.",
+    "authored": "2026-07-30",
+    "authored_ruling": "docs/rulings/P1_stage_a_owner_approval_2026-07-30.md"
+  },
+  "exempted_files": [
+    {
+      "path": "backend/services/synisense/shield/llm_router.py",
+      "reason": "The Shield's outbound LLM chokepoint. Only file authorised to import litellm / emergentintegrations and reach provider hosts. Enforces de-id + re-id round trip."
+    },
+    {
+      "path": "backend/services/synisense/shield/fluency_synthesizer.py",
+      "reason": "Fluency synthesis behind the Shield chokepoint. Calls llm_router.invoke_with_metering (not raw providers directly)."
+    },
+    {
+      "path": "backend/services/synisense/shield/brief_synthesizer.py",
+      "reason": "Opportunity-brief synthesis behind the Shield chokepoint. Calls llm_router.invoke_with_metering (not raw providers directly)."
+    },
+    {
+      "path": "backend/services/synisense/shield/perception_router.py",
+      "reason": "Perception service routing (audio/vision worker dispatch). Chokepoint-adjacent; carries provider-adjacent transport for perception jobs."
+    }
+  ],
+  "forbidden_import_names": [
+    "openai",
+    "anthropic",
+    "google.generativeai",
+    "litellm",
+    "emergentintegrations"
+  ],
+  "forbidden_provider_hosts": [
+    "api.openai.com",
+    "api.anthropic.com",
+    "generativelanguage.googleapis.com"
+  ]
+}

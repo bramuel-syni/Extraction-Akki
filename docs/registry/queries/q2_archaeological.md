@@ -4,7 +4,7 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 
 **Class:** Orphans archaeology — Owner-ruled findings from `function_promise_registry_v0.md` §4 Q2 table (5 findings Q2-01..Q2-05 with `[RULED · …]` tags verbatim).
 
-**Run timestamp:** 2026-07-15T03:59:25.870757+00:00
+**Run timestamp:** 2026-07-30T19:36:12.282442+00:00
 
 **Source SHAs:**
 - `docs/registry/function_promise_registry_v0.md`: `598a7ad4d326dd5c0fc003fe8091a52fd215fb63e76d5c04befd1aa4c25584b0`
@@ -14,7 +14,7 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 - `docs/registry/function_promise_registry_v0.4_supplement.md`: `d1fa1949a206d5fb73481864962f93efaa888a4ef4793efad82a53681fc3dc1b`
 - `docs/registry/function_promise_registry_v0.5_supplement.md`: `d2d0c5f4c37dcbe525ff99a757687d7ae81446cd738719341e2b7884d4ac778f`
 - `docs/registry/consolidation_log_v0.md`: `2c60425599afbd59cb083cc8a391a94b717598a796a8028ca28ca4176ab26062`
-- `docs/registry/machine/registry.yaml`: `669e620f1a752ed242e637c557c66a02d9cff1b83dc0d916aa6916787f7c1dca`
+- `docs/registry/machine/registry.yaml`: `1c7c9ea573428b93386de46bb1cb9b029d37f0837722ccb775c1d717940020bd`
 
 **Finding count:** 5
 

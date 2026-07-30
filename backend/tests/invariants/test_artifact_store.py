@@ -487,7 +487,7 @@ def test_v1_g7_attestation_parity_29_byte_identical_at_artifact_store_close() ->
     """
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 31, (
+    assert len(snapshots) == 32, (
         f"V1-G7 Artifact Store: expected 31 snapshots (28 pre-existing + "
         f"OuterGateReceipt_v1 + KA v0 + CallableSkillProvisioning v0 additive "
         f"per AS-E1 α + TF-E1 α + TF-E2 α). Actual: {len(snapshots)}."

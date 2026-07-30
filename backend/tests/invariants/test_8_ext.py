@@ -297,7 +297,7 @@ def test_v1_g7_attestation_28_contracts_byte_identical_at_8_ext_close() -> None:
     """
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 31, (
+    assert len(snapshots) == 32, (
         f"Post-Artifact-Store: expected 29 snapshots (28 pre-existing + "
         f"OuterGateReceipt_v1 additive per AS-E1 α). Actual: {len(snapshots)}."
     )
