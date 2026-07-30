@@ -1963,3 +1963,24 @@ CI initially came back with 1 failure at `test_manifest_entry_resolves[frontend/
 
 — End of 2026-07-30 P1 close entry. —
 
+
+
+---
+
+## 2026-07-30 — P1 addendum · frontend BACKEND_URL blocker fix (post-verification)
+
+**Trigger:** Owner-verification-cycle-1 returned 4/5 pass, 1 BLOCKER. Served frontend bundle contained `const BACKEND_URL = undefined;` — axios baseURL was literally `"undefined/api"`.
+**Addendum on disk:** `docs/close_reports/p1_addendum_frontend_backend_url_blocker_fix_2026-07-30.md`.
+
+**Applied:**
+- 5 source files updated to resilient fallback pattern `process.env.REACT_APP_BACKEND_URL || ''` — falls back to same-origin (relative `/api`) when env var absent/undefined. Files: `apiClient.js`, `ComplianceRulebookWritePage.js`, `OnboardingInvitePage.jsx`, `SampleGroundingContext.jsx`, `CounterSignBanner.jsx`.
+- `frontend/.env` updated: `REACT_APP_BACKEND_URL=https://governance-scan-3.preview.emergentagent.com` (platform convention).
+- Frontend service restarted; CRA recompiled bundle. Bundle-grep confirms `BACKEND_URL = "https://governance-scan-3.preview.emergenta[gent.com]"` baked in; no runtime `undefined/api`.
+
+**Curl-smoke via preview URL passes:** `/api/health` 200 · admin login 200 with JWT + 6 roles · wrong-password shape `{reason, detail}` (no `outcome` — auth taxonomy respected).
+
+**Testing-agent invoked** per user's system reminder (builder curl-inspection is not the operative signal for closing this blocker). Testing-agent report is the definitive verification.
+
+**Honest-record admission:** main P1 close report's "demoable immediately" line did not hold at first verification. Defect class recorded: `.env` values MUST be smoke-tested through the actual browser preview URL, not just via curl from inside the pod. Applied to future closes as a checklist item.
+
+— End of P1 addendum entry. —

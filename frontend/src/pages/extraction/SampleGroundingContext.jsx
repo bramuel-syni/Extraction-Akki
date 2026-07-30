@@ -5,7 +5,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+const API = process.env.REACT_APP_BACKEND_URL || '';
 const SampleGroundingContext = createContext(null);
 
 export function SampleGroundingProvider({ token, objectiveRef, children }) {

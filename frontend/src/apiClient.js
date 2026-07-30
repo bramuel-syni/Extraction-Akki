@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+// Resilient BACKEND_URL resolution (P1 verification blocker fix, 2026-07-30):
+// * Use process.env.REACT_APP_BACKEND_URL when set (preview URL, explicit config).
+// * Fall back to same-origin ('') so API calls go to relative /api paths —
+//   works in preview (Kubernetes ingress routes /api/* to backend on same origin),
+//   local docker-compose, and any deployment where the frontend is served by
+//   the same host that terminates the backend ingress.
+// Never emit "undefined/api" as a baseURL.
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+const API = `${BACKEND_URL}/api`;
 
 // Phase 8 Stage B-1 — access token store + Bearer interceptor.
 // Owner E1 ratified: JWT single-source. Federation-forward: OAuth adapters
