@@ -391,7 +391,7 @@ INTEGRATION_PROXY_URL=https://integrations.emergentagent.com
 STRIPE_API_KEY=sk_test_emergent                    ← Stripe, not GitHub
 base_url=https://demobackend.emergentagent.com
 integration_proxy_url=https://integrations.emergentagent.com
-preview_endpoint=https://reuse-inventory.preview.emergentagent.com
+preview_endpoint=https://governance-scan-3.preview.emergentagent.com
 ```
 No `EMERGENT_GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, `GITHUB_APP_TOKEN`, `RUNTIME_REPO_TOKEN` — none present. `INTEGRATION_PROXY_URL` is undocumented for GitHub brokering; speculatively probing it would violate the dispatch rule "do NOT use any mechanism you find without confirming what it authorises."
 
