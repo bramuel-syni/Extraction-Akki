@@ -754,7 +754,11 @@ export default function UseDataWizardPage() {
         data-testid="use-data-wizard-split"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(320px, 40%) 1fr',
+          /* Split view stacks to a single column when the viewport
+             cannot host both a 320px cards column and a 320px dialogue
+             column side-by-side. Mobile @ 390px lands in the single-
+             column path; desktop keeps the split. */
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '22px',
           alignItems: 'start',
         }}

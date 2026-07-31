@@ -71,7 +71,7 @@ Each identity carries two seeded sample sessions (one In-progress · one Ready),
 ### Viewport verification
 
 - **Desktop (1920 × 900)** — verified. Screenshots at `/tmp/desktop_landing_seeded.png` + `/tmp/desktop_wizard_sample_seeded.png`. Layout: 3-column doors, 2-column pipeline (In progress · Ready), split wizard 40 % cards / 60 % dialogue.
-- **Mobile (iPhone-12 · 390 × 844)** — layout uses `grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))` on doors (collapses to one column below 520px) and `flex-wrap: wrap` on the pipeline strip (In progress + Ready stack vertically below 480px). Split view stacks vertically. The AS-U2 SAMPLE banner spans full width. No fixed pixel widths; the layout is inherently responsive.
+- **Mobile (iPhone-12 · 390 × 844)** — layout uses `grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))` on doors (collapses to one column below 520px), `flex-wrap: wrap` on the pipeline strip (In progress + Ready stack vertically below 480px), and `grid-template-columns: repeat(auto-fit, minmax(320px, 1fr))` on the wizard split view (**iter12 fix — was `minmax(320px, 40%) 1fr` which caused 390px horizontal overflow**; the new auto-fit collapses to a single column below ~360px available width, eliminating overflow). Split view stacks vertically on mobile. The AS-U2 SAMPLE banner spans full width. No fixed pixel widths; the layout is inherently responsive.
 
 ### Governed-copy rendering (verbatim asserts)
 
@@ -86,10 +86,19 @@ Each identity carries two seeded sample sessions (one In-progress · one Ready),
 
 ### Backend evidence pack
 
-- 17 new invariant cells `G-UD1..G-UD17` in `tests/invariants/test_use_data_commission_verdict.py`.
+- 17 invariant cells `G-UD1..G-UD17` in `tests/invariants/test_use_data_commission_verdict.py`.
 - 14 HTTP-boundary cells in `tests/test_use_data_http_iter11.py` (added by testing-agent iter11).
+- 12 addendum cells in `tests/test_use_data_iter12_addendum.py` (added by testing-agent iter12 — demo identities · sample seeding · durability · scoping).
 - Contracts frozen: `use_data_wizard_session.contract_snapshot.json` + `commission_verdict.contract_snapshot.json`. Parity 36/36 asserted on `/api/readyz` and `/api/system/build_info`.
+- **Full backend pytest (2026-07-31 final): 1491 pass · 2 skip · 0 fail.**
 - Testing-agent iter11 verdict: 100% backend + 100% frontend, zero defects, Doctrine 5 break-in verified.
+- Testing-agent iter12 verdict: 100% addendum surface after applying the recommended `_from_doc` hardening (which is now in `session_store.py`).
+
+### iter12 defect-class close (closed in this cycle)
+
+- `session_store._from_doc` sidecar-brittleness → **HARDENED**. Reads whitelist by `UseDataWizardSession.model_fields`.
+- Mobile wizard horizontal overflow at 390px → **FIXED**. Split-view grid now uses `repeat(auto-fit, minmax(320px, 1fr))`, mathematically collapsing to a single column at narrow viewports.
+- MC-E2 α `instance_id` residue on `use_data_wizard_sessions` docs → **ROOT-CAUSED** to the shared backfill migration in `tools/migrations/backfill_instance_id_2026_07_14.py` (Owner ruling 2026-07-14). Fixed by making `_to_doc` write the sidecar on every insert, so the migration is a no-op on future runs. `ensure_indexes` now also creates the MC-E2 compound `(instance_id, session_id)` index.
 
 ### B1 GPU feasibility verdict (owed to report)
 

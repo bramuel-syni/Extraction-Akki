@@ -26,24 +26,60 @@ from contracts.use_data_wizard_session import UseDataWizardSession
 
 COLLECTION = "use_data_wizard_sessions"
 
+# MC-E2 α condition (Owner ruling 2026-07-14): every persistent collection
+# carries an `instance_id` sidecar so the backfill-attestation test remains
+# clean. The value is written from the ambient instance context at write
+# time; the frozen UseDataWizardSession contract does not include this
+# field, and reads whitelist by model_fields so the sidecar never leaks
+# back into the wire format.
+_DEFAULT_INSTANCE_ID = "instance_1"
+
+
+def _current_instance_id() -> str:
+    """Return the effective instance_id for a persistence write.
+
+    Uses the shared multi_instance resolver if importable; falls back to
+    `instance_1` (matches the tools/migrations/backfill_* default) so the
+    module is safe to import in isolation.
+    """
+    try:
+        from services.multi_instance import current_instance_id  # type: ignore
+        return current_instance_id() or _DEFAULT_INSTANCE_ID
+    except Exception:  # pragma: no cover — trivial fallback
+        return _DEFAULT_INSTANCE_ID
+
 
 async def ensure_indexes() -> None:
-    """Unique index on session_id + operator_id lookup helper."""
+    """Unique index on session_id + operator_id lookup helper + MC-E2 compound."""
     coll = db[COLLECTION]
     await coll.create_index("session_id", unique=True)
     await coll.create_index("operator_id")
     await coll.create_index("is_sample")
+    # MC-E2 α: compound (instance_id, session_id) enables instance-scoped
+    # queries with lookup efficiency.
+    await coll.create_index([("instance_id", 1), ("session_id", 1)], name="instance_id_compound")
 
 
 def _to_doc(session: UseDataWizardSession, is_sample: bool = False) -> Dict[str, Any]:
     payload = session.model_dump()
     payload["is_sample"] = is_sample
+    payload["instance_id"] = _current_instance_id()
     return payload
 
 
 def _from_doc(doc: Dict[str, Any]) -> UseDataWizardSession:
-    # Strip the sidecar flags before rehydrating the frozen contract.
-    stripped = {k: v for k, v in doc.items() if k not in ("_id", "is_sample")}
+    """Rehydrate the frozen contract from a persistence doc.
+
+    WHITELIST by `UseDataWizardSession.model_fields` (rather than blacklisting
+    the known sidecar keys `_id` + `is_sample`). This hardens the read path
+    against ANY future sidecar residue on persistence docs — the MC-E2 α
+    `instance_id` field, `_id`, `is_sample`, and any other sidecar the
+    persistence layer may add over time. The frozen contract has
+    `ConfigDict(extra="forbid")` so an unknown sidecar would raise
+    ValidationError → 500; whitelisting closes that class of hazard.
+    """
+    allowed = set(UseDataWizardSession.model_fields.keys())
+    stripped = {k: v for k, v in doc.items() if k in allowed}
     return UseDataWizardSession(**stripped)
 
 

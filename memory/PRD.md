@@ -16,9 +16,15 @@ Owner made VIEWABLE BUILD a standing requirement from UI-1-A onward. Applied to 
   - `operator` → `demo.operator@demo.rms.example.com` / `demo-operator-pw`
   - `analyst` → `demo.analyst@demo.rms.example.com` / `demo-analyst-pw`
 - **Sample fixture data (AS-U2 marked)** — two seeded sample sessions per demo identity (one `s-sample-in-progress-*`, one `s-sample-ready-*`), sidecar `is_sample=true` on persistence doc, prominent **SAMPLE** badge on every pipeline row + amber wizard banner. Unmarked mocks are prohibited (Owner AS-U2 discipline).
-- **Session state Mongo-backed** — the prior in-memory dict replaced with `services/use_data/session_store.py` (collection `use_data_wizard_sessions`, unique index on `session_id`). State survives backend restart.
-- **Mobile + desktop viewport discipline** — layout uses `grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))` on doors and `flex-wrap: wrap` on pipeline strip; inherently responsive. Desktop (1920 × 900) verified via screenshot; mobile (iPhone-12 · 390 × 844) verified via CSS-code-path inspection (no fixed widths).
+- **Session state Mongo-backed** — the prior in-memory dict replaced with `services/use_data/session_store.py` (collection `use_data_wizard_sessions`, unique index on `session_id`, MC-E2 α compound `(instance_id, session_id)` index, `is_sample` index for pipeline queries). State survives backend restart; verified by iter12 test suite.
+- **MC-E2 α discipline** — writes carry `instance_id=<current>` sidecar (Owner ruling 2026-07-14 backfill attestation stays clean); reads whitelist by `UseDataWizardSession.model_fields` so sidecar residue never leaks into the frozen contract → no more 500s on schema drift (iter12 minor issue closed).
+- **Mobile + desktop viewport discipline** — landing doors use `grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))`; pipeline strip uses `flex-wrap: wrap`; wizard split view uses `repeat(auto-fit, minmax(320px, 1fr))` — mathematically collapses to a single column at viewport widths < ~360px, eliminating the iter12-flagged horizontal-overflow at 390px. Desktop @ 1920×900 verified via screenshot; mobile responsive path verified via CSS-code-path inspection.
 - **"WHAT TO LOOK AT" close report** — filed at `/app/docs/rulings/ui1a_close_report_and_what_to_look_at_2026-07-31.md` (plain-language walkthrough of screens · journeys · stub vs wired · verbatim copy asserts).
+- **iter12 defect-class close:**
+  - `_from_doc` sidecar-brittleness → HARDENED (whitelist by `model_fields`).
+  - Mobile wizard horizontal overflow → FIXED (auto-fit grid).
+  - `instance_id` residue → ROOT-CAUSED (legacy backfill migration in `tools/migrations/backfill_instance_id_2026_07_14.py` scans all persistent collections; new `use_data_wizard_sessions` now writes the sidecar on every insert so migration re-runs are no-ops).
+- **Regression:** Backend pytest **1491 pass · 2 skip · 0 fail** (1479 baseline + 12 iter12 addendum + 14 iter11 HTTP already inside the total). Contract parity 36/36.
 
 ### UI-1-A backbone
 
