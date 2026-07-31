@@ -2175,3 +2175,21 @@ The previously HUMAN_REQUIRED cross-key HTTP break-in case is now automatable en
 **Remaining for sub-cycle 4:** Prove + Team modules (verifier surfaces · succession · claim ledger).
 
 — End of Phase 3 sub-cycle 3 entry. —
+
+═══════════════════════════════════════════════════════════════════
+
+## 2026-08-02 · Phase 3 sub-cycle 3 · Independent-verification addendum
+
+**Trigger:** Owner independent-verification exposed 2 defects + 1 perf flag against the initial close (`iteration_9.json`). Addendum landed at `docs/close_reports/phase3_subcycle3_govern_module_2026-08-02.md` per honest-record discipline. Re-verification in `iteration_10.json`.
+
+**Defect 1 (RESOLVED) — Frozen chip not rendered at ceremony level:** the ratified `Frozen is immutable.` string only rendered after `state === 'effective'` (unreachable without interaction), so at rest it was absent. Fixed by surfacing the string as the Apply-stage caption in `CeremonyStages` (always visible from first mount). Jest gate rewritten to assert RENDERED byte-identical presence via `data-testid="govern-change-rule-stage-caption-applied"` — not the constant's existence. Preview-URL first-load confirmed byte-identical.
+
+**Defect 2 (HAZARD-STOP · OPEN) — unset-retention banner lacks DPO attribution:** rendered banner is byte-identical to canonical FB v2 lines 114-115: *"the system holds everything indefinitely until you set a window — a decision only you can make"*. The DPO ownership lives in `AkkiOS_Governance_Orchestration_Brief_v1.0.md` line 208 (DECISION OWNER table), NOT in the banner text. Per Owner directive, NO copy edited; canonical string reported for reconciliation. Three resolution paths open (a: DPO caption adjacent; b: keep banner canonical + rely on Governance Brief; c: revise per §A5-1 disposition).
+
+**Defect 3 (NOT REPRODUCED) — slow load / timeout on change-rule:** page performs ZERO on-mount fetches. Load time measured at 184-198ms first-interactive vs 3000ms budget across two independent measurements (main-agent + testing-agent). Perf flag treated as transient network condition during Owner-side verification.
+
+**Regression:** backend `1444 pass / 2 skip / 0 fail`; Jest `27 suites / 194 pass / 0 fail` (+1 rendered-location cell).
+
+Sub-cycle 3 close is CONDITIONALLY GREEN pending Owner reconciliation of Defect 2.
+
+— End of Phase 3 sub-cycle 3 addendum entry. —

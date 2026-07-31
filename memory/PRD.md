@@ -3,7 +3,16 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **Phase 3 sub-cycle 3 CLOSED · Govern module surfaces · Parity 34/34 unchanged**)
+## Current gate status (2026-08-02 · **Phase 3 sub-cycle 3 CONDITIONALLY GREEN** · addendum recorded · one HAZARD-STOP open pending Owner reconciliation · Parity 34/34 unchanged)
+
+- **Owner independent-verification (post-initial-close)** exposed 2 rendering defects + 1 perf flag against the initial close verdict (`iteration_9.json`). Addendum landed at `docs/close_reports/phase3_subcycle3_govern_module_2026-08-02.md`. Re-verification recorded in `iteration_10.json`.
+- **Defect 1 (RESOLVED):** `Frozen is immutable.` now renders BYTE-IDENTICAL as the Apply-stage caption on `/govern/change-rule` on initial mount (data-testid `govern-change-rule-stage-caption-applied`). Jest gate rewritten to assert the RENDERED position, not the constant's existence.
+- **Defect 2 (HAZARD-STOP · OPEN):** unset-retention banner rendered text byte-identical to canonical FB v2 lines 114-115 — but carries no DPO attribution in the banner text itself. DPO ownership lives in Governance Brief line 208 (DECISION OWNER table). Per Owner directive, NO copy edited. Awaiting Owner reconciliation on three paths (a) DPO caption adjacent, (b) keep banner canonical + rely on Governance Brief, (c) revise per §A5-1.
+- **Defect 3 (NOT REPRODUCED):** `/govern/change-rule` load time measured at 184-198ms (well under 3000ms budget); no on-mount fetches in the surface. Transient network condition during Owner-side verification.
+- **Regression preserved:** backend `1444 pass / 2 skip / 0 fail`; Jest `27 suites / 194 pass / 0 fail` (+1 rendered-location cell over initial close report figure of 193).
+- **Testing agent verdict** (`iteration_10.json`): focused re-verification of both Owner-flagged pages — retest_needed=false; 4/4 targeted items pass; 100% frontend regression; one open action item on Owner reconciliation.
+
+## Prior gate status (2026-08-02 · **Phase 3 sub-cycle 3 CLOSED · Govern module surfaces · Parity 34/34 unchanged**)
 
 - **Sub-cycle:** Phase 3 · sub-cycle 3 (Owner ruling 2026-08-02 sub-cycle 3 dispatch).
 - **Screens landed (5 new):** `/govern` (Rule inventory + DPO landing) · `/govern/retention` (posture + change ceremony + authorized-deletion) · `/govern/change-rule` (four-stage ceremony wizard with countdown) · `/govern/refusal-health` (coverage + families with FB-10 wizard-door flywheel) · `/govern/pending` (role-aware queue with Countersign + Object).

@@ -107,3 +107,54 @@
 ## AC-5 · Sub-cycle 3 CLOSED (Owner sign-off pending)
 
 *End of close report. Verbatim carrier · SR v3 compliant.*
+
+═══════════════════════════════════════════════════════════════════
+
+## ADDENDUM · Independent-verification defects (2026-08-02, post-close)
+
+**Trigger:** Owner-side independent verification of sub-cycle 3 raised 2 rendering defects + 1 perf flag against the initial close verdict (`iteration_9.json`). This addendum records the defects and their resolution / open state per honest-record discipline. Re-verification recorded in `iteration_10.json`.
+
+### Defect 1 — `/govern/change-rule` · ratified string not rendered at ceremony level
+
+**Defect:** the literal string `Frozen is immutable.` was NOT visibly present on `/govern/change-rule` on initial page load. The chip only rendered after a request reached `state === 'effective'` — a state unreachable without user interaction, so at rest the ratified string was absent from the ceremony surface entirely. The initial Jest gate cell asserted the constant's existence in the ratified-copy module (a false-positive shape), not the string's RENDERED position on the surface.
+
+**Resolution:** the `CeremonyStages` component in `frontend/src/pages/govern/GovernChangeRulePage.jsx` was extended so the Apply stage carries `FROZEN_IS_IMMUTABLE` as its caption — rendered under the Apply pill, always visible on initial mount. FB v2 §A5-1 explicitly encodes this string as a behavioural rule (not a tone choice), so surfacing it at the ceremony-stage level is faithful to the brief. The Jest gate cell was rewritten to assert the RENDERED byte-identical presence via `data-testid="govern-change-rule-stage-caption-applied"`, closing the gap between "constant defined" and "string rendered".
+
+**Verification:** preview-URL rendering confirms the caption appears immediately below the APPLY pill on first load; text is byte-identical to the ratified constant (`iteration_10.json` FIX-1 check).
+
+### Defect 2 — `/govern/retention` · unset-retention banner lacks DPO attribution · HAZARD-STOP
+
+**Defect:** Owner-side tester expected the unset-retention banner to carry DPO attribution (per Governance Brief §28-29 assignment of retention-setting duty to the DPO). The rendered banner shows the indefinite-retention statement without naming the DPO.
+
+**Investigation** (read-only against canonical pack):
+- The ratified banner string in `docs/mandates/AKKI_OS_FRONTEND_BRIEF_v2.md` lines 114-115 is: *"the system holds everything indefinitely until you set a window — a decision only you can make"*.
+- The rendered DOM on both `/govern` and `/govern/retention` is byte-identical to this canonical string via `UNSET_RETENTION_BANNER` in `frontend/src/design/ratified_copy.js` (`iteration_10.json` HAZARD-STOP check).
+- DPO ownership of the retention-window decision lives in `AkkiOS_Governance_Orchestration_Brief_v1.0.md` line 208 — the DECISION OWNER table entry, NOT in the banner text.
+
+**HAZARD-STOP resolution:** per Owner directive ("if the canonical banner text genuinely lacks DPO wording, HAZARD-STOP and report the exact canonical string to me instead of editing copy yourself"), NO copy was edited. The exact canonical string is quoted above for Owner reconciliation. Open items:
+- (a) surface DPO attribution adjacent to the banner as a non-banner caption (e.g., "Owner · DPO" chip beside the banner header), or
+- (b) keep the banner canonical and rely on the Governance Brief §28 table for ownership attribution, or
+- (c) revise the ratified string itself per FB v2 §A5-1 disposition (revise / retire).
+
+Awaiting Owner ruling. This defect is currently OPEN.
+
+### Defect 3 (perf flag) — `/govern/change-rule` slow load / timeout · NOT REPRODUCED
+
+**Owner-side observation:** `/govern/change-rule` loaded slowly and timed out twice on re-verification; hypothesis was "unbounded fetch on mount".
+
+**Investigation:** the change-rule page performs ZERO on-mount API calls — the `useEffect` list is empty. The component tree contains: `AkkiShell` (no data fetches), `CeremonyStages` (pure render), and a form. There is no request-list fetch, no rule-inventory fetch, no ledger-history fetch. The `Countdown` sub-component sets a 1-second interval, but it renders only when a request reaches `pending_delay` state (unreachable on empty mount).
+
+**Measurement:** live preview-URL first-interactive time measured at **184ms** (main-agent measurement) and **198ms** (testing-agent iteration_10 measurement) — both well under the 3000ms budget. Network idle before user interaction.
+
+**Resolution:** perf flag NOT REPRODUCED under two independent load measurements. Most likely transient network condition during Owner-side verification. No code change required. Recorded here per honest-record discipline; if the flag recurs in production traffic, re-open under a dedicated performance investigation ticket.
+
+---
+
+## Addendum sign-off
+
+- Defects 1 + 3: RESOLVED (verified via preview URL rendering + Jest gate + iteration_10.json).
+- Defect 2: HAZARD-STOP · OPEN · Owner reconciliation pending (no copy edit made).
+- Full regression preserved: backend `1444 pass / 2 skip / 0 fail`; Jest `27 suites / 194 pass / 0 fail` (+1 rendered-location cell from the initial close report figure of 193).
+- Sub-cycle 3 close is CONDITIONALLY GREEN pending Owner reconciliation on the banner attribution.
+
+*End of addendum. SR v3 verbatim carrier · honest-record discipline · no copy edited.*
