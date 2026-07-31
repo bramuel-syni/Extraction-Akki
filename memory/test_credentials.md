@@ -1,19 +1,28 @@
-# Test Credentials (updated 2026-07-30 P1 close)
+# Test Credentials — Akki OS (RMS Intelligence System)
 
-## Admin login
+## Admin demo login (permanent seed)
 - **Email:** `admin@rms.example.com`
 - **Password:** `admin-b1-test-pw`
-- **Roles:** admin, operator, engineer, buyer, master_admin, dpo
-- **Seed vehicle:** `services/auth/user_store.seed_admin_if_absent` — idempotent, only creates when absent, never overwrites.
+- **Roles:** admin
+- **Endpoint:** `POST /api/auth/login` → returns `access_token` (Bearer JWT)
+- **Purpose:** end-to-end flow testing, wizard flows, admin-scope access to `/api/memory/*`, `/api/system/*`, all admin surfaces.
 
-## Environment posture
-- `AKKI_ENV=development` (dev fallback active; Shield trust-receipt master secret is set in .env; dev echo mode remains functional under Owner scoping).
-- `EMERGENT_LLM_KEY` is loaded from `/app/backend/.env`.
+## Master admin (permanent seed)
+- **Email:** `master@rms.example.com`
+- **Password:** `master-b1-test-pw`
+- **Roles:** master_admin
+- **Endpoint:** `POST /api/auth/login`
 
-## How to demo
-1. `curl http://localhost:8001/api/health` — expect `status: ok`.
-2. `POST /api/auth/login` with the JSON body `{"email":"admin@rms.example.com","password":"admin-b1-test-pw"}`; expect 200 + JWT.
-3. Frontend at `http://localhost:3000/auth/login` — same credentials.
+## Backend testing surface — engineer-key issuance
+Engineer keys for `/api/memory/*` and any external-integrator surface are minted server-side by an admin/master_admin call to `POST /api/engineer/keys/grant`. Testing agent may either:
+  1. Log in as admin (above), grant an engineer key to a fresh identity, then use the resulting JWT for engineer-key-scoped calls; OR
+  2. Log in as admin directly and use admin scope for `/api/memory/*` (admin has full plane scope per `routers/memory.py::_authorize_plane_access`).
 
-## Refusal taxonomy note (Owner E2 non-negotiable)
-- Access-control denial (bad credentials, missing token, expired token, scope insufficient, identity mismatch) returns `{reason, detail}` with HTTP 401/403. **NEVER `outcome=refused`.** Governed refusal is the platform's V2/V3 concern; auth denial is a taxonomy-separate class.
+## Memory Service parity (post Stage B, 2026-07-31)
+- `/api/readyz` returns `{"status":"ready","parity_count":34,"expected_parity":34,"db":"ok"}`
+- `/api/system/build_info` returns `parity_count = 34`
+
+## Environment
+- Backend URL: `REACT_APP_BACKEND_URL` from `/app/frontend/.env` — used verbatim.
+- MongoDB: local via `MONGO_URL` + `DB_NAME` from `/app/backend/.env`.
+- LLM: EMERGENT_LLM_KEY in `/app/backend/.env`.

@@ -327,8 +327,9 @@ def test_v1_g7_attestation_parity_31_at_census_dimensions_close() -> None:
     Parity 31 preserved byte-identical."""
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 32, (
-        f"V1-G7 at CD close: expected 31 snapshots (unchanged). Actual: {len(snapshots)}."
+    assert len(snapshots) == 34, (
+        f"V1-G7 at CD close → Memory Service Stage B: expected 34 snapshots. "
+        f"Actual: {len(snapshots)}."
     )
 
 

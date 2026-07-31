@@ -297,9 +297,8 @@ def test_v1_g7_attestation_28_contracts_byte_identical_at_8_ext_close() -> None:
     """
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 32, (
-        f"Post-Artifact-Store: expected 29 snapshots (28 pre-existing + "
-        f"OuterGateReceipt_v1 additive per AS-E1 α). Actual: {len(snapshots)}."
+    assert len(snapshots) == 34, (
+        f"Post-Memory-Service-Stage-B: expected 34 snapshots. Actual: {len(snapshots)}."
     )
 
 
@@ -351,29 +350,53 @@ async def test_approval_mints_standard_access_jwt_no_new_class() -> None:
 # --- Data-class registry v3 attestation (P8E-E7 α condition) ---
 
 def test_data_class_registry_v3_landed_additive_from_v2() -> None:
-    """P8E-E7 α condition: v3 additive from v2; v2 file preserved (never mutated)."""
+    """P8E-E7 α condition: v3 additive from v2; v2 file preserved (never mutated).
+
+    Memory Service Stage B (2026-07-31): v4 landed additive from v3 per
+    Owner (2a) — Northena ledger is the single append-only record; memory
+    events ride the same row shape with the event class carried at
+    stamp_audit.data_class. Registry version bump is a GOVERNED change.
+    """
     import json as _json
     compliance_dir = Path(__file__).resolve().parents[3] / "backend" / "services" / "compliance"
     v2_path = compliance_dir / "data_class_registry.v2.json"
     v3_path = compliance_dir / "data_class_registry.v3.json"
+    v4_path = compliance_dir / "data_class_registry.v4.json"
     assert v2_path.exists(), "v2 must remain on disk (never mutated in place)."
-    assert v3_path.exists(), "v3 must land at 8-EXT."
+    assert v3_path.exists(), "v3 must remain on disk (never mutated in place)."
+    assert v4_path.exists(), "v4 must land at Memory Service Stage B."
     v2 = _json.loads(v2_path.read_text())
     v3 = _json.loads(v3_path.read_text())
+    v4 = _json.loads(v4_path.read_text())
     v2_classes = {c["data_class"] for c in v2["valid_data_classes"] if isinstance(c, dict)}
     v3_classes = {c["data_class"] for c in v3["valid_data_classes"] if isinstance(c, dict)}
-    # v3 is a superset of v2 (additive).
+    v4_classes = {c["data_class"] for c in v4["valid_data_classes"] if isinstance(c, dict)}
+    # Additive discipline: v2 ⊆ v3 ⊆ v4.
     assert v2_classes.issubset(v3_classes)
-    # New class present in v3.
+    assert v3_classes.issubset(v4_classes)
+    # v3 landed engineer_onboarding_approved (Phase 8-EXT).
     assert "engineer_onboarding_approved" in v3_classes
-    # v3 is strictly larger than v2 (additive-only).
-    assert len(v3_classes) == len(v2_classes) + 1
+    # v4 landed 7 memory_* classes (Memory Service Stage B, 2026-07-31).
+    v4_new_classes = v4_classes - v3_classes
+    assert v4_new_classes == {
+        "memory_plane_issued",
+        "memory_contribution_landed",
+        "memory_contribution_refused",
+        "memory_publication_attempted",
+        "memory_publication_landed",
+        "memory_publication_refused",
+        "memory_plane_revoked",
+    }, f"Memory Service Stage B: expected 7 memory_* additions; got {v4_new_classes}"
+    # v4 governance authority captured (Owner ruling of 2026-07-31).
+    assert "authority" in v4, "v4 must carry authority block per governed registry-change discipline"
+    assert v4["authority"]["who"] == "Owner"
+    assert "2026-07-30" in v4["authority"]["when"]
 
 
 def test_deletion_ledger_loader_repointed_to_v3() -> None:
-    """P8E-E7 α condition: `deletion_ledger.py:45` re-pointed to v3."""
+    """P8E-E7 α condition: `deletion_ledger.py:45` re-pointed to v4 (Memory Service Stage B, 2026-07-31)."""
     dl_path = Path(__file__).resolve().parents[3] / "backend" / "services" / "compliance" / "deletion_ledger.py"
-    assert "data_class_registry.v3.json" in dl_path.read_text()
+    assert "data_class_registry.v4.json" in dl_path.read_text()
 
 
 # --- P8E-E4 α: 4-code auth registry closed at four codes ---

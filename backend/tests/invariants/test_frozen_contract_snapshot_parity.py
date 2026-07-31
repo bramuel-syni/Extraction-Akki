@@ -67,6 +67,8 @@ CONTRACT_TO_SNAPSHOT: Dict[str, str] = {
     "knowledge_artifact_v0.py":       "knowledge_artifact_v0.contract_snapshot.json",
     "callable_skill_provisioning_v0.py": "callable_skill_provisioning_v0.contract_snapshot.json",
     "trust_receipt_v1.py":               "trust_receipt_v1.contract_snapshot.json",  # P1 close 2026-07-30 · Owner condition (i)
+    "memory_plane_v0.py":                "memory_plane_v0.contract_snapshot.json",   # Memory Service Stage B 2026-07-31 · Owner (c2) FREEZE per D4b
+    "memory_write_back_v0.py":           "memory_write_back_v0.contract_snapshot.json",  # Memory Service Stage B 2026-07-31 · Owner (c2) FREEZE per D4b
 }
 
 

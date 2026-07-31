@@ -1,0 +1,101 @@
+{
+  "version": "v4",
+  "notes": " | v3->v4 additive per Owner (2a) 2026-07-30 (Memory Service Stage B, 2026-07-31): +7 memory_* rule-change classes for the memory-service ledger row family. GOVERNED registry version bump (registries are a governed-value class); NEVER an in-place edit. Authority: Owner ruling 2026-07-30 cycle 3 option (b) + follow-up (2a).",
+  "authority": {
+    "who": "Owner",
+    "when": "2026-07-30 (dispatch cycle 3, follow-up decision 2a)",
+    "ruling_ref": "docs/rulings/memory_service_option_b_owner_ruling_2026-07-30_cycle3.md + docs/rulings/memory_service_ledger_reuse_2a_owner_ruling_2026-07-31.md"
+  },
+  "valid_data_classes": [
+    {
+      "data_class": "authorized_deletion",
+      "landed_at_version": "v0",
+      "description": "Authorized deletion event emitted by services/retention/authorized_deletion.py::execute_authorized_deletion.",
+      "spec_anchor": "Stage A \u00a75 (Sub-stage 2 deliverables) + \u00a77.3.C (converge-continue neutral placeholder for non-refusal semantics)."
+    },
+    {
+      "data_class": "unclassified",
+      "landed_at_version": "v0",
+      "description": "Fallback bucket per R-3 discipline. R-3 anti-silence: unclassified is registered and renderable.",
+      "spec_anchor": "Rulings record \u00a710 R-3 + Stage A \u00a75.1 governance-event fallback semantics."
+    },
+    {
+      "data_class": "countersigned_rule_change",
+      "landed_at_version": "v1",
+      "description": "Dual-control rule-change event emitted by services/checker/countersign_ledger.py::emit_countersign_ledger_row.",
+      "spec_anchor": "Stage A \u00a76.1 CK-B1 + rulings \u00a711.2 Ruling 2 (capacity-role rendering)."
+    },
+    {
+      "data_class": "tightening_effective",
+      "landed_at_version": "v1",
+      "description": "Unilateral tightening becomes effective at delay expiry. Ruling 3: emits UNCONDITIONALLY even with active objection.",
+      "spec_anchor": "Stage A \u00a76.1 tightening-effective + rulings \u00a711.2 Ruling 3."
+    },
+    {
+      "data_class": "tightening_objected",
+      "landed_at_version": "v1",
+      "description": "Objection annotation event. Ruling 3: annotates + escalates; does NOT halt.",
+      "spec_anchor": "Stage A \u00a76.1 tightening_objected + rulings \u00a711.2 Ruling 3."
+    },
+    {
+      "data_class": "owner_suspended_tightening",
+      "landed_at_version": "v1",
+      "description": "Owner-suspend action; the ONLY action that halts a tightening.",
+      "spec_anchor": "Stage A \u00a76 owner-suspend endpoint + rulings \u00a711.2 Ruling 3."
+    },
+    {
+      "data_class": "retrofit_authority_voided",
+      "landed_at_version": "v2",
+      "description": "In-flight admin-initiated compliance-rule checker request voided at B-4 retrofit landing per Owner Ruling B5b-E4 (Amendment H). Emits with reason='retrofit_authority_transfer'. Grandfathering REJECTED \u2014 voiding preserves RT-R2 invariant (write authority never exists in both consoles simultaneously). stamp_audit sidecar pinned keys: {data_class, rule_class, request_id, voided_at, reason, prior_state, prior_initiator_id, prior_initiator_role}. Trivially green on today's null population; permanent thereafter.",
+      "spec_anchor": "Rulings \u00a712 B5b-E4 (Amendment H, 2026-07-07) + BCR v1.4.1 \u00a73.13 RT-R2."
+    },
+    {
+      "data_class": "engineer_onboarding_approved",
+      "landed_at_version": "v3",
+      "description": "Onboarding-approval event emitted by services/auth/engineer_invites.py::emit_onboarding_approved_ledger_row when an internal_engineer approves a pending_invite; introduces an external_engineer identity to the system. Distinct from B-3 engineer_key_grant_event (grant issuance) \u2014 onboarding-approval is the introduction, grant-issuance is the subsequent capability delegation. Ruling P8E-E7 \u03b1 (Owner 2026-07-08): additive versioned bump v2->v3, NEVER in-place, per Ruling-4/B-5b pattern.",
+      "spec_anchor": "Rulings \u00a7Phase 8-EXT P8E-E7 \u03b1 + BCR \u00a73.9 EE-R3 [STAKED]."
+    },
+    {
+      "data_class": "memory_plane_issued",
+      "landed_at_version": "v4",
+      "description": "A new memory plane was issued and bound to an integration key. Emitted by services/memory/plane_registry.issue_plane. stamp_audit pinned keys: {data_class, plane_id, integration_key, tenant_id, retrieval_scope, issued_at}. Governance authority (2a, 2026-07-31): the Northena ledger is the SINGLE append-only record; memory events ride the same row shape (NorthenaLedgerRow_v1) with the event class carried at stamp_audit.data_class.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a78 + Owner ruling 2a (2026-07-31)."
+    },
+    {
+      "data_class": "memory_contribution_landed",
+      "landed_at_version": "v4",
+      "description": "A write-back contribution was accepted into a plane's contribution store. Emitted by services/memory/write_back.write_contribution. stamp_audit pinned keys: {data_class, plane_id, contribution_id, class_declared, cited_source_count, rights_class, intended_scope}. Plane-local by default (intended_scope=mind_context_only); publication is a separate governed act.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a77-\u00a78 + Owner (2a, 2026-07-31)."
+    },
+    {
+      "data_class": "memory_contribution_refused",
+      "landed_at_version": "v4",
+      "description": "A write-back contribution was refused (class_cap breach, rights forbid, shape invalid). Emitted by services/memory/write_back on refusal path. stamp_audit pinned keys: {data_class, plane_id, refusal_reason, detail}. Governed refusal envelope shape is applied at the router boundary via services/memory/refusal.py; auth denials are handled by the separate auth taxonomy.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a711 + Owner E2 non-negotiable (auth vs governed refusal taxonomy separation)."
+    },
+    {
+      "data_class": "memory_publication_attempted",
+      "landed_at_version": "v4",
+      "description": "A publication ceremony was attempted (plane-local artifact proposed for Registry-visibility). Emitted by services/memory/publication.attempt_publication before the quality/rights gates run. stamp_audit pinned keys: {data_class, plane_id, contribution_id, attempted_at}.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a76 (POST /api/memory/planes/{id}/publish)."
+    },
+    {
+      "data_class": "memory_publication_landed",
+      "landed_at_version": "v4",
+      "description": "Publication ceremony passed all gates; the contribution is now Registry-visible. Emitted after quality + rights gates greenlight. stamp_audit pinned keys: {data_class, plane_id, contribution_id, registry_ref, published_at}.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a76-\u00a77."
+    },
+    {
+      "data_class": "memory_publication_refused",
+      "landed_at_version": "v4",
+      "description": "Publication ceremony was refused (quality threshold unset per SR-5, quality gate denied, rights gate denied). stamp_audit pinned keys: {data_class, plane_id, contribution_id, refusal_reason, detail}.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a76 + SR-5 fail-loud on unset [SLOT]."
+    },
+    {
+      "data_class": "memory_plane_revoked",
+      "landed_at_version": "v4",
+      "description": "A memory plane was revoked; reads are frozen immediately, in-flight writes cannot land. Emitted by services/memory/revocation.revoke_plane. stamp_audit pinned keys: {data_class, plane_id, revoked_by, revoked_at, reason}.",
+      "spec_anchor": "docs/stage_a_proposals/memory_service_stage_a.md \u00a76 + \u00a78 (immediate freeze)."
+    }
+  ]
+}

@@ -30,6 +30,7 @@ SUPPLEMENT_PATHS = [
     REPO_ROOT / "docs" / "registry" / "function_promise_registry_v0.3_supplement.md",
     REPO_ROOT / "docs" / "registry" / "function_promise_registry_v0.4_supplement.md",
     REPO_ROOT / "docs" / "registry" / "function_promise_registry_v0.5_supplement.md",
+    REPO_ROOT / "docs" / "registry" / "function_promise_registry_v0.6_supplement_memory_stage_a.md",
 ]
 DOCTRINE_PATH = REPO_ROOT / "docs" / "governance" / "registry_doctrine_v1.md"
 RULINGS_FINDINGS_PATH = REPO_ROOT / "docs" / "rulings" / "registry_findings_01_to_11.md"
@@ -391,6 +392,15 @@ def parse_v1_source(v1_path: Path, archaeological_supplements: list[Path]) -> Re
     for archaeological continuity but NOT re-parsed (their content is already
     inside v1). This is the "v1 as single active source" posture per Owner
     ruling `docs/rulings/g2_rm_e1_to_e3_2026-07-14.md`.
+
+    POST-V1 SUPPLEMENTS (governance §14 extension): any supplement in the
+    SUPPLEMENT_PATHS list whose content is NOT inside v1 (identified by name
+    suffix — supplements landing AFTER v1 consolidation carry the marker
+    `_supplement_<phase_slug>` rather than the archaeological `v0.<n>_supplement`
+    naming). These are re-parsed as ADDITIVE material. Owner ruling 2026-07-30
+    cycle 3 option (b) + follow-up (2a) 2026-07-31: FPR rows land in supplement
+    sidecar BEFORE each function does (AC-3), so post-v1 supplements MUST be
+    parseable into the machine YAML.
     """
     v1_text = v1_path.read_text(encoding="utf-8")
     tables = _iter_pipe_tables(v1_text)
@@ -400,6 +410,22 @@ def parse_v1_source(v1_path: Path, archaeological_supplements: list[Path]) -> Re
     for table in tables:
         promises.extend(parse_promise_table(table))
         functions.extend(parse_function_table(table, source_label="v1.md"))
+
+    # Post-v1 supplements (governance §14 extension): archaeological v0.<n>
+    # supplements are already inside v1; supplements with post-v1 slug naming
+    # carry NEW material and must be re-parsed additively.
+    archaeological_names = {
+        f"function_promise_registry_v0.{i}_supplement.md" for i in range(1, 6)
+    }
+    post_v1_supplements = [
+        p for p in archaeological_supplements if p.name not in archaeological_names
+    ]
+    for supp_path in post_v1_supplements:
+        supp_text = supp_path.read_text(encoding="utf-8")
+        supp_tables = _iter_pipe_tables(supp_text)
+        for table in supp_tables:
+            promises.extend(parse_promise_table(table))
+            functions.extend(parse_function_table(table, source_label=supp_path.name))
 
     # Deduplicate promises by promise_id (v1 body contains v0.md §2 verbatim;
     # supplements do not restate promises so no dupes expected — defensive).

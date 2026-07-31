@@ -201,8 +201,10 @@ def test_no_new_refusal_codes_at_7b_3():
 
 def test_prior_contracts_count_now_28_post_9_1():
     """Block C — parity invariant now maps 29 contracts post-Artifact-Store (AS-E1 α additive)."""
+    # Parity count 34 post-Memory Service Stage B (Owner (c2) 2026-07-31 additive
+    # memory_plane_v0 + memory_write_back_v0). Prior: 32 post-P1 (trust_receipt_v1).
     from tests.invariants.test_frozen_contract_snapshot_parity import CONTRACT_TO_SNAPSHOT
-    assert len(CONTRACT_TO_SNAPSHOT) == 32
+    assert len(CONTRACT_TO_SNAPSHOT) == 34
 
 
 @pytest.mark.parametrize("contract_file", sorted([

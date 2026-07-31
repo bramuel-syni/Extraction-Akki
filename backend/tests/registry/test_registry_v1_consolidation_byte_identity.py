@@ -39,10 +39,18 @@ def test_v1_consolidated_file_exists():
 
 
 def test_v1_promise_text_byte_identical_to_source():
-    """RM-E1 α HARD GATE: every v0.md + supplement row is verbatim in v1.md.
+    """RM-E1 α HARD GATE: every v0.md + archaeological-supplement row is
+    verbatim in v1.md.
 
-    Zero drift permitted. Any deviation = HALT + escalate as finding for future
-    ruled amendment turn per Owner ruling `docs/rulings/g2_rm_e1_to_e3_2026-07-14.md`.
+    Zero drift permitted for archaeological (pre-v1) sources. Post-v1
+    supplements (matching non-v0.<n> naming, e.g. `_supplement_<phase>`)
+    are NEW material landing after v1 consolidation — they are NOT
+    required to be inside v1.md. This is the governance §14 additive-
+    supplement pattern applied to a post-consolidation registry.
+
+    Any deviation on archaeological rows = HALT + escalate as finding for
+    future ruled amendment turn per Owner ruling
+    `docs/rulings/g2_rm_e1_to_e3_2026-07-14.md`.
     """
     v1_text = V1_PATH.read_text(encoding="utf-8")
     v0_text = V0_PATH.read_text(encoding="utf-8")
@@ -53,7 +61,14 @@ def test_v1_promise_text_byte_identical_to_source():
         if row not in v1_text:
             drift.append(f"v0.md row not in v1: {row[:120]}")
 
+    archaeological_names = {
+        f"function_promise_registry_v0.{i}_supplement.md" for i in range(1, 6)
+    }
     for supp in SUPPLEMENT_PATHS:
+        if supp.name not in archaeological_names:
+            # Post-v1 supplement (governance §14 extension): new material,
+            # NOT required to be inside v1.md.
+            continue
         supp_rows = _extract_rows(supp.read_text(encoding="utf-8"))
         for row in supp_rows:
             if row not in v1_text:

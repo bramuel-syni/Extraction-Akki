@@ -1,0 +1,80 @@
+{
+  "additionalProperties": false,
+  "description": "Write-back contribution envelope (plane-local by default).",
+  "properties": {
+    "cited_sources": {
+      "description": "Cited source references. At least one required; drives class cap.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Cited Sources",
+      "type": "array"
+    },
+    "class_declared": {
+      "description": "Class declared for the contribution (matches Solva's class taxonomy). Capped at max(cited_source classes) by write_back.enforce_class_cap.",
+      "minLength": 1,
+      "title": "Class Declared",
+      "type": "string"
+    },
+    "content_ref": {
+      "description": "Reference to the contribution's byte content in the artifact store. Never the content inline \u2014 references, not copies.",
+      "title": "Content Ref",
+      "type": "string"
+    },
+    "contribution_id": {
+      "description": "Server-minted unique contribution identifier (uuid-hex, prefix `wb-`).",
+      "minLength": 1,
+      "title": "Contribution Id",
+      "type": "string"
+    },
+    "created_at": {
+      "description": "ISO-8601 UTC timestamp of contribution acceptance.",
+      "title": "Created At",
+      "type": "string"
+    },
+    "five_ring_stamp": {
+      "description": "The five-rings shape carried by this contribution (content, provenance, defensibility, context, re-extraction handle). See contracts/five_rings.py for the ring schema. Validated at write.",
+      "title": "Five Ring Stamp",
+      "type": "object"
+    },
+    "intended_scope": {
+      "default": "mind_context_only",
+      "description": "Where the contribution is intended to land. Default plane-local; `registry_publication` triggers the governed publication ceremony.",
+      "enum": [
+        "mind_context_only",
+        "registry_publication"
+      ],
+      "title": "Intended Scope",
+      "type": "string"
+    },
+    "plane_id": {
+      "description": "Plane this contribution lands in. Enforced by scoped_accessor.",
+      "minLength": 1,
+      "title": "Plane Id",
+      "type": "string"
+    },
+    "rights_class": {
+      "default": "internal_only",
+      "description": "Rights class at birth. Default `internal_only`. Widening requires a separate publication ceremony (Owner ruling condition (c2) implicit \u2014 publication is a governed act, never automatic).",
+      "enum": [
+        "internal_only",
+        "registry_visible",
+        "public_receipt"
+      ],
+      "title": "Rights Class",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contribution_id",
+    "plane_id",
+    "content_ref",
+    "five_ring_stamp",
+    "class_declared",
+    "cited_sources",
+    "created_at"
+  ],
+  "title": "MemoryWriteBack_v0",
+  "type": "object"
+}

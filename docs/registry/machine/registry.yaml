@@ -21,8 +21,10 @@ supplements:
     sha256: d1fa1949a206d5fb73481864962f93efaa888a4ef4793efad82a53681fc3dc1b
   - path: docs/registry/function_promise_registry_v0.5_supplement.md
     sha256: d2d0c5f4c37dcbe525ff99a757687d7ae81446cd738719341e2b7884d4ac778f
+  - path: docs/registry/function_promise_registry_v0.6_supplement_memory_stage_a.md
+    sha256: 4b23407558e42ee6c19c57ec8038ee3ae68d80e1984d80da9247d2d34d29b8b8
 
-# Row totals: promises=47 · functions=147 · findings=12
+# Row totals: promises=47 · functions=170 · findings=12
 
 promises:
   - promise_id: PROM-S1-provable-envelope-inheritance
@@ -2633,6 +2635,351 @@ functions:
     ladder_rung: 1 · Deterministic
     owner: Owner
     source: v1.md
+    rulings: []
+  - function_id: akki.memory.frozen_contract_memory_plane_v0
+    governor: Named surfaces (memory)
+    mandate: "Memory-plane envelope frozen per D4b: (a) crosses environment boundary (integration-key holder ↔ platform); (b) LOW change rate — plane shape is a governed value, not iterated. Snapshot at `tests/invariants/memory_plane_v0.contract_snapshot.json` byte-identical."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: contracts/memory_plane_v0.py + tests/invariants/memory_plane_v0.contract_snapshot.json
+    enforcement: "pytest (test_frozen_contract_snapshot_parity.py + test_m_g_two_frozen_snapshots_present_and_byte_identical) + `EXPECTED_PARITY = 34` shared counter"
+    cost: 1 cell · µs class
+    dependencies: Pydantic v2
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.frozen_contract_memory_write_back_v0
+    governor: Named surfaces (memory)
+    mandate: "Memory write-back contribution shape frozen per D4b: (a) crosses environment boundary (external contributor ↔ platform); (b) LOW change rate — five-ring shape + class-cap discipline are governed values. Snapshot at `tests/invariants/memory_write_back_v0.contract_snapshot.json` byte-identical."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: contracts/memory_write_back_v0.py + tests/invariants/memory_write_back_v0.contract_snapshot.json
+    enforcement: pytest + shared parity counter
+    cost: 1 cell · µs class
+    dependencies: "Pydantic v2 · five_rings@v0 shape"
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.parity_34_at_stage_b_close
+    governor: Named surfaces (Deviation-audit reflexive)
+    mandate: "Two seal events landed atomically; `/api/system/build_info` + `/api/readyz` report `parity_count = 34 = expected_parity`. Every prior V1-G7 assertion bumped 32 → 34 in one atomic parity-restoration commit (invariants + registry). Backend refuses to boot on parity drift (fail-closed)."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: services/health/parity_counter.py + tests/invariants/test_frozen_contract_snapshot_parity.py
+    enforcement: "pytest + integration curl (`/api/readyz` returns 200 with parity 34/34)"
+    cost: 1 cell · µs class
+    dependencies: shared parity counter
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.scoped_accessor_binds_plane_at_mint
+    governor: Named surfaces (memory)
+    mandate: "`ScopedAccessor.__init__` binds `plane_id` + `integration_key` + `tenant_id` + `state` into name-mangled `__slots__`. `for_plane(...)` factory refuses when integration-key mismatch — cross-key access is inexpressible via the accessor seam."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: "services/memory/scoped_accessor.py::for_plane + services/memory/scoped_accessor.py::ScopedAccessor.__init__"
+    enforcement: pytest (test_m_g1_scoped_accessor_cannot_read_across_planes_by_direct_call) — break-in raises PlaneScopeViolation
+    cost: 1 cell · µs class
+    dependencies: plane_registry.get_plane
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.scoped_accessor_setattr_immutable_after_init
+    governor: Named surfaces (memory · reflexive)
+    mandate: "`ScopedAccessor.__setattr__` raises AttributeError post-init. `__slots__` forbids adding new attrs; name-mangled `__plane_id` unreachable from external code; no `plane_id_override` kwarg on any method. Break-in via setattr, dict manipulation, kwarg smuggling all refused."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: "services/memory/scoped_accessor.py::ScopedAccessor"
+    enforcement: pytest (test_m_g2_scoped_accessor_cannot_bypass_via_kwarg_or_setattr_override) — 4 break-in vectors all refused
+    cost: 1 cell · µs class
+    dependencies: Python __slots__ + name mangling
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.write_back_plane_isolation_by_construction
+    governor: Named surfaces (memory)
+    mandate: "`write_back.write_contribution` routes through `accessor.insert_contribution`; the accessor cross-checks `contribution_doc.plane_id == accessor.plane_id` and `contribution_doc.tenant_id == accessor.tenant_id`, raising PlaneScopeViolation on mismatch. Foreign-plane forgery via a valid accessor for a different plane refused."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: "services/memory/write_back.py + services/memory/scoped_accessor.py::insert_contribution"
+    enforcement: pytest (test_m_g3_write_back_write_to_plane_A_isolated_from_plane_B_reads) — forged doc raises PlaneScopeViolation
+    cost: 1 cell · ms class
+    dependencies: scoped_accessor
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.mind_context_never_crosses_keys
+    governor: Named surfaces (memory · reflexive)
+    mandate: "Working-set partition rows carry `plane_id + tenant_id`; scoped accessor filters both. Direct Mongo query for A's ref filtered by B's plane_id returns empty. Mind context is plane-local by construction."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: "services/memory/scoped_accessor.py::list_working_set + record_working_set_use"
+    enforcement: pytest (test_m_g4_mind_context_never_crosses_keys)
+    cost: 1 cell · ms class
+    dependencies: Motor client
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.estate_memory_shared_across_keys_via_publication_only
+    governor: Named surfaces (memory)
+    mandate: "Registry-visibility (estate-memory) is reachable ONLY through the separate publication ceremony. Post-publication, contribution doc's `rights_class` is widened to `registry_visible` + `intended_scope=registry_publication` + a `registry_ref` is stamped. The write path never sets these values."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: "services/memory/publication.py::attempt_publication"
+    enforcement: pytest (test_m_g5_estate_memory_shared_across_keys)
+    cost: 1 cell · ms class
+    dependencies: quality gate + rights gate
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.write_back_five_ring_shape_enforced
+    governor: Named surfaces (memory)
+    mandate: "Every contribution's `five_ring_stamp` must carry all five rings (content · provenance · defensibility · context · re_extraction_handle). Missing rings → `contribution_shape_invalid` governed refusal at the router boundary."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/write_back.py::validate_five_ring_shape"
+    enforcement: pytest — governed refusal envelope
+    cost: 1 cell · µs class
+    dependencies: MemoryWriteBack_v0
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.write_back_class_cap_never_exceeds_cited_sources
+    governor: Named surfaces (Solva)
+    mandate: "`class_declared ≤ max(cited_source classes)` per Solva class taxonomy (`fact > utterance > non_factual`). Attempt to publish `class_declared=fact` with `cited_source_classes=[utterance]` refused with `contribution_over_class_cap`."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/write_back.py::enforce_class_cap"
+    enforcement: pytest — 3 cells
+    cost: 1 cell · µs class
+    dependencies: Solva class registry
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.write_back_rights_at_birth_internal_only
+    governor: Named surfaces (memory)
+    mandate: "Every contribution lands with `rights_class=internal_only` + `intended_scope=mind_context_only` by default. Widening at write-time is refused via `contribution_rights_forbid`. Widening requires the separate publication ceremony."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/write_back.py::enforce_rights_at_birth"
+    enforcement: pytest — 2 cells
+    cost: 1 cell · µs class
+    dependencies: publication ceremony
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.publication_quality_threshold_slot_fail_loud
+    governor: Named surfaces (memory)
+    mandate: "`PUBLICATION_QUALITY_THRESHOLD` is a [SLOT: null] constant. When unset (default posture), the ceremony refuses with `publication_quality_threshold_unset` — fail-loud per SR-5. No silent fallback. No hand-tuned figure passed off as measured."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/constants.py + services/memory/publication.py::publication_quality_gate"
+    enforcement: pytest (test_m_g6_publication_is_separate_governed_act + test_m_g_publication_threshold_unset_by_default)
+    cost: 1 cell · µs class
+    dependencies: AKKI_MEMORY_PUBLICATION_QUALITY_THRESHOLD env var
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.publication_is_separate_governed_act_never_automatic
+    governor: Named surfaces (memory)
+    mandate: Publication is never automatic. Attempt → gate → land is a 3-step ledger-recorded ceremony. Refusal at any gate leaves the contribution plane-local (rights_class=internal_only, intended_scope=mind_context_only) — no partial widening.
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/publication.py::attempt_publication"
+    enforcement: pytest (test_m_g6) — 3 ledger rows on refused ceremony (attempted + refused; landed absent)
+    cost: 1 cell · ms class
+    dependencies: quality gate + rights gate
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.publication_rights_gate_minimum_cited_sources
+    governor: Named surfaces (memory)
+    mandate: "Publication gate rejects contributions with `cited_source_count < PUBLICATION_MIN_CITED_SOURCES [SLOT: 1]`. Ensures the class-cap discipline extends through the publication seam."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/publication.py::publication_rights_gate"
+    enforcement: pytest — governed refusal envelope
+    cost: 1 cell · µs class
+    dependencies: services/memory/constants.py
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.revocation_freezes_plane_immediately
+    governor: Named surfaces (memory)
+    mandate: "`revoke_plane` sets `plane.state=revoked` atomically + emits `memory_plane_revoked` ledger row. Any subsequently-minted `ScopedAccessor` sees state=revoked and raises `PlaneRevoked` on read/write. Re-revoke is idempotent (returns `already_revoked=True`)."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/revocation.py::revoke_plane + services/memory/scoped_accessor.py::_assert_active"
+    enforcement: pytest (test_m_g7_revocation_freezes_plane_immediately)
+    cost: 1 cell · ms class
+    dependencies: plane_registry.update_plane_state
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.ledger_reuses_northena_ledger_row_v1_with_memory_data_class
+    governor: Named surfaces (Northena)
+    mandate: "Every memory event rides `NorthenaLedgerRow_v1` (the ONE append-only ledger) with `stamp_audit.data_class ∈ {memory_plane_issued, memory_contribution_landed, memory_contribution_refused, memory_publication_attempted, memory_publication_landed, memory_publication_refused, memory_plane_revoked}`. No second ledger. One trace thread per plane."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/ledger.py + services/compliance/deletion_ledger.py::emit_deletion_ledger_row"
+    enforcement: pytest — every event class produces one row via the shared emitter
+    cost: 1 cell · ms class
+    dependencies: Northena append-only ledger
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.data_class_registry_v3_to_v4_governed_additive
+    governor: Named surfaces (Compliance · reflexive)
+    mandate: "Registry bump v3 → v4 lands as a GOVERNED change; v3 file preserved byte-identical; v4 additive with 7 memory_* classes + `authority` block noting Owner ruling + timestamp. Registries are a governed-value class with their own change authority — NEVER an in-place edit."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/compliance/data_class_registry.v4.json + services/compliance/deletion_ledger.py::_REGISTRY_PATH"
+    enforcement: "pytest (test_data_class_registry_v3_landed_additive_from_v2 · assertions extended to check v4 additive from v3 + authority block present + 7 memory_* new classes)"
+    cost: 1 cell · µs class
+    dependencies: authorized_deletion module
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.plane_state_ledger_reconstructible
+    governor: Named surfaces (Deviation-audit reflexive)
+    mandate: "Given only the Northena ledger, `ledger_reconstructor.rebuild_state(plane_id)` recomputes: state, revoked_at, issued_at, integration_key, tenant_id, retrieval_scope, contribution counts + IDs, publication counts + published IDs. Attest: delete the plane doc; ledger alone rebuilds the state."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: services/memory/ledger_reconstructor.py
+    enforcement: pytest (test_m_g8_plane_state_ledger_reconstructible) — rebuild after registry-doc delete
+    cost: 1 cell · ms class
+    dependencies: "Northena ledger `at` sort"
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.router_openapi_registered_eight_endpoints
+    governor: Named surfaces (backend)
+    mandate: "Eight endpoints registered under `/api/memory/*`: POST /planes; GET /planes; GET /planes/{id}; POST /planes/{id}/contribute; POST /planes/{id}/publish; POST /planes/{id}/revoke; GET /planes/{id}/working_set; GET /planes/{id}/retrieval_scope; GET /planes/{id}/reconstructed_state. Present in OpenAPI at build."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "routers/memory.py + server.py::app.include_router"
+    enforcement: "curl `/api/openapi.json` lists all endpoints"
+    cost: 1 cell · µs class
+    dependencies: FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.router_scope_enforcement_server_side_per_call
+    governor: Named surfaces (memory · reflexive)
+    mandate: "Every endpoint (except `/planes` list-issue) enforces plane-scope by (a) fetching plane doc, (b) checking `caller_integration_key == plane.issued_to_integration_key` OR caller has admin/master_admin, (c) refusing with `auth_scope_insufficient` on mismatch. Cross-key HTTP break-in refused with 403."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: "routers/memory.py::_authorize_plane_access"
+    enforcement: "pytest (test_m_g_router_cross_key_plane_read_denied) — 403 auth_scope_insufficient with NO `outcome` key"
+    cost: 1 cell · µs class
+    dependencies: services/auth/dependencies
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.refusal_taxonomy_separate_from_auth
+    governor: Named surfaces (memory)
+    mandate: "Governed refusals carry `{outcome: \"refused\", reason, detail}` (8-code closed set: plane_not_found, plane_revoked, plane_scope_invalid, contribution_over_class_cap, contribution_rights_forbid, contribution_shape_invalid, publication_gate_denied, publication_quality_threshold_unset). Auth denials carry `{reason, detail}` with NO `outcome` key. Adding a governed reason requires an Owner ruling."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: services/memory/refusal.py + services/memory/memory_refusal_reasons.v0.json + routers/memory.py
+    enforcement: pytest (test_m_g9 × 3 + test_m_g_refusal_reason_set_closed)
+    cost: 1 cell · µs class
+    dependencies: services/auth/auth_refusal.py taxonomy
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.working_set_constants_are_slots
+    governor: Named surfaces (memory · reflexive)
+    mandate: "`WORKING_SET_MAX_REFS_PER_PLANE [SLOT: 10_000]` + `WORKING_SET_EVICTION_HALFLIFE_DAYS [SLOT: 30]` + `PUBLICATION_QUALITY_THRESHOLD [SLOT: null]` + `PUBLICATION_MIN_CITED_SOURCES [SLOT: 1]`. Every constant carries a `[SLOT: <default>]` marker in the module docstring. No hand-tuned figure passed as measured. Env-var overridable per SR-5."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: services/memory/constants.py
+    enforcement: pytest (test_m_g_constants_all_carry_slot_markers)
+    cost: 1 cell · µs class
+    dependencies: os.environ.get
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.memory.working_set_eviction_is_cache_refresh_not_data_deletion
+    governor: Named surfaces (memory · reflexive)
+    mandate: "Working-set eviction removes plane-local *references* to artifacts held elsewhere; it does not delete user data or ledger rows. Whitelisted in `test_no_unauthorized_deletion_path.py::_WHITELIST` with rationale preserved inline. Class-distinct from `authorized_deletion` of held data."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "services/memory/working_set.py::evict_by_halflife + tests/invariants/test_no_unauthorized_deletion_path.py"
+    enforcement: pytest — deletion-path gate green with 2-entry whitelist
+    cost: 1 cell · ms class
+    dependencies: Motor delete_one
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.6_supplement_memory_stage_a.md
     rulings: []
 
 findings:

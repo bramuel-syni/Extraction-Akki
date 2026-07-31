@@ -45,8 +45,17 @@ _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 # Whitelist — files where deletion I/O is authorised. Owner-anchored
 # per Stage A §5.1 line 241 ("SINGLE-SOURCE-OF-DELETION module").
+#
+# Memory Service Stage B (2026-07-31): working-set eviction is
+# usage-proportional cache-refresh (per Owner ruling 2026-07-30 cycle 3
+# option (b) §"working-set persistence is usage-proportional"). It does
+# NOT delete user data or ledger rows; it evicts plane-local *references*
+# to artifacts held elsewhere. This is class-distinct from
+# authorized_deletion of held data. Added to whitelist with rationale
+# preserved inline.
 _WHITELIST: List[str] = [
     "services/retention/authorized_deletion.py",
+    "services/memory/working_set.py",  # cache-eviction, not user-data deletion
 ]
 
 # Production scan roots (exclude tests + __pycache__).

@@ -307,8 +307,9 @@ def test_v1_g7_attestation_parity_31_byte_identical_at_transform_forms_close() -
     """V1-G7 at Transform Forms close: 29 pre-TF + KA v0 + CallableSkillProvisioning v0 = 31."""
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 32, (
-        f"V1-G7 Transform Forms: expected 31 snapshots. Actual: {len(snapshots)}."
+    assert len(snapshots) == 34, (
+        f"V1-G7 Transform Forms → Memory Service Stage B: expected 34 snapshots. "
+        f"Actual: {len(snapshots)}."
     )
     v1_names = [s.name for s in snapshots]
     assert "knowledge_artifact_v0.contract_snapshot.json" in v1_names
@@ -329,6 +330,10 @@ def test_v0_paths_byte_identical_at_transform_forms_close() -> None:
         # P1 close 2026-07-30 — trust_receipt_v1 sibling contract landed
         # per Owner ruling condition (i). Also outside "pre-TF" set.
         "trust_receipt_v1.contract_snapshot.json",
+        # Memory Service Stage B 2026-07-31 — Owner (c2) FREEZE per D4b.
+        # Two new frozen seats; also outside "pre-TF" set.
+        "memory_plane_v0.contract_snapshot.json",
+        "memory_write_back_v0.contract_snapshot.json",
     }
     pre_tf = [
         s for s in invariants_dir.glob("*.contract_snapshot.json")

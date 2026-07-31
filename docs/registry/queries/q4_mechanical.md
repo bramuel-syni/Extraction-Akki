@@ -14,6 +14,7 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 - `docs/registry/function_promise_registry_v0.3_supplement.md`: `8d4cd2ed9c4e802944517908424ba2297ac3b4dd5e0d2a8e6d54f6042e64a8e4`
 - `docs/registry/function_promise_registry_v0.4_supplement.md`: `d1fa1949a206d5fb73481864962f93efaa888a4ef4793efad82a53681fc3dc1b`
 - `docs/registry/function_promise_registry_v0.5_supplement.md`: `d2d0c5f4c37dcbe525ff99a757687d7ae81446cd738719341e2b7884d4ac778f`
+- `docs/registry/function_promise_registry_v0.6_supplement.md`: `4b23407558e42ee6c19c57ec8038ee3ae68d80e1984d80da9247d2d34d29b8b8`
 
 **UNVERIFIED count:** 19  ·  **[CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE]:** 18  ·  **remedy-candidate: P4 advisory annotations:** 5  ·  **Overlaps with archaeological:** 7
 
@@ -24,13 +25,13 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 | `northena.artifact.signature_bound` | `PROM-S4-artifact-signature-bound` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Runtime signature check' lacks testable telemetry/gate reference |
 | `mtafiti.perception.pinned_model_provenance` | `PROM-9-2a-real-worker-provenance`, `PROM-S1-honesty-grammar-source-labels` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Contract field required (model_id + weights_sha)' lacks testable telemetry/gate reference |
 | `mtafiti.perception.mode_selection_evident_at_read` | `PROM-9-2a-mode-selection-evident` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Contract field required (execution_mode)' lacks testable telemetry/gate reference |
-| `mtafiti.census.dimension_registry_vocabulary` | `PROM-S2-census-dimension-integrity`, `PROM-S1-honesty-grammar-source-labels` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Vocabulary-set membership check' lacks testable telemetry/gate reference |
+| `mtafiti.census.dimension_registry_vocabulary` | `PROM-S1-honesty-grammar-source-labels`, `PROM-S2-census-dimension-integrity` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Vocabulary-set membership check' lacks testable telemetry/gate reference |
 | `targeta.commission_wizard.shape_as_objective_prefill` | `PROM-S2-shape-as-objective-reach-only` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Runtime pre-fill contract' lacks testable telemetry/gate reference |
 | `targeta.transform_form.per_call_provisioning` | `PROM-tf-transform-form-per-call-provisioning` | no | — | — | enforcement field 'Load-bearing internal contract (no snapshot)' lacks testable telemetry/gate reference |
 | `targeta.transform_form.class_registry_additive` | `PROM-tf-class-with-claim-invariant` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Versioned-registry load + additive-only gate' lacks testable telemetry/gate reference |
 | `governance.tiered_ruling_model` | `PROM-S3-governance-doc-on-disk` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'On-disk canonical + append-only amendments' lacks testable telemetry/gate reference |
 | `governance.standing_rule_v3` | `PROM-S3-governance-doc-on-disk` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Standing convention + reply-body SHA discipline' lacks testable telemetry/gate reference |
-| `governance.registry_doctrine_v1` | `PROM-registry-rent-paying`, `PROM-S3-governance-doc-on-disk` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'On-disk canonical + doctrine-ratification' lacks testable telemetry/gate reference |
+| `governance.registry_doctrine_v1` | `PROM-S3-governance-doc-on-disk`, `PROM-registry-rent-paying` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'On-disk canonical + doctrine-ratification' lacks testable telemetry/gate reference |
 | `registry.population.gaux_docs_on_disk` | `PROM-S3-governance-doc-on-disk` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | remedy-candidate: P4 | enforcement field 'file-existence' lacks testable telemetry/gate reference |
 
 ## Overlaps with archaeological subjects (SQ-E1 γ)

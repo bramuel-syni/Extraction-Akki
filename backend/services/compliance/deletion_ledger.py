@@ -42,7 +42,7 @@ from contracts.northena_ledger import (
 )
 from core import db
 
-_REGISTRY_PATH = Path(__file__).parent / "data_class_registry.v3.json"
+_REGISTRY_PATH = Path(__file__).parent / "data_class_registry.v4.json"
 _registry_cache: Optional[dict] = None
 
 

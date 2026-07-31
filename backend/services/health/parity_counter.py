@@ -27,9 +27,16 @@ from pathlib import Path
 # can never disagree about what parity is.
 _INVARIANTS_DIR = Path(__file__).resolve().parents[2] / "tests" / "invariants"
 
-EXPECTED_PARITY: int = 32
-"""Bumped 31 -> 32 at P1 close (2026-07-30) — Owner ruling condition (i):
-trust_receipt_v1 sibling contract landed as new frozen seat.
+EXPECTED_PARITY: int = 34
+"""Bumped 32 -> 34 at Memory Service Stage B (2026-07-31) — Owner ruling
+condition (c2) 2026-07-30 cycle 3: two seal events landed as new frozen
+seats via D4b prior FREEZE — memory_plane_v0 (plane envelope) and
+memory_write_back_v0 (contribution shape). Both cross an environment
+boundary (integration-key holder → platform) with LOW change rate; prior
+per D4b is FREEZE.
+
+Prior: bumped 31 -> 32 at P1 close (2026-07-30) — Owner ruling condition
+(i): trust_receipt_v1 sibling contract landed as new frozen seat.
 See docs/rulings/P1_stage_a_owner_approval_2026-07-30.md §Condition (i)."""
 
 

@@ -1,0 +1,8 @@
+{
+  "rule_id": "tier_lock",
+  "locked": true,
+  "reason_note": "audit-trail regression",
+  "grantor_id": "6a6ba8e9c29ca2df857a2765",
+  "idempotency_key": "audit-trail-ba4ad88c",
+  "at": "2026-07-31T00:38:05.738878+00:00"
+}

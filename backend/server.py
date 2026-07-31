@@ -183,6 +183,14 @@ app.include_router(system_info_router.router, prefix="/api")
 from routers import docs_bundle as docs_bundle_router  # noqa: E402
 app.include_router(docs_bundle_router.router, prefix="/api")
 
+# Memory Service (Owner ruling 2026-07-30 cycle 3 option (b) + follow-ups
+# 1a/2a/3a). Backend-only surface at /api/memory/*. Two new frozen contracts
+# (memory_plane_v0, memory_write_back_v0) → parity 32 → 34. Ledger reuses
+# NorthenaLedgerRow_v1 with 7 governed memory_* data_class values in
+# data_class_registry.v4.json (registry-version-bump per authority 2a).
+from routers import memory as memory_router  # noqa: E402
+app.include_router(memory_router.router, prefix="/api")
+
 
 @app.on_event("startup")
 async def _startup() -> None:

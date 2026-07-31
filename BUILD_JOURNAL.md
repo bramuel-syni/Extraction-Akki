@@ -1984,3 +1984,39 @@ CI initially came back with 1 failure at `test_manifest_entry_resolves[frontend/
 **Honest-record admission:** main P1 close report's "demoable immediately" line did not hold at first verification. Defect class recorded: `.env` values MUST be smoke-tested through the actual browser preview URL, not just via curl from inside the pod. Applied to future closes as a checklist item.
 
 — End of P1 addendum entry. —
+
+
+---
+
+## 2026-07-31 — Memory Service Stage B (Cycle 3) close · parity 32 → 34 · 49 new enforcement cells
+
+**Owner ruling:** `docs/rulings/memory_service_option_b_owner_ruling_2026-07-30_cycle3.md` (adopt Stage A option (b)) + follow-up decisions `1a/2a/3a` recorded at `docs/rulings/memory_service_followups_1a_2a_3a_owner_2026-07-31_cycle3.md`.
+
+**Delivered atomically (backend only per cycle scope):**
+
+1. **Parity restoration** — 32 → 34. Two seal events landed per D4b FREEZE: `MemoryPlane_v0` + `MemoryWriteBack_v0`. Snapshots byte-identical to live schemas. `EXPECTED_PARITY` bumped in `services/health/parity_counter.py`. All parity-attest cells across invariants + registry suites bumped in one sweep. MRR-G-Parity gate at `services/registry/validator.py` updated to 34/34. `/api/readyz` + `/api/system/build_info` report parity 34/34 live.
+
+2. **Memory business logic** — `services/memory/` package: plane_registry (Mongo-backed issue/get/state-transition), scoped_accessor (isolation by construction: `__slots__` + `__setattr__`-immutable + no override kwarg + `for_plane` factory refuses cross-key mint), write_back (five-ring shape + class-cap + rights-at-birth), publication (governed 3-step ceremony; fail-loud on unset [SLOT] threshold per SR-5), revocation (immediate freeze; idempotent), working_set (usage-proportional persistence; halflife-decay LRU under `[SLOT: 10_000]` cap), ledger_reconstructor (read-only rebuild from Northena ledger).
+
+3. **Ledger reuse (Owner 2a)** — memory events ride `NorthenaLedgerRow_v1` via shared `emit_deletion_ledger_row` seam. `services/memory/ledger.py` is a thin event-emitter wrapper. Zero second ledger. One trace thread per plane. Governed registry version bump v3 → v4 additive: `services/compliance/data_class_registry.v4.json` with top-level `authority` block (Owner + timestamp + ruling ref). 7 memory_* data_class values registered.
+
+4. **Router (Owner 3a)** — 8 endpoints under `/api/memory/*` in OpenAPI. Engineer-key credentials scoped; server-side `_authorize_plane_access` on every call. Cross-key HTTP break-in refused with 403 `auth_scope_insufficient` (no `outcome` key). Governed refusals carry `{outcome: "refused", reason, detail}` — Owner E2 taxonomy separation preserved.
+
+5. **Break-in gate roster (M-G1..M-G9)** — 24 cells in `backend/tests/invariants/test_memory_service_m_g1_to_m_g9.py`. Every gate ATTEMPTS the violation (§33C break-in style). Coverage: direct cross-plane read; kwarg/setattr/dict-manipulation bypass (4 vectors); write-plane-A read-plane-B isolation; mind-context never crosses keys; estate memory only via publication; publication is separate governed act; revocation immediate freeze + idempotent; plane state ledger-reconstructible after registry-doc delete; refusal shape governed ≠ auth (3 cells); registry v4 additive with authority; parity 34/34; snapshots byte-identical; constants carry `[SLOT: default]` markers; threshold unset by default; class-cap enforcement (3 cells); rights-at-birth enforcement (2 cells); router engineer-key flow; router cross-key denied; reason set closed.
+
+6. **P2 buildable-now guard tightening (dispatch §4 P2-R1 / P2-R4)** — 25 cells in `backend/tests/invariants/test_p2_buildable_now.py`. V1-G2 tightened (kill-and-restart merge + HTTP idempotent replay). V1-G3 tightened (`purge_attestation.purged_at` ISO-shaped). V1-G4 extension (HTTP intake validator rejects malformed payload + bogus unit shape → 400). V1-G6 tightened (telemetry four fields + per_modality dict shape). P2-G-R4.a AST-walker (parametrized × 7 worker files): never import ledger writers, never import identity stack. P2-G-R4.b gpu-import gate: `cuda_runtime` refuses when `PERCEPTION_EXECUTION_MODE` unset or invalid; stub-first serves in the absence of GPU env.
+
+7. **FPR machine YAML** — 23 memory rows registered in `docs/registry/function_promise_registry_v0.6_supplement_memory_stage_a.md` and regenerated into `docs/registry/machine/registry.yaml`. Parser `backend/services/registry/parser.py::parse_v1_source` extended to re-parse post-v1 supplements as additive material (governance §14 extension). All MRR-G* gates green including MRR-G-Parity (34/34).
+
+8. **Housekeeping doc trail** — Rulings + dispatch §6 erratum (34 ≠ 33) + Frontend Brief v2 intake summary + CC-6 branch determination (Path α, DELEGATED-REVERSIBLE) + Audio Intelligence pack re-upload hash verification (byte-identical to committed source `b6ad57b3…`; no amendment).
+
+9. **Close-out** — Close report at `docs/close_reports/memory_service_stage_b_2026-07-31.md` (AC-1 full contents). Enforcement-cell count re-measured: 49 new cells. Full backend suite: 1382 passing + 1 skipped + 0 regressions in ~43s. Demo login (`admin@rms.example.com` / `admin-b1-test-pw`) works; live `POST /api/memory/planes` under admin scope returns 201 with server-minted plane_id.
+
+**Deliberate omissions per cycle scope:**
+- No frontend code touched (Phase 3 Surfaces deferred to next cycle).
+- No GPU code / BM-V / PH-R2 (blocked on OT-1/OT-2/OT-3 Owner facts).
+- No new promise IDs minted (conservation-not-authorship posture; all 23 FPR rows cite existing promises).
+
+**Waiting on backend testing agent report as the operative close signal per Owner condition.**
+
+— End of Memory Service Stage B entry. —

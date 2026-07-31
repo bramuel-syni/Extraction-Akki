@@ -1,0 +1,78 @@
+{
+  "additionalProperties": false,
+  "description": "Memory Plane envelope \u2014 the one plane per integration key.",
+  "properties": {
+    "contribution_store_ref": {
+      "description": "Reference (URI-form) to the plane's contribution store partition. Plane-local; scoped_accessor enforces isolation by construction.",
+      "title": "Contribution Store Ref",
+      "type": "string"
+    },
+    "issued_at": {
+      "description": "ISO-8601 UTC timestamp of plane issuance.",
+      "title": "Issued At",
+      "type": "string"
+    },
+    "issued_to_integration_key": {
+      "description": "Integration key (or engineer key) this plane is bound to. Immutable.",
+      "minLength": 1,
+      "title": "Issued To Integration Key",
+      "type": "string"
+    },
+    "plane_id": {
+      "description": "Server-minted unique plane identifier (uuid-hex, prefix `mp-`).",
+      "minLength": 1,
+      "title": "Plane Id",
+      "type": "string"
+    },
+    "retrieval_scope": {
+      "description": "The estate slice the plane may read (feed_id / grain filter / time window). Immutable after issue.",
+      "title": "Retrieval Scope",
+      "type": "string"
+    },
+    "revoked_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "ISO-8601 UTC timestamp of revocation, when applicable.",
+      "title": "Revoked At"
+    },
+    "state": {
+      "default": "active",
+      "description": "Plane lifecycle state. Revocation freezes reads immediately (services/memory/revocation.py).",
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "tenant_id": {
+      "description": "Multi-instance scope. Enforced by scoped_accessor at every read.",
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "working_set_ref": {
+      "description": "Reference to the plane's working set (references, not copies). Grows from observed use per usage-proportional persistence rule.",
+      "title": "Working Set Ref",
+      "type": "string"
+    }
+  },
+  "required": [
+    "plane_id",
+    "issued_to_integration_key",
+    "tenant_id",
+    "retrieval_scope",
+    "contribution_store_ref",
+    "working_set_ref",
+    "issued_at"
+  ],
+  "title": "MemoryPlane_v0",
+  "type": "object"
+}

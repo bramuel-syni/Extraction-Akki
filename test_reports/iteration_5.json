@@ -1,0 +1,36 @@
+{
+  "summary": "Cycle 3 backend-only verification (Memory Service Stage A/B + P2 buildable-now guards). Full pytest suite: 1382 passed, 1 skipped, 0 failed in ~43s. Invariant subset test_memory_service_m_g1_to_m_g9.py runs 24 cells all green; test_p2_buildable_now.py runs 25 cells all green (49/49 combined). Wrote fresh HTTP-surface smoke suite /app/backend/tests/test_memory_http_surface.py exercising the external REACT_APP_BACKEND_URL (https://governance-scan-3.preview.emergentagent.com) — 14/14 green. Verified: admin login returns JWT; POST /api/memory/planes issues plane_id matching ^mp-[0-9a-f]{12}$ with contribution_store_ref=contributions:<pid>, working_set_ref=working_set:<pid>, state=active; GET returns same envelope; unauthenticated GET returns 401 with reason=auth_missing and NO outcome key; GET on non-existent plane returns 4xx with outcome=refused, reason=plane_not_found (taxonomy discipline honored); contribute happy path returns 201 with rights_class=internal_only + intended_scope=mind_context_only; class-cap, rights-forbid, shape-invalid all return governed refusals with correct reasons; publish against a real contribution with unset threshold [SLOT] returns outcome=refused, reason=publication_quality_threshold_unset (SR-5 fail-loud verified); revoke idempotent (already_revoked toggles false→true), subsequent contribute on revoked plane returns plane_revoked; reconstructed_state shows state=revoked with contributions_landed_count>=1; /api/readyz returns parity 34/34 db=ok; /api/system/build_info parity_count=34; OpenAPI exposes all 8 /api/memory/* paths. Registry v4 landed additive at services/compliance/data_class_registry.v4.json (v3 preserved); deletion_ledger.py points to v4; machine registry.yaml contains 23 rows starting with 'akki.memory'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/memory/planes/{plane_id}/contribute", "issue": "Router requires an additional `content_ref: str` field on ContributeRequest that is NOT documented in the review-request payload spec (spec listed only content/provenance/defensibility/context/re_extraction_handle inside five_ring_stamp). Callers omitting content_ref receive FastAPI 422 with type='missing' rather than a governed refusal. Not a governance-taxonomy violation (422 has no outcome key so is correctly-classified as auth/validation lane), but the discovery hint in review-request text should be updated to reflect the true schema, and consider tightening OpenAPI examples."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_memory_http_surface.py",
+    "/app/backend/tests/invariants/test_memory_service_m_g1_to_m_g9.py",
+    "/app/backend/tests/invariants/test_p2_buildable_now.py"
+  ],
+  "action_items": [
+    "Optional: update the memory-service contribute spec (or router docstring/OpenAPI example) to reflect the required top-level `content_ref` field, so downstream integrators receive a governed hint rather than a bare Pydantic 422."
+  ],
+  "critical_code_review_comments": [
+    "publication.attempt_publication fetches the contribution BEFORE the threshold gate runs (services/memory/publication.py:88-108). A caller passing a nonexistent contribution_id therefore receives reason='publication_gate_denied' rather than 'publication_quality_threshold_unset'. This is arguably correct (existence is a precondition of any gate), but be aware the SR-5 fail-loud path requires a real contribution to be reached in HTTP tests — the pytest cell already tests the pure function path directly.",
+    "routers/docs_bundle.py emits a duplicate operation ID warning (download_bundle HEAD) — cosmetic only, not gating, but consider unique operation_id kwargs on the .head() decorator to silence the FastAPI warning."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_memory_http_surface.py (new — HTTP smoke suite)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "N/A (backend-only per request)"},
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (from /app/memory/test_credentials.md) — verified working",
+  "seed_data_creation": "Each HTTP-smoke test creates ephemeral planes prefixed with retrieval_scope=estate://smoke-a or estate://revoke-test. No cleanup necessary — data is per-plane and scoped by admin JWT identity.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Cycle 3 backend green across all requested surfaces. If a future run needs to exercise publication happy-path, set env AKKI_MEMORY_PUBLICATION_QUALITY_THRESHOLD=50 before starting the backend — the unset-default is itself a governed gate per SR-5 and MUST NOT be defaulted in code. HTTP smoke suite at /app/backend/tests/test_memory_http_surface.py is safe to keep as regression. Registry v4 additive bump verified byte-independent from v3 (both files on disk). Taxonomy discipline verified live: 401 unauth → {reason:auth_missing} no outcome key; 4xx governed → outcome=refused + reason + detail. Do NOT collapse these two envelopes.",
+  "rca of the issue": "N/A — no bugs. One documentation-drift note (content_ref field) captured under minor issues; router behavior is correct."
+}
