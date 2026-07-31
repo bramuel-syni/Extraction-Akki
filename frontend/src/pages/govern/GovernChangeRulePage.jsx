@@ -45,32 +45,58 @@ function DirectionChip({ from, to }) {
 }
 
 function CeremonyStages({ current }) {
+  // Stage 4 (Apply) carries the ratified behavioural rule as its caption per
+  // FB v2 §A5-1 ("Frozen is immutable." — recommended for fast ratification
+  // because it encodes a behavioural rule, not a tone choice). Rendered at
+  // ceremony level so the rule is always visible, not only after a request
+  // reaches `effective` state.
   const stages = [
-    { key: 'proposed', label: 'Propose' },
-    { key: 'countersigned', label: 'Counter-sign' },
-    { key: 'waiting', label: 'Wait' },
-    { key: 'applied', label: 'Apply' },
+    { key: 'proposed', label: 'Propose', caption: null },
+    { key: 'countersigned', label: 'Counter-sign', caption: null },
+    { key: 'waiting', label: 'Wait', caption: null },
+    { key: 'applied', label: 'Apply', caption: FROZEN_IS_IMMUTABLE },
   ];
   return (
-    <div data-testid="govern-change-rule-stages" style={{ display: 'flex', gap: '12px', marginBottom: '18px' }}>
+    <div data-testid="govern-change-rule-stages" style={{ display: 'flex', gap: '18px', marginBottom: '22px', flexWrap: 'wrap' }}>
       {stages.map((s) => (
-        <span
+        <div
           key={s.key}
-          data-testid={`govern-change-rule-stage-${s.key}`}
-          style={{
-            padding: '5px 12px',
-            borderRadius: '2px',
-            background: current === s.key ? AKKI_V4_PALETTE.navy : 'transparent',
-            color: current === s.key ? AKKI_V4_PALETTE.cream : AKKI_V4_PALETTE.smoke,
-            border: `1px solid ${AKKI_V4_PALETTE.navy}`,
-            fontFamily: AKKI_V4_TYPOGRAPHY.labels,
-            fontSize: '0.72rem',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-          }}
+          data-testid={`govern-change-rule-stage-block-${s.key}`}
+          style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
         >
-          {s.label}
-        </span>
+          <span
+            data-testid={`govern-change-rule-stage-${s.key}`}
+            style={{
+              padding: '5px 12px',
+              borderRadius: '2px',
+              background: current === s.key ? AKKI_V4_PALETTE.navy : 'transparent',
+              color: current === s.key ? AKKI_V4_PALETTE.cream : AKKI_V4_PALETTE.smoke,
+              border: `1px solid ${AKKI_V4_PALETTE.navy}`,
+              fontFamily: AKKI_V4_TYPOGRAPHY.labels,
+              fontSize: '0.72rem',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              textAlign: 'center',
+            }}
+          >
+            {s.label}
+          </span>
+          {s.caption && (
+            <span
+              data-testid={`govern-change-rule-stage-caption-${s.key}`}
+              style={{
+                fontSize: '0.72rem',
+                color: AKKI_V4_PALETTE.oxblood,
+                fontStyle: 'italic',
+                fontFamily: AKKI_V4_TYPOGRAPHY.body,
+                paddingLeft: '4px',
+                maxWidth: '120px',
+              }}
+            >
+              {s.caption}
+            </span>
+          )}
+        </div>
       ))}
     </div>
   );

@@ -259,7 +259,20 @@ describe('Phase-3-SubC3 · gate_refusal_health_gap_files_via_wizard_door', () =>
    Auxiliary discipline cells (round out coverage — do NOT count against 4 cells).
    ============================================================================= */
 describe('Phase-3-SubC3 · aux · applied change acquires FROZEN_IS_IMMUTABLE chip', () => {
-  it('effective state renders the ratified frozen chip verbatim', async () => {
+  it('the ratified string is RENDERED at the Apply stage caption on initial page load (FB v2 §A5-1 behavioural rule)', async () => {
+    render(<MemoryRouter><GovernChangeRulePage /></MemoryRouter>);
+    // Ratified string MUST be visible at the ceremony level BEFORE any
+    // request is created — the rule is a stage caption, not conditional on
+    // effective state. Assertion binds on RENDERED location, not on the
+    // constant's existence in a module.
+    const applyCaption = screen.getByTestId('govern-change-rule-stage-caption-applied');
+    expect(applyCaption).toBeInTheDocument();
+    expect(applyCaption).toHaveTextContent(FROZEN_IS_IMMUTABLE);
+    // And the rendered text is BYTE-IDENTICAL to the ratified constant.
+    expect(applyCaption.textContent).toBe(FROZEN_IS_IMMUTABLE);
+  });
+
+  it('effective state also renders the ratified frozen chip on the request card (verbatim)', async () => {
     render(<MemoryRouter><GovernChangeRulePage /></MemoryRouter>);
     api.checkerInitiate.mockResolvedValueOnce({
       status: 200,
