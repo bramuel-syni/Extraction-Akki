@@ -127,4 +127,52 @@ Each item is **verbatim** from the delta log (no paraphrase) and carries one of 
 
 ═══════════════════════════════════════════════════════════════════
 
-*End of UI-1-A defect + Owner-ruling addendum. Awaiting re-verification before UI-1-B dispatch.*
+## Iter14 — Owner iter13 addendum blockers CLOSED (2026-07-31 · appended)
+
+Iter13 verdict: 2/3 PASS, 1 FAIL, 1 grammar correction. Iter14 fixes both and re-verifies.
+
+### Iter13 Blocker A — SAMPLE seeding for admin identity → CLOSED
+
+**Root cause:** the identity resolver in `server.py` startup seeded only the four `DEMO_IDENTITIES`; `admin@rms.example.com` was not on the list, so admin's `/api/use_data/sessions` returned 33 rows with zero `is_sample=true`.
+
+**Fix:** the resolver now unions `DEMO_IDENTITIES ∪ {ADMIN_EMAIL from env} ∪ {"master@rms.example.com" fallback}`. Seeder is idempotent because it upserts on a fixed `session_id` prefix (`s-sample-in-progress-<uid[-12:]>` / `s-sample-ready-<uid[-12:]>`) — a restart re-runs the seed loop but the upsert-by-id ensures per-identity sample count stays at (1 in_progress, 1 ready).
+
+**Verified (iter14):**
+- `GET /api/use_data/sessions` as **admin@rms.example.com** returns `in_progress[0].is_sample = true` (`session_id=s-sample-in-progress-a2df857a2765`) and `ready[0].is_sample = true` (`session_id=s-sample-ready-a2df857a2765`), pinned to position [0] above 33 real test-exercise sessions.
+- Same contract verified for all 5 identities (admin + 4 demo).
+- Idempotent-on-restart: `supervisorctl restart backend` + re-check → identical (1,1) per-identity sample counts. No duplicates.
+- Frontend DOM: /use-data as admin renders EXACTLY 2 `use-data-sample-badge` elements (screenshot at `/tmp/admin_landing_with_samples.png`); clicking the sample row opens the wizard with `use-data-wizard-sample-banner` reading verbatim *"SAMPLE FIXTURE · This is seeded demo data (AS-U2). It is not a live commission."*
+
+### Iter13 Blocker B (grammar ruling) — Escalatable route as interactive element → CLOSED
+
+**Owner ruling verbatim:** *"REFUSED-escalatable's 'route to approval' must be an INTERACTIVE element (link/button to the approval surface), not plain text. Canon §1.3: the refusal 'routes to the approval surface. Someone can approve; the system says who.' Routing means actionable. This is also the load-bearing asymmetry: absolute = zero affordance, escalatable = a working route. Until Team (UI-1-E) exists, the route may point to the Govern holds surface or render the route target with an honest dormant marker if the destination page isn't built — but it must be an element, not prose."*
+
+**Fix:** `UseDataVerdictPanel.jsx` now renders `use-data-verdict-refusal-route-affordance` (escalatable) and `use-data-verdict-held-route-affordance` (held-for-check) as React-Router `<Link>` components (rendered as `<a>` with `href`). `resolveApprovalDestination()` maps route-text substrings to Canon-live Govern surfaces:
+- `countersign` / default → `/govern/pending` · "Open Govern · Pending →"
+- `change-a-rule` / `change a rule` → `/govern/change-rule` · "Open Govern · Change a rule →"
+- `retention` → `/govern/retention` · "Open Govern · Retention →"
+- `team` → `/team` (dormant; the dormant marker on that page is the honest disclosure per the Owner's dormant-marker allowance)
+
+Absolute-refusal path remains unchanged: zero interactive elements (Doctrine 5).
+
+**Verified (iter14):**
+- `refused-escalatable` section: `<a data-testid="use-data-verdict-refusal-route-affordance" href="/govern/change-rule">Open Govern · Change a rule →</a>` — matches its route text (`"Declare a privacy floor or route via Change-a-Rule."`).
+- Prose `use-data-verdict-refusal-route-label` sits alongside the affordance (both visible).
+- `held-for-check` section: `<a data-testid="use-data-verdict-held-route-affordance" href="/govern/pending">Open Govern · Pending →</a>`.
+- `refused-absolute` section: `.querySelectorAll('a').length === 0` AND `.querySelectorAll('button').length === 0`. Neither `use-data-verdict-refusal-route-affordance` nor `use-data-verdict-held-route-affordance` testid appears anywhere within.
+- Paired asymmetry witness: escalatable link count = 1, absolute link count = 0. **Load-bearing asymmetry from Canon §1.3 stands.**
+- New Jest gate `refusal_grammar_paired_break_in_gate.test.js` (5 tests) — green.
+
+### Iter14 regression evidence
+
+- **Backend Pytest:** 1491 pass · 2 skip · 0 fail (unchanged · parity 36/36).
+- **Frontend Jest:** 14 suites · 120 tests · 0 fail — includes the four UI-1-A gates:
+  - `canon_os_root_vocab_gate.test.js` (extended vocab)
+  - `verdict_absolute_no_affordance_gate.test.js` (Doctrine 5 break-in)
+  - `sample_badge_rendered_location_gate.test.js` (SAMPLE badge rendered location)
+  - `refusal_grammar_paired_break_in_gate.test.js` **(NEW · iter14 · paired escalatable-vs-absolute route asymmetry)**
+- **Iter14 testing-agent verdict:** 100% pass, zero blockers, `retest_needed: false`.
+
+═══════════════════════════════════════════════════════════════════
+
+*UI-1-A CLOSED. Awaiting UI-1-B dispatch.*

@@ -3,7 +3,15 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-07-31 late-day · **UI-1-A CLOSED after Owner-ruling addendum · Parity 36/36 · Canon OS shell live**)
+## Current gate status (2026-07-31 late-day · **UI-1-A FULLY CLOSED after iter14 · Owner blockers resolved · Parity 36/36 · Canon OS shell live**)
+
+### Iter14 blocker close (2026-07-31) — Owner iter13 verdict 2/3 → 3/3 · UI-1-A ready for close-dispatch
+
+- **Blocker A (SAMPLE seeding for admin) — CLOSED.** Identity resolver unioned `DEMO_IDENTITIES ∪ ADMIN_EMAIL ∪ master@rms.example.com`. `admin@rms.example.com` now returns `in_progress[0].is_sample=true` + `ready[0].is_sample=true` on `GET /api/use_data/sessions`, pinned above real test-exercise sessions. Idempotent across `supervisorctl restart backend`. 2 rendered SAMPLE badges verified in DOM for admin. Same contract for all 5 identities.
+- **Blocker B (Escalatable route grammar) — CLOSED.** `UseDataVerdictPanel.jsx` `resolveApprovalDestination()` maps route-text substrings to Canon-live Govern surfaces (`/govern/pending`, `/govern/change-rule`, `/govern/retention`). Refused-escalatable + held-for-check both render `<a data-testid="use-data-verdict-*-route-affordance" href="/govern/*">Open Govern · … →</a>` — interactive Link components. Absolute-refusal path unchanged: zero anchors, zero buttons, Doctrine 5 asymmetry witnessed. New Jest gate `refusal_grammar_paired_break_in_gate.test.js` (5 tests).
+- **Iter14 testing-agent verdict:** 100% pass. `retest_needed: false`. UI-1-A close-dispatch clear.
+- **Regression:** Backend Pytest **1491 pass · 2 skip · 0 fail**. Frontend Jest **14 suites · 120 tests · 0 fail**. Parity 36/36 live.
+- **Standing preview:** https://governance-scan-3.preview.emergentagent.com — Canon OS shell at root · Doctrine 5 + refusal-grammar-paired-asymmetry demonstrable at /use-data/verdict-demo · SAMPLE badges above the fold on every identity.
 
 ### Owner-ruling addendum (2026-07-31 · iter12 defects + R1-R4) — SATISFIED · iter13 GREEN
 
