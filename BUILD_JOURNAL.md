@@ -2020,3 +2020,26 @@ CI initially came back with 1 failure at `test_manifest_entry_resolves[frontend/
 **Waiting on backend testing agent report as the operative close signal per Owner condition.**
 
 — End of Memory Service Stage B entry. —
+
+
+---
+
+## 2026-07-31 (late-day) — Engineer-key grant single-source propagation fix (Cycle 3 addendum)
+
+**Defect (independent verification):** `POST /api/engineer/key_grants` persisted grants to the `engineer_key_grants` collection but the grantee's identity resolution never derived those grants at login/refresh. Consequence: real (non-admin) engineer-key holders were locked out of `/api/memory/*` via HTTP — the per-key plane-isolation surface existed in code + unit tests but was unreachable through the real auth surface.
+
+**Owner-prescribed fix (option b · SINGLE-SOURCE per EE-R4 no-parallel-mechanism):** identity resolution at login and refresh derives active `key_grants` from the `engineer_key_grants` collection. `users.key_grants` array is now vestigial (never read for auth). Admin's seed grant lives in the same collection via `seed_admin_grant_if_absent` startup hook. Revocation propagates naturally on next login/refresh (derivation filter excludes revoked rows).
+
+**Files touched:** `services/auth/engineer_key_grant_service.py` (+ `resolve_active_grants_for_email` + `seed_admin_grant_if_absent`); `services/auth/user_store.py` (+ async `resolve_identity`; `authenticate` uses it); `routers/auth.py::refresh` (uses `resolve_identity`); `server.py` (startup hooks); `routers/docs_bundle.py` (split `api_route` into `@router.get` + `@router.head` with unique `operation_id`; kills Duplicate-Operation-ID warning); `routers/memory.py::ContributeRequest` (OpenAPI example payload for downstream integrators).
+
+**New enforcement cells:** 7 M-G-E2E cells in `tests/invariants/test_memory_engineer_key_grant_e2e_propagation.py`. All exercise the invariant over HTTP via `ASGITransport` (no in-process helpers): M-G-E2E-1 fresh-user-no-grant → 403; M-G-E2E-2 grant→relogin→plane-POST-succeeds; M-G-E2E-3 cross-key break-in on GET/contribute/revoke → 403; M-G-E2E-4 admin full-scope read spec-intended; M-G-E2E-5 revocation propagates at next login; M-G-E2E-6 refresh path also single-source; M-G-E2E-7 rogue `users.key_grants` mirror ignored at login (EE-R4 attest).
+
+**Cycle-3 total enforcement-cell count re-measured:** **56 cells** = 24 M-G + 25 P2 + 7 M-G-E2E. Backend suite: **1403 passed / 1 skipped / 0 failed / 0 regressions**.
+
+**Backend testing agent report (iteration_6.json):** operative close signal. All 7 E2E cells green; HTTP path exercised with fresh uuid-suffixed users; propagation invariants held from the wire seam; `retest_needed: False`.
+
+**Ruling on disk:** `docs/rulings/memory_service_engineer_grant_propagation_fix_2026-07-31.md`. **Addendum in close report:** `docs/close_reports/memory_service_stage_b_2026-07-31.md`.
+
+The previously HUMAN_REQUIRED cross-key HTTP break-in case is now automatable end-to-end.
+
+— End of Cycle-3 addendum entry. —

@@ -158,3 +158,36 @@ Re-upload verification confirmed byte-identical to committed source (SHA `b6ad57
 ═══════════════════════════════════════════════════════════════════
 
 *Close report generated 2026-07-31. Awaiting backend testing-agent report as the operative close signal per Owner condition.*
+
+---
+
+## ADDENDUM — Independent verification defect + single-source fix (2026-07-31 late-day)
+
+**Defect surfaced at independent verification:** `POST /api/engineer/key_grants` persisted grants to `engineer_key_grants` collection but the grantee's identity resolution never derived those grants at login/refresh — the per-key plane-isolation path was unreachable through the real auth surface. This suite claimed spec-close while the SPEC had a gap. Recording it honestly here.
+
+**Fix landed (single-source per EE-R4 no-parallel-mechanism):**
+- Identity resolution at login + refresh now derives active `key_grants` from `engineer_key_grants` collection (the ONE store of grant truth). `users.key_grants` array is vestigial, never read for auth.
+- Admin's seed grant now lives in the same single-source collection (via new `seed_admin_grant_if_absent` startup hook).
+- Revocation naturally propagates on next login/refresh (derivation filter excludes revoked rows).
+
+**Fix files:**
+- `services/auth/engineer_key_grant_service.py` — new `resolve_active_grants_for_email` + `seed_admin_grant_if_absent`
+- `services/auth/user_store.py` — new async `resolve_identity`; `authenticate` now uses it
+- `routers/auth.py::refresh` — now uses `user_store.resolve_identity`
+- `server.py` — startup calls `seed_admin_grant_if_absent`
+
+**New enforcement cells:** 7 M-G-E2E cells in `tests/invariants/test_memory_engineer_key_grant_e2e_propagation.py`. All exercise the invariant over HTTP (no in-process helpers). Cycle-3 total enforcement-cell count re-measured: **56 cells (24 M-G + 25 P2 + 7 M-G-E2E)**.
+
+**Cosmetic items also folded:**
+- `routers/docs_bundle.py` — split `api_route` into `@router.get` + `@router.head` with unique `operation_id` kwargs; Duplicate-Operation-ID warning gone.
+- `routers/memory.py::ContributeRequest` — OpenAPI `json_schema_extra` example added with all 7 required fields + all 5 rings.
+
+**Backend testing agent verification (iteration_6.json):**
+- Full backend suite: **1403 passed / 1 skipped / 0 failed / 0 regressions**
+- All 7 M-G-E2E cells green
+- HTTP end-to-end exercised with fresh uuid-suffixed users
+- `retest_needed: False`
+
+**Ruling document:** `docs/rulings/memory_service_engineer_grant_propagation_fix_2026-07-31.md`.
+
+═══════════════════════════════════════════════════════════════════

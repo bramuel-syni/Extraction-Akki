@@ -3,7 +3,16 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-07-31 · **Memory Service Stage B CLOSED · Parity 34/34 live · Cycle 3 backend-only delivered**)
+## Current gate status (2026-07-31 late-day · **Cycle 3 fully closed after independent-verification fix · Parity 34/34 live · Grant propagation single-source-of-truth**)
+
+- **Independent verification defect surfaced + fixed:** engineer-key grants persisted to `engineer_key_grants` collection but the grantee's identity resolution never derived those grants at login/refresh — real engineer-key holders were locked out of `/api/memory/*` via HTTP. Owner-prescribed fix landed per option (b) SINGLE-SOURCE per EE-R4 no-parallel-mechanism: identity resolution derives active `key_grants` from `engineer_key_grants` collection (the ONE store of grant truth). `users.key_grants` is vestigial (never read for auth). Admin seed grant lives in the single-source collection via `seed_admin_grant_if_absent` startup hook. Revocation propagates naturally at next login/refresh.
+- **New E2E gate roster:** 7 cells in `tests/invariants/test_memory_engineer_key_grant_e2e_propagation.py` (register→no-grant-denied; grant→relogin→plane-POST-succeeds; cross-key break-in on GET/contribute/revoke → 403; admin full-scope read spec-intended; revocation propagates at next login; refresh path single-source; mirror rogue-write ignored). All 7 green via HTTP over ASGITransport.
+- **Cosmetic items folded:** `docs_bundle` HEAD duplicate-op-id warning (split `api_route` into distinct `@router.get`/`@router.head`); memory `ContributeRequest` OpenAPI example payload landed.
+- **Full backend suite: 1403 passed / 1 skipped / 0 failed / 0 regressions.** Testing agent report `iteration_6.json`: `retest_needed: False`.
+- **Cycle-3 total enforcement-cell count re-measured:** 56 = 24 M-G + 25 P2 + 7 M-G-E2E.
+- **Ruling on disk:** `docs/rulings/memory_service_engineer_grant_propagation_fix_2026-07-31.md`. **Addendum in close report:** `docs/close_reports/memory_service_stage_b_2026-07-31.md`. **Journal:** appended to `/app/BUILD_JOURNAL.md`.
+
+## Prior gate status (2026-07-31 · **Memory Service Stage B CLOSED · Parity 34/34 live · Cycle 3 backend-only delivered**)
 
 - **Latest gate:** Memory Service Stage B (Owner ruling 2026-07-30 cycle 3 option (b) + follow-ups 1a/2a/3a). BACKEND ONLY per cycle scope. Full backend suite **1382 passed / 1 skipped / 0 failed / 0 regressions**. HTTP smoke suite 14/14 green. Testing-agent report: 100% success rate; retest_needed=false.
 - **Parity restored 32 → 34** via two seal events per D4b FREEZE:
