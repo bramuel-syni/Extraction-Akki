@@ -3,6 +3,7 @@
 Routes:
     POST   /api/use_data/session               open wizard session
     GET    /api/use_data/session/{session_id}  read session envelope
+    GET    /api/use_data/sessions              list operator's sessions (pipeline strip)
     POST   /api/use_data/session/{session_id}/turn     append dialogue turn
     POST   /api/use_data/session/{session_id}/reflection  set/open/assumed field
     POST   /api/use_data/session/{session_id}/plan        plan preview values
@@ -10,7 +11,9 @@ Routes:
     GET    /api/use_data/ceiling                       read effective auto-run ceiling
     POST   /api/use_data/ceiling                       REFUSED · Change-a-Rule only
 
-Session state is held in-memory for UI-1-A; persistence is a UI-1-B fold.
+Session state is Mongo-backed (`use_data_wizard_sessions` collection) so
+the demo preview survives backend restarts (Owner viewable-build addendum
+2026-07-31).
 
 Design law:
     * Every governed value confirmed on the Commission card at commit time —
@@ -42,6 +45,7 @@ from contracts.use_data_wizard_session import (
 )
 from services.auth.dependencies import require_identity_or_deny
 from services.auth.identity import Identity
+from services.use_data import session_store
 from services.use_data.commission_verdict_engine import (
     AUTO_RUN_CEILING_USD_INITIAL,
     compose_verdict,
@@ -51,10 +55,6 @@ from services.use_data.commission_verdict_engine import (
 
 
 router = APIRouter(prefix="/use_data", tags=["use_data"])
-
-
-# In-memory session store (UI-1-A scope · durability lands in UI-1-B).
-_SESSIONS: Dict[str, UseDataWizardSession] = {}
 
 
 def _now_iso() -> str:
@@ -101,8 +101,38 @@ async def open_session(body: OpenSessionBody, request: Request):
         opened_at_iso=_now_iso(),
         door=body.door,
     )
-    _SESSIONS[session.session_id] = session
+    await session_store.insert(session, is_sample=False)
     return session
+
+
+@router.get("/sessions")
+async def list_sessions(request: Request):
+    """Pipeline strip source (Canon §6.5): In progress + Ready rows for the caller.
+
+    Each row carries the sidecar `is_sample` flag so the surface can render
+    AS-U2 SAMPLE badges on demo fixtures.
+    """
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
+    rows = await session_store.list_by_operator(identity.user_id)
+    in_progress: List[Dict[str, Any]] = []
+    ready: List[Dict[str, Any]] = []
+    for r in rows:
+        s: UseDataWizardSession = r["session"]
+        payload = {
+            "session_id": s.session_id,
+            "door": s.door.value,
+            "opened_at_iso": s.opened_at_iso,
+            "committed_at_iso": s.commission.committed_at_iso if s.commission else None,
+            "verdict_ref": s.commission.verdict_ref if s.commission else None,
+            "is_sample": r["is_sample"],
+        }
+        if s.commission is not None and s.commission.verdict_ref:
+            ready.append(payload)
+        else:
+            in_progress.append(payload)
+    return {"in_progress": in_progress, "ready": ready}
 
 
 @router.get("/session/{session_id}")
@@ -110,13 +140,16 @@ async def get_session(session_id: str, request: Request):
     identity, denial = await _resolve_identity(request)
     if denial is not None:
         return denial
-    session = _SESSIONS.get(session_id)
-    if session is None:
+    row = await session_store.get_with_sample_flag(session_id)
+    if row is None:
         raise HTTPException(status_code=404, detail="session not found")
+    session: UseDataWizardSession = row["session"]
     forbidden = _forbid_other_operator(session, identity)
     if forbidden is not None:
         return forbidden
-    return session
+    payload = session.model_dump()
+    payload["is_sample"] = row["is_sample"]
+    return payload
 
 
 class AppendTurnBody(BaseModel):
@@ -130,7 +163,7 @@ async def append_turn(session_id: str, body: AppendTurnBody, request: Request):
     identity, denial = await _resolve_identity(request)
     if denial is not None:
         return denial
-    session = _SESSIONS.get(session_id)
+    session = await session_store.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
     forbidden = _forbid_other_operator(session, identity)
@@ -143,6 +176,7 @@ async def append_turn(session_id: str, body: AppendTurnBody, request: Request):
         ts_iso=_now_iso(),
     )
     session.dialogue.append(turn)
+    await session_store.upsert(session)
     return session
 
 
@@ -159,7 +193,7 @@ async def upsert_reflection_field(session_id: str, body: ReflectionUpdate, reque
     identity, denial = await _resolve_identity(request)
     if denial is not None:
         return denial
-    session = _SESSIONS.get(session_id)
+    session = await session_store.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
     forbidden = _forbid_other_operator(session, identity)
@@ -174,6 +208,7 @@ async def upsert_reflection_field(session_id: str, body: ReflectionUpdate, reque
         committed_by_ref=None,  # commit sets this at Commission-card time.
     ))
     session.reflection = ReflectionCard(fields=fields)
+    await session_store.upsert(session)
     return session
 
 
@@ -191,7 +226,7 @@ async def set_plan(session_id: str, body: PlanPreviewBody, request: Request):
     identity, denial = await _resolve_identity(request)
     if denial is not None:
         return denial
-    session = _SESSIONS.get(session_id)
+    session = await session_store.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
     forbidden = _forbid_other_operator(session, identity)
@@ -204,6 +239,7 @@ async def set_plan(session_id: str, body: PlanPreviewBody, request: Request):
         cost_high_usd=body.cost_high_usd,
         ceiling_usd=body.ceiling_usd,
     )
+    await session_store.upsert(session)
     return session
 
 
@@ -233,7 +269,7 @@ async def commit_commission(session_id: str, body: CommitBody, request: Request)
     identity, denial = await _resolve_identity(request)
     if denial is not None:
         return denial
-    session = _SESSIONS.get(session_id)
+    session = await session_store.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
     forbidden = _forbid_other_operator(session, identity)
@@ -265,6 +301,7 @@ async def commit_commission(session_id: str, body: CommitBody, request: Request)
         committed_at_iso=_now_iso(),
         verdict_ref=verdict.trust_receipt_ref,
     )
+    await session_store.upsert(session)
     return {"session": session.model_dump(), "verdict": verdict.model_dump()}
 
 

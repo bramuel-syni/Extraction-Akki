@@ -579,6 +579,7 @@ export default function UseDataWizardPage() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
+  const [isSample, setIsSample] = useState(false);
   const [deny, setDeny] = useState(null);
   const [fault, setFault] = useState(null);
   const [sending, setSending] = useState(false);
@@ -613,7 +614,10 @@ export default function UseDataWizardPage() {
         navigate('/use-data');
         return;
       }
-      setSession(r.body);
+      // Response envelope shape: full session model + sidecar is_sample flag.
+      const { is_sample: sample, ...sessionFields } = r.body || {};
+      setSession(sessionFields);
+      setIsSample(!!sample);
     })();
   }, [sessionId, navigate]);
 
@@ -718,6 +722,23 @@ export default function UseDataWizardPage() {
       title={`Use Data · ${session.door.replaceAll('_', ' ')}`}
       subtitle="One conversation. Six cards. One committed act."
     >
+      {isSample && (
+        <div
+          data-testid="use-data-wizard-sample-banner"
+          style={{
+            background: AKKI_V4_PALETTE.amber,
+            color: AKKI_V4_PALETTE.cream,
+            padding: '10px 16px',
+            marginBottom: '18px',
+            fontFamily: AKKI_V4_TYPOGRAPHY.monoLine,
+            fontSize: '0.8rem',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}
+        >
+          SAMPLE FIXTURE · This is seeded demo data (AS-U2). It is not a live commission.
+        </div>
+      )}
       <p
         data-testid="use-data-wizard-canon-11-1-verbatim"
         style={{

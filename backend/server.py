@@ -243,6 +243,30 @@ async def _startup() -> None:
             )
             await _grant_ensure_indexes()
             await seed_admin_grant_if_absent(admin_email=_admin_email)
+        # UI-1-A viewable-build addendum (2026-07-31) — Mongo-backed Use Data
+        # wizard sessions + demo identities + AS-U2-marked sample fixtures.
+        # All three are idempotent; per Owner: "keep the preview standing
+        # between closes … seeded state persists (Mongo-backed, not
+        # in-memory), and the preview reflects the latest close at all
+        # times."
+        from services.use_data import session_store as use_data_session_store
+        from services.auth.demo_identity_seeder import (
+            DEMO_IDENTITIES,
+            seed_demo_identities_if_absent,
+        )
+        from services.use_data.sample_fixture_seeder import (
+            seed_sample_fixtures_if_absent,
+        )
+        await use_data_session_store.ensure_indexes()
+        await seed_demo_identities_if_absent()
+        # Resolve the demo operators' user_ids so the fixture seeder can
+        # attach sessions to real Mongo _id values.
+        _demo_ops: list[dict] = []
+        for spec in DEMO_IDENTITIES:
+            doc = await auth_user_store.get_by_email(spec["email"])
+            if doc is not None:
+                _demo_ops.append({"email": spec["email"], "user_id": str(doc["_id"])})
+        await seed_sample_fixtures_if_absent(_demo_ops)
     except Exception:
         log.exception("rms.startup: async delivery substrate boot failed")
         raise

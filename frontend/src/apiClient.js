@@ -332,6 +332,12 @@ export const api = {
         validateStatus: (s) => s >= 200 && s < 600,
       })
       .then((r) => ({ status: r.status, body: r.data })),
+  useDataListSessions: () =>
+    client
+      .get('/use_data/sessions', {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
   useDataReadSession: (sessionId) =>
     client
       .get(`/use_data/session/${encodeURIComponent(sessionId)}`, {

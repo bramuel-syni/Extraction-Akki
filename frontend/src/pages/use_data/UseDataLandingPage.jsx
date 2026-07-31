@@ -88,12 +88,64 @@ function DoorCard({ door, onEnter }) {
   );
 }
 
-function PipelineStrip({ ceilingUsd }) {
-  /* Canon §6.5 · two sections beneath the doors: In progress · Ready.
-   * UI-1-A scope: sections render honestly-empty; population lands in UI-1-B
-   * once the pipeline sidecar is durable. This is NOT invented copy —
-   * it is honest "no rows yet" per Owner design law.
+function SampleBadge() {
+  /* AS-U2 — Owner viewable-build addendum verbatim:
+   *   "seeded with fixture data VISIBLY MARKED as sample (AS-U2 — an
+   *    unmarked sample is a hidden mock and prohibited)"
+   * The badge renders on every row and detail whose `is_sample=true`.
    */
+  return (
+    <span
+      data-testid="use-data-sample-badge"
+      style={{
+        display: 'inline-block',
+        marginLeft: '8px',
+        padding: '2px 6px',
+        background: AKKI_V4_PALETTE.amber,
+        color: AKKI_V4_PALETTE.cream,
+        fontSize: '0.65rem',
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        fontFamily: AKKI_V4_TYPOGRAPHY.monoLine,
+      }}
+    >
+      SAMPLE
+    </span>
+  );
+}
+
+function PipelineRow({ row, testIdPrefix, onOpen }) {
+  return (
+    <div
+      data-testid={`${testIdPrefix}-${row.session_id}`}
+      onClick={() => onOpen(row.session_id)}
+      style={{
+        padding: '8px 10px',
+        borderBottom: `1px solid ${AKKI_V4_PALETTE.mist}`,
+        cursor: 'pointer',
+        fontSize: '0.85rem',
+        color: AKKI_V4_PALETTE.ink,
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = AKKI_V4_PALETTE.mist)}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+        <strong style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.78rem' }}>
+          {row.door.replaceAll('_', ' ')}
+        </strong>
+        {row.is_sample && <SampleBadge />}
+      </div>
+      <div style={{ color: AKKI_V4_PALETTE.sage, fontSize: '0.75rem', marginTop: '2px' }}>
+        {row.session_id}
+      </div>
+    </div>
+  );
+}
+
+function PipelineStrip({ ceilingUsd, pipeline, onOpen }) {
+  /* Canon §6.5 · two sections beneath the doors: In progress · Ready. */
+  const inProgress = pipeline?.in_progress || [];
+  const ready = pipeline?.ready || [];
   return (
     <section
       data-testid="use-data-pipeline-strip"
@@ -117,15 +169,25 @@ function PipelineStrip({ ceilingUsd }) {
           >
             In progress
           </h3>
-          <div
-            style={{
-              fontSize: '0.85rem',
-              color: AKKI_V4_PALETTE.sage,
-            }}
-            data-testid="use-data-pipeline-in-progress-empty"
-          >
-            No commissions in progress.
-          </div>
+          {inProgress.length === 0 ? (
+            <div
+              style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.sage }}
+              data-testid="use-data-pipeline-in-progress-empty"
+            >
+              No commissions in progress.
+            </div>
+          ) : (
+            <div data-testid="use-data-pipeline-in-progress-list">
+              {inProgress.map((row) => (
+                <PipelineRow
+                  key={row.session_id}
+                  row={row}
+                  testIdPrefix="use-data-pipeline-in-progress-row"
+                  onOpen={onOpen}
+                />
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ flex: 1, minWidth: '240px' }}>
           <h3
@@ -139,15 +201,25 @@ function PipelineStrip({ ceilingUsd }) {
           >
             Ready
           </h3>
-          <div
-            style={{
-              fontSize: '0.85rem',
-              color: AKKI_V4_PALETTE.sage,
-            }}
-            data-testid="use-data-pipeline-ready-empty"
-          >
-            No ready artefacts yet.
-          </div>
+          {ready.length === 0 ? (
+            <div
+              style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.sage }}
+              data-testid="use-data-pipeline-ready-empty"
+            >
+              No ready artefacts yet.
+            </div>
+          ) : (
+            <div data-testid="use-data-pipeline-ready-list">
+              {ready.map((row) => (
+                <PipelineRow
+                  key={row.session_id}
+                  row={row}
+                  testIdPrefix="use-data-pipeline-ready-row"
+                  onOpen={onOpen}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div
@@ -167,6 +239,7 @@ function PipelineStrip({ ceilingUsd }) {
 
 export default function UseDataLandingPage() {
   const [ceilingUsd, setCeilingUsd] = useState(null);
+  const [pipeline, setPipeline] = useState({ in_progress: [], ready: [] });
   const [deny, setDeny] = useState(null);
   const [fault, setFault] = useState(null);
   const [opening, setOpening] = useState(null);
@@ -174,16 +247,20 @@ export default function UseDataLandingPage() {
 
   useEffect(() => {
     (async () => {
-      const r = await api.useDataCeiling();
-      if (r.status >= 500) {
-        setFault(r.body);
+      const rCeiling = await api.useDataCeiling();
+      if (rCeiling.status >= 500) {
+        setFault(rCeiling.body);
         return;
       }
-      if (r.status === 401 || r.status === 403) {
-        setDeny(r.body);
+      if (rCeiling.status === 401 || rCeiling.status === 403) {
+        setDeny(rCeiling.body);
         return;
       }
-      setCeilingUsd(r.body?.ceiling_usd);
+      setCeilingUsd(rCeiling.body?.ceiling_usd);
+      const rList = await api.useDataListSessions();
+      if (rList.status === 200 && rList.body) {
+        setPipeline(rList.body);
+      }
     })();
   }, []);
 
@@ -202,6 +279,10 @@ export default function UseDataLandingPage() {
     if (r.status === 200 && r.body?.session_id) {
       navigate(`/use-data/wizard/${encodeURIComponent(r.body.session_id)}`);
     }
+  }
+
+  function openSession(sessionId) {
+    navigate(`/use-data/wizard/${encodeURIComponent(sessionId)}`);
   }
 
   if (deny) {
@@ -257,7 +338,11 @@ export default function UseDataLandingPage() {
           opening conversation …
         </div>
       )}
-      <PipelineStrip ceilingUsd={ceilingUsd} />
+      <PipelineStrip
+        ceilingUsd={ceilingUsd}
+        pipeline={pipeline}
+        onOpen={openSession}
+      />
     </AkkiShell>
   );
 }

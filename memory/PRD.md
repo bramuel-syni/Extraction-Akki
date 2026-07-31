@@ -3,7 +3,24 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-07-31 late-day · **UI-1-A (Use Data) DELIVERED · Parity 36/36 held · Canon §6 module live**)
+## Current gate status (2026-07-31 late-day · **UI-1-A (Use Data) DELIVERED + VIEWABLE-BUILD ADDENDUM APPLIED · Parity 36/36 · Canon §6 module live**)
+
+### Owner viewable-build addendum (2026-07-31) — SATISFIED
+
+Owner made VIEWABLE BUILD a standing requirement from UI-1-A onward. Applied to this in-flight close:
+
+- **Preview standing:** https://governance-scan-3.preview.emergentagent.com is up · both services under supervisor · Mongo-backed persistence.
+- **Demo identities per class** — seeded idempotent at startup, credentials in `/app/memory/test_credentials.md`:
+  - `master_admin` → `demo.master_admin@demo.rms.example.com` / `demo-master-admin-pw`
+  - `dpo` → `demo.dpo@demo.rms.example.com` / `demo-dpo-pw`
+  - `operator` → `demo.operator@demo.rms.example.com` / `demo-operator-pw`
+  - `analyst` → `demo.analyst@demo.rms.example.com` / `demo-analyst-pw`
+- **Sample fixture data (AS-U2 marked)** — two seeded sample sessions per demo identity (one `s-sample-in-progress-*`, one `s-sample-ready-*`), sidecar `is_sample=true` on persistence doc, prominent **SAMPLE** badge on every pipeline row + amber wizard banner. Unmarked mocks are prohibited (Owner AS-U2 discipline).
+- **Session state Mongo-backed** — the prior in-memory dict replaced with `services/use_data/session_store.py` (collection `use_data_wizard_sessions`, unique index on `session_id`). State survives backend restart.
+- **Mobile + desktop viewport discipline** — layout uses `grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))` on doors and `flex-wrap: wrap` on pipeline strip; inherently responsive. Desktop (1920 × 900) verified via screenshot; mobile (iPhone-12 · 390 × 844) verified via CSS-code-path inspection (no fixed widths).
+- **"WHAT TO LOOK AT" close report** — filed at `/app/docs/rulings/ui1a_close_report_and_what_to_look_at_2026-07-31.md` (plain-language walkthrough of screens · journeys · stub vs wired · verbatim copy asserts).
+
+### UI-1-A backbone
 
 - **Dispatch:** UI-1-A (Use Data module) per `AKKI_OS_EXPERIENCE_CANON_v1.md` §6 (single source of truth for frontend/UX; retired mandates in `/salvage/dispatch_v2_retirement_2026-07-31/`).
 - **Backend crash fixed:** `routers/use_data.py` was crashing on startup with `ImportError` for a non-existent `require_authenticated_identity` symbol. Rewritten to use the codebase convention `require_identity_or_deny(request)` inside the handler body (matches `routers/memory.py` / `engineer.py` / `checker.py`). Server restored; parity 36/36 confirmed live via `/api/readyz` and `/api/system/build_info`.
