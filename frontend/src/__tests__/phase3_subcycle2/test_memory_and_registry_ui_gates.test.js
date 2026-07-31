@@ -476,8 +476,9 @@ describe('Phase-3-SubC2 · R-U registry estate map discipline', () => {
     for (const slug of ['video', 'audio', 'documentary']) {
       const action = screen.getByTestId(`registry-dim-action-${slug}`);
       expect(action).toHaveTextContent(/Propose census/i);
-      // Action routes to the operator wizard door.
-      expect(action.getAttribute('href')).toBe('/operator/commission');
+      // Action routes to the Use Data wizard landing (UI-1-A cutover · 2026-07-31 ·
+      // replaces prior /operator/commission per Canon §6.1 three-door landing).
+      expect(action.getAttribute('href')).toBe('/use-data');
     }
   });
 });

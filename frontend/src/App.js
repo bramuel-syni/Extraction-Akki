@@ -4,17 +4,10 @@ import AskConsolePage from './pages/AskConsolePage';
 import TraceReceiptPage from './pages/trace/TraceReceiptPage';
 import AuthLoginPage from './pages/AuthLoginPage';
 import AuthRegisterPage from './pages/AuthRegisterPage';
-import OperatorHomePage from './pages/operator/OperatorHomePage';
-import CommissionWizardPage from './pages/operator/CommissionWizardPage';
-import CommitReviewPage from './pages/operator/CommitReviewPage';
-import EngineerRegisterAppPage from './pages/engineer/EngineerRegisterAppPage';
-import EngineerFirstCallPage from './pages/engineer/EngineerFirstCallPage';
-import EngineerAdministerPage from './pages/engineer/EngineerAdministerPage';
-import OnboardingInvitePage from './pages/engineer/OnboardingInvitePage';
-// Commercial-cut 2026-07-06 (BCR v1.4 §12): buyer §5 surface (BuyerShape/
-// Acquire/Receive) cut whole — buyer wizard variant is not built on this
-// tree post-cut. Salvage location:
-//   /app/salvage/commercial_cut_2026_07_06/frontend/pages/
+// UI-1-A (2026-07-31) · Operator + Engineer modules SALVAGED to
+// /salvage/ui1a_retirement_2026-07-31/ per Owner directive (Canon §6 cutover).
+// Legacy paths redirect to the new /use-data landing per the retirement note.
+// Buyer §5 surface was cut at commercial cut 2026-07-06 (BCR v1.4 §12).
 import MasterAdminHomePage from './pages/master_admin/MasterAdminHomePage';
 import ChangeARulePage from './pages/master_admin/ChangeARulePage';
 import AuditTrailPage from './pages/master_admin/AuditTrailPage';
@@ -30,7 +23,9 @@ import OpportunityBriefsPage from './pages/opportunity_briefs/OpportunityBriefsP
 // Phase 3 sub-cycle 1 — Connect module (Owner ruling 2026-08-01).
 import ConnectHomePage from './pages/connect/ConnectHomePage';
 import ConnectNewSourcePage from './pages/connect/ConnectNewSourcePage';
-// Phase 3 sub-cycle 1 — Commission View (FB-5).
+// Phase 3 sub-cycle 1 — Commission View (FB-5). Kept live per Canon §6.5
+// (In-progress + Ready pipeline detail); Use Data landing links here for
+// the run-detail drilldown.
 import CommissionViewHomePage from './pages/commission_view/CommissionViewHomePage';
 import CommissionRunDetailPage from './pages/commission_view/CommissionRunDetailPage';
 // Phase 3 sub-cycle 2 — Memory Service surface + Plane observability panel
@@ -46,6 +41,11 @@ import GovernRetentionPage from './pages/govern/GovernRetentionPage';
 import GovernChangeRulePage from './pages/govern/GovernChangeRulePage';
 import GovernRefusalHealthPage from './pages/govern/GovernRefusalHealthPage';
 import GovernPendingPage from './pages/govern/GovernPendingPage';
+// UI-1-A (2026-07-31) · Use Data module per AKKI_OS_EXPERIENCE_CANON_v1 §6.
+// Three doors · one conversational wizard · six cards · Commission verdict.
+import UseDataLandingPage from './pages/use_data/UseDataLandingPage';
+import UseDataWizardPage from './pages/use_data/UseDataWizardPage';
+import UseDataDeveloperSurfacePage from './pages/use_data/UseDataDeveloperSurfacePage';
 import { AuthProvider } from './hooks/useAuth';
 
 // Phase 8 Stage B-1 — Auth landing (Owner E1 ratified: custom JWT + bcrypt).
@@ -53,8 +53,7 @@ import { AuthProvider } from './hooks/useAuth';
 // Ask Console remains the primary surface at `/`; auth surface at `/auth/*`.
 // G-10/G-7 PROMOTE (docs/rulings/g10_g7_promote_2026-07-14.md, 2026-07-14):
 // TraceReceiptPage lifted out of /legacy/* and mounted at public /trace and
-// /trace/:traceId. Remaining seven /legacy/* pages retired at the same
-// ruling; the AppShell and /legacy/* nested Routes block removed.
+// /trace/:traceId.
 export default function App() {
   return (
     <BrowserRouter>
@@ -66,18 +65,15 @@ export default function App() {
           {/* G-10/G-7 PROMOTE — Trust Receipt three-lens surface (public). */}
           <Route path="trace" element={<TraceReceiptPage />} />
           <Route path="trace/:traceId" element={<TraceReceiptPage />} />
-          {/* Phase 8 Stage B-2 — Operator surface (UI Spec §2) */}
-          <Route path="operator" element={<OperatorHomePage />} />
-          <Route path="operator/commission" element={<CommissionWizardPage />} />
-          <Route path="operator/commit-review/:sessionId" element={<CommitReviewPage />} />
-          {/* Phase 8 Stage B-3 — Engineer surface (UI Spec §4) */}
-          <Route path="engineer/register" element={<EngineerRegisterAppPage />} />
-          <Route path="engineer/first-call" element={<EngineerFirstCallPage />} />
-          <Route path="engineer/administer" element={<EngineerAdministerPage />} />
-          {/* Phase 8-EXT — external-engineer onboarding (UI Spec v2.1 §5.4) */}
-          <Route path="engineer/onboarding" element={<OnboardingInvitePage />} />
-          {/* Phase 8 Stage B-3 — Buyer surface (UI Spec §5) CUT at
-              commercial cut 2026-07-06 (BCR v1.4 §12); no live routes. */}
+          {/* UI-1-A · Use Data module (Canon §6). */}
+          <Route path="use-data" element={<UseDataLandingPage />} />
+          <Route path="use-data/wizard/:sessionId" element={<UseDataWizardPage />} />
+          <Route path="use-data/developer/:sessionId" element={<UseDataDeveloperSurfacePage />} />
+          {/* UI-1-A · Legacy operator/* + engineer/* routes redirect to
+              /use-data landing (retirement note §Route redirects landed). */}
+          <Route path="operator" element={<Navigate to="/use-data" replace />} />
+          <Route path="operator/*" element={<Navigate to="/use-data" replace />} />
+          <Route path="engineer/*" element={<Navigate to="/use-data" replace />} />
           {/* Phase 8 Stage B-4 — Master Admin surface (UI Spec §6) */}
           <Route path="master-admin" element={<MasterAdminHomePage />} />
           <Route path="master-admin/change-a-rule/:ruleId" element={<ChangeARulePage />} />

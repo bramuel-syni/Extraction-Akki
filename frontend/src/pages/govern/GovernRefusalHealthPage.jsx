@@ -9,8 +9,8 @@ import { REFUSAL_ACTION_TRIPLET } from '../../design/ratified_copy';
 
 /* Govern · Refusal Health & Coverage — FB-10 gap filing flywheel.
  * Reads GET /api/compliance/refusals_coverage + GET /api/compliance/refusals.
- * Every refusal family carries an action link to /operator/commission
- * (the wizard door · FB-15 same routing rule as Estate Map coverage-gap).
+ * Every refusal family carries an action link to /use-data
+ * (Canon §6.1 wizard doors · UI-1-A · replaces prior /operator/commission).
  */
 function currentMonthISO() {
   const d = new Date();
@@ -193,7 +193,7 @@ export default function GovernRefusalHealthPage() {
                     </ul>
                   </div>
                   <Link
-                    to="/operator/commission"
+                    to="/use-data"
                     data-testid={`govern-refusal-family-${family}-file-gap`}
                     style={{ color: AKKI_V4_PALETTE.oxblood, textDecoration: 'none', fontSize: '0.85rem' }}
                   >

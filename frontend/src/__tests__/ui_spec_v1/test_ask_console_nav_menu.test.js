@@ -42,7 +42,7 @@ describe('Ask Console · ConsoleNavMenu discoverability aid', () => {
     expect(screen.queryByTestId('console-nav-menu')).not.toBeInTheDocument();
   });
 
-  test('clicking toggle opens menu with all 8 sibling routes', () => {
+  test('clicking toggle opens menu with all sibling routes', () => {
     renderAsk();
     fireEvent.click(screen.getByTestId('console-nav-toggle'));
     expect(screen.getByTestId('console-nav-menu')).toBeInTheDocument();
@@ -50,10 +50,10 @@ describe('Ask Console · ConsoleNavMenu discoverability aid', () => {
       'aria-expanded',
       'true',
     );
-    // All 8 sibling routes present.
+    // UI-1-A (2026-07-31) — nav retirements: /operator, /engineer/register
+    // are salvaged; /use-data is the Canon §6.1 three-door landing.
     const expectedRoutes = [
-      { testid: 'console-nav-link-operator', href: '/operator' },
-      { testid: 'console-nav-link-engineer-register', href: '/engineer/register' },
+      { testid: 'console-nav-link-use-data', href: '/use-data' },
       { testid: 'console-nav-link-master-admin', href: '/master-admin' },
       { testid: 'console-nav-link-compliance', href: '/compliance' },
       { testid: 'console-nav-link-extraction-console', href: '/extraction/console' },
@@ -93,10 +93,9 @@ describe('Ask Console · ConsoleNavMenu discoverability aid', () => {
     // Auth-gated surfaces are present in the menu regardless of auth state.
     // The AuthProvider bounces clicks to /auth/login when unauth'd (existing
     // behavior); the menu itself does NOT hide entries per role.
-    expect(screen.getByTestId('console-nav-link-operator')).toBeInTheDocument();
+    expect(screen.getByTestId('console-nav-link-use-data')).toBeInTheDocument();
     expect(screen.getByTestId('console-nav-link-master-admin')).toBeInTheDocument();
     expect(screen.getByTestId('console-nav-link-compliance')).toBeInTheDocument();
-    expect(screen.getByTestId('console-nav-link-engineer-register')).toBeInTheDocument();
   });
 
   test('class-honesty · no Opportunity Brief CONTENT leaks to the nav menu', () => {

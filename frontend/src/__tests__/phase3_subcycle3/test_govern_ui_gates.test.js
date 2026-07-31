@@ -14,7 +14,7 @@
  *        countersign renders access-control-denial (navy · NOT governed).
  *   4. gate_refusal_health_gap_files_via_wizard_door
  *      — every family card carries a `File as extraction candidate →`
- *        action routing to /operator/commission.
+ *        action routing to /use-data (UI-1-A cutover · 2026-07-31).
  */
 import React from 'react';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
@@ -195,7 +195,8 @@ describe('Phase-3-SubC3 · gate_change_rule_ceremony_direction_symmetry', () => 
 
 /* =============================================================================
    CELL 4 · every refusal-family card carries a "File as extraction candidate →"
-   action routing to /operator/commission.
+   action routing to /use-data (UI-1-A cutover · 2026-07-31 · replaces prior
+   /operator/commission route).
    ============================================================================= */
 describe('Phase-3-SubC3 · gate_refusal_health_gap_files_via_wizard_door', () => {
   it('every refusal family card carries the wizard-door filing action', async () => {
@@ -224,7 +225,7 @@ describe('Phase-3-SubC3 · gate_refusal_health_gap_files_via_wizard_door', () =>
       const card = screen.getByTestId(`govern-refusal-family-${family}`);
       const action = within(card).getByTestId(`govern-refusal-family-${family}-file-gap`);
       expect(action).toHaveTextContent(/File as extraction candidate/);
-      expect(action).toHaveAttribute('href', '/operator/commission');
+      expect(action).toHaveAttribute('href', '/use-data');
       // Ratified refusal action triplet rendered verbatim.
       REFUSAL_ACTION_TRIPLET.forEach((line, i) => {
         expect(within(card).getByTestId(`govern-refusal-family-${family}-path-${i}`)).toHaveTextContent(line);

@@ -321,6 +321,47 @@ export const api = {
         validateStatus: (s) => s >= 200 && s < 600,
       })
       .then((r) => ({ status: r.status, body: r.data })),
+  // UI-1-A (2026-07-31) · Use Data conversational wizard · Canon §6.
+  useDataCeiling: () =>
+    client
+      .get('/use_data/ceiling', { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  useDataOpenSession: (door) =>
+    client
+      .post('/use_data/session', { door }, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  useDataReadSession: (sessionId) =>
+    client
+      .get(`/use_data/session/${encodeURIComponent(sessionId)}`, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  useDataAppendTurn: (sessionId, role, text) =>
+    client
+      .post(`/use_data/session/${encodeURIComponent(sessionId)}/turn`, { role, text }, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  useDataUpsertReflection: (sessionId, payload) =>
+    client
+      .post(`/use_data/session/${encodeURIComponent(sessionId)}/reflection`, payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  useDataSetPlan: (sessionId, payload) =>
+    client
+      .post(`/use_data/session/${encodeURIComponent(sessionId)}/plan`, payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  useDataCommit: (sessionId, payload) =>
+    client
+      .post(`/use_data/session/${encodeURIComponent(sessionId)}/commit`, payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
 };
 
 export default api;

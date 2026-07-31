@@ -163,13 +163,14 @@ function AskInput({ value, onChange, onSubmit, busy }) {
 // Class-honesty: no Opportunity Brief content leaks here — this is a
 // hyperlink list only; brief content only renders inside `/opportunity-briefs`.
 const CONSOLE_NAV_ITEMS = [
-  { path: '/operator', label: 'Operator Home', gate: 'auth' },
-  { path: '/engineer/register', label: 'Engineer', gate: 'auth' },
+  // UI-1-A · Use Data module (Canon §6.1 three-door landing).
+  { path: '/use-data', label: 'Use Data', gate: 'auth' },
   { path: '/master-admin', label: 'Master Admin', gate: 'auth' },
   { path: '/compliance', label: 'Compliance', gate: 'auth' },
   { path: '/extraction/console', label: 'Extraction Console', gate: 'auth' },
   { path: '/extraction/registry-admin', label: 'Registry Admin', gate: 'auth' },
   { path: '/opportunity-briefs', label: 'Opportunity Briefs', gate: 'public' },
+  { path: '/connect', label: 'Connect', gate: 'auth' },
   // Phase 3 sub-cycle 2 — Memory Service + Registry Estate Map surfaces
   // (Owner ruling 2026-08-02 · Surfaces v2 shell rule: new routes must be
   // reachable from visible navigation, not deep-linked only).

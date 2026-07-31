@@ -3,6 +3,39 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
+## Current gate status (2026-07-31 late-day · **UI-1-A (Use Data) DELIVERED · Parity 36/36 held · Canon §6 module live**)
+
+- **Dispatch:** UI-1-A (Use Data module) per `AKKI_OS_EXPERIENCE_CANON_v1.md` §6 (single source of truth for frontend/UX; retired mandates in `/salvage/dispatch_v2_retirement_2026-07-31/`).
+- **Backend crash fixed:** `routers/use_data.py` was crashing on startup with `ImportError` for a non-existent `require_authenticated_identity` symbol. Rewritten to use the codebase convention `require_identity_or_deny(request)` inside the handler body (matches `routers/memory.py` / `engineer.py` / `checker.py`). Server restored; parity 36/36 confirmed live via `/api/readyz` and `/api/system/build_info`.
+- **Backend delivered (thin, in-memory session for UI-1-A):** `/api/use_data/*` — open session, read session, append turn, upsert reflection field, set plan preview, commit → CommissionVerdict, read auto-run ceiling, refuse direct-write ceiling.
+- **Commission verdict engine** (`services/use_data/commission_verdict_engine.py`) — five checks fail-closed (rights compatibility, privacy floor, PII posture, budget ceiling, scope resolvability); three outcomes (runs_now · refused · held_for_check); §1.3 refusal grammar honoured (absolute vs escalatable). Auto-run ceiling $1,000 initial (Owner 2026-07-31); change path Change-a-Rule only (POST /api/use_data/ceiling refused).
+- **17 new invariant gate cells** in `tests/invariants/test_use_data_commission_verdict.py` (G-UD1..G-UD17):
+  - **G-UD1..8** — per-check refusal shapes verified fail-closed.
+  - **G-UD9** — all-pass under ceiling → RUNS_NOW.
+  - **G-UD10** — all-pass over ceiling → HELD_FOR_CHECK (single DPO countersign).
+  - **G-UD11** — verdict envelope always carries five checks + auto-run ceiling.
+  - **G-UD12** — Canon §1.3 · Doctrine 5 break-in: absolute refusals have `route_to_approval is None`.
+  - **G-UD13** — escalatable refusals name route + criterion.
+  - **G-UD14** — POST /api/use_data/ceiling refused Change-a-Rule-only (`outcome:refused` · `reason:auto_run_ceiling_change_a_rule_only`).
+  - **G-UD15** — GET /api/use_data/ceiling returns $1,000 USD initial.
+  - **G-UD16** — commit endpoint returns proper CommissionVerdict envelope (all-pass path).
+  - **G-UD17** — anonymous callers CANNOT read another operator's session (auth_missing 401).
+- **Frontend delivered per Canon §6:**
+  - `/use-data` — three-door landing (Canon §6.1 · Integrate an App · Export / License Data · Train a Model); §11.1 verbatim "Conversation shapes; the card commits." rendered; §6.5 pipeline strip (In progress · Ready) beneath doors; auto-run ceiling read + Change-a-Rule note.
+  - `/use-data/wizard/:sessionId` — Canon §6.2 split view (~40% cards · ~60% conversation); six cards (Reflection · Intel · Test · Plan preview · Sample results · Commission); each governed value confirmed explicitly at Commission-card commit; Plan preview verbatim halt-note rendered.
+  - `/use-data/developer/:sessionId` — Canon §6.6 non-nav Developer surface; scoped key · webhook · event type · status · usage strip as MarkedOpenSlot (honest UI-1-B fold candidates); "every call lands in the record the DPO reads." + "identical terms to internal use; no lighter-weight path for machines." both rendered verbatim.
+  - `UseDataVerdictPanel` — three outcome shapes; absolute refusals render NO approval affordance (break-in beacon `use-data-verdict-refusal-no-affordance-beacon`); escalatable refusals name route + criterion + value; held-for-check names Pending policy check + single DPO countersign route + ceiling + proposed spend.
+- **Retirement discipline (UI-1-A clean cutover · Owner hybrid a+c directive):**
+  - `frontend/pages/operator/` and `frontend/pages/engineer/` copied to `/salvage/ui1a_retirement_2026-07-31/frontend/` (chmod 444).
+  - Legacy routes redirect via `Navigate` at App.js (`/operator/*` and `/engineer/*` → `/use-data`).
+  - Retired Jest test files (5) salvaged to `/salvage/ui1a_retirement_2026-07-31/frontend/__tests__/ui_spec_v1/`.
+  - Legacy hardcoded links in `GovernRefusalHealthPage` / `OpportunityBriefsPage` / `RegistryEstateMapPage` re-pointed to `/use-data`.
+  - Ask Console nav updated: retired `Operator Home` + `Engineer`; added `Use Data` + `Connect`.
+- **Honest gap disclosure (per Owner directive):** engineer key-grant issuance/revocation UI temporarily absent; backend endpoints (`/api/engineer/keys/*`) remain reachable via authenticated HTTP; UI-1-E (Team · access register) returns the surface.
+- **Regression preserved:** Backend Pytest **1465 pass · 2 skip · 0 fail** (+17 UI-1-A cells over Sub-C3's 1448). Jest **22 suites · 169 pass · 0 fail** (net +1 from adding UI-1-A cells, -5 from salvaged tests, plus route updates).
+- **Parity locked at 36/36** — `UseDataWizardSession@v0` + `CommissionVerdict@v0` snapshots byte-identical throughout.
+- **Owner holds preserved:** B1 GPU ceiling AWAITING OWNER FIGURE; Data Engineer role mandate OPEN ITEM; grants-revision JWT claim PARKED (SR-5); Wizard draft persistence NOT RULED IN (UI-1-B fold); B1 GPU HAZARD-STOP still requires cloud/GPU host provision.
+
 ## Current gate status (2026-08-02 · **Phase 3 sub-cycle 3 CONDITIONALLY GREEN** · addendum recorded · one HAZARD-STOP open pending Owner reconciliation · Parity 34/34 unchanged)
 
 - **Owner independent-verification (post-initial-close)** exposed 2 rendering defects + 1 perf flag against the initial close verdict (`iteration_9.json`). Addendum landed at `docs/close_reports/phase3_subcycle3_govern_module_2026-08-02.md`. Re-verification recorded in `iteration_10.json`.

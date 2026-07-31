@@ -71,7 +71,7 @@ function DimensionRow({ item, kind }) {
         {gap && (
           <Link
             data-testid={`registry-dim-action-${item.slug}`}
-            to={`/operator/commission`}
+            to={`/use-data`}
             style={{
               display: 'inline-block',
               padding: '6px 10px',

@@ -76,7 +76,7 @@ export default function OpportunityBriefsPage() {
     } catch (_) {
       // sessionStorage unavailable in some test envs; navigation still occurs.
     }
-    navigate('/operator/commission');
+    navigate('/use-data');
   };
 
   return (

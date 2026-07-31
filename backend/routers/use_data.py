@@ -7,6 +7,8 @@ Routes:
     POST   /api/use_data/session/{session_id}/reflection  set/open/assumed field
     POST   /api/use_data/session/{session_id}/plan        plan preview values
     POST   /api/use_data/session/{session_id}/commit      commit → CommissionVerdict
+    GET    /api/use_data/ceiling                       read effective auto-run ceiling
+    POST   /api/use_data/ceiling                       REFUSED · Change-a-Rule only
 
 Session state is held in-memory for UI-1-A; persistence is a UI-1-B fold.
 
@@ -23,22 +25,23 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from contracts.use_data_wizard_session import (
-    Door,
-    FieldState,
-    UseDataWizardSession,
+    CommissionCard,
     DialogueTurn,
     DialogueTurnRole,
+    Door,
+    FieldState,
+    PlanPreviewCard,
     ReflectionCard,
     ReflectionField,
-    PlanPreviewCard,
-    CommissionCard,
+    UseDataWizardSession,
 )
-from services.auth.dependencies import require_authenticated_identity, Identity
+from services.auth.dependencies import require_identity_or_deny
+from services.auth.identity import Identity
 from services.use_data.commission_verdict_engine import (
     AUTO_RUN_CEILING_USD_INITIAL,
     compose_verdict,
@@ -62,16 +65,36 @@ def _new_id(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:12]}"
 
 
+async def _resolve_identity(request: Request):
+    """Return (identity, None) on permit, (None, JSONResponse) on deny."""
+    result = await require_identity_or_deny(request)
+    if isinstance(result, JSONResponse):
+        return None, result
+    return result, None
+
+
+def _forbid_other_operator(session: UseDataWizardSession, identity: Identity) -> Optional[JSONResponse]:
+    if session.operator_id != identity.user_id:
+        return JSONResponse(
+            status_code=403,
+            content={
+                "reason": "auth_scope_insufficient",
+                "detail": "Session belongs to a different operator.",
+            },
+        )
+    return None
+
+
 class OpenSessionBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     door: Door
 
 
 @router.post("/session")
-async def open_session(
-    body: OpenSessionBody,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> UseDataWizardSession:
+async def open_session(body: OpenSessionBody, request: Request):
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     session = UseDataWizardSession(
         session_id=_new_id("s"),
         operator_id=identity.user_id,
@@ -83,15 +106,16 @@ async def open_session(
 
 
 @router.get("/session/{session_id}")
-async def get_session(
-    session_id: str,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> UseDataWizardSession:
+async def get_session(session_id: str, request: Request):
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     session = _SESSIONS.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
-    if session.operator_id != identity.user_id:
-        return JSONResponse(status_code=403, content={"reason": "auth_scope_insufficient", "detail": "session belongs to a different operator"})
+    forbidden = _forbid_other_operator(session, identity)
+    if forbidden is not None:
+        return forbidden
     return session
 
 
@@ -102,16 +126,16 @@ class AppendTurnBody(BaseModel):
 
 
 @router.post("/session/{session_id}/turn")
-async def append_turn(
-    session_id: str,
-    body: AppendTurnBody,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> UseDataWizardSession:
+async def append_turn(session_id: str, body: AppendTurnBody, request: Request):
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     session = _SESSIONS.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
-    if session.operator_id != identity.user_id:
-        return JSONResponse(status_code=403, content={"reason": "auth_scope_insufficient", "detail": "not your session"})
+    forbidden = _forbid_other_operator(session, identity)
+    if forbidden is not None:
+        return forbidden
     turn = DialogueTurn(
         turn_id=_new_id("t"),
         role=body.role,
@@ -131,18 +155,17 @@ class ReflectionUpdate(BaseModel):
 
 
 @router.post("/session/{session_id}/reflection")
-async def upsert_reflection_field(
-    session_id: str,
-    body: ReflectionUpdate,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> UseDataWizardSession:
+async def upsert_reflection_field(session_id: str, body: ReflectionUpdate, request: Request):
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     session = _SESSIONS.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
-    if session.operator_id != identity.user_id:
-        return JSONResponse(status_code=403, content={"reason": "auth_scope_insufficient", "detail": "not your session"})
-    fields = list(session.reflection.fields)
-    fields = [f for f in fields if f.name != body.name]
+    forbidden = _forbid_other_operator(session, identity)
+    if forbidden is not None:
+        return forbidden
+    fields = [f for f in session.reflection.fields if f.name != body.name]
     fields.append(ReflectionField(
         name=body.name,
         label=body.label,
@@ -164,16 +187,16 @@ class PlanPreviewBody(BaseModel):
 
 
 @router.post("/session/{session_id}/plan")
-async def set_plan(
-    session_id: str,
-    body: PlanPreviewBody,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> UseDataWizardSession:
+async def set_plan(session_id: str, body: PlanPreviewBody, request: Request):
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     session = _SESSIONS.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
-    if session.operator_id != identity.user_id:
-        return JSONResponse(status_code=403, content={"reason": "auth_scope_insufficient", "detail": "not your session"})
+    forbidden = _forbid_other_operator(session, identity)
+    if forbidden is not None:
+        return forbidden
     session.plan_preview = PlanPreviewCard(
         coverage_range_low_pct=body.coverage_range_low_pct,
         coverage_range_high_pct=body.coverage_range_high_pct,
@@ -206,16 +229,16 @@ class CommitBody(BaseModel):
 
 
 @router.post("/session/{session_id}/commit")
-async def commit_commission(
-    session_id: str,
-    body: CommitBody,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> Dict[str, Any]:
+async def commit_commission(session_id: str, body: CommitBody, request: Request):
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     session = _SESSIONS.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="session not found")
-    if session.operator_id != identity.user_id:
-        return JSONResponse(status_code=403, content={"reason": "auth_scope_insufficient", "detail": "not your session"})
+    forbidden = _forbid_other_operator(session, identity)
+    if forbidden is not None:
+        return forbidden
 
     checks = run_five_checks(
         rights_declared=body.rights_declared,
@@ -251,15 +274,15 @@ class CeilingWriteBody(BaseModel):
 
 
 @router.post("/ceiling")
-async def refuse_direct_ceiling_write(
-    body: CeilingWriteBody,
-    identity: Identity = Depends(require_authenticated_identity),
-) -> JSONResponse:
+async def refuse_direct_ceiling_write(body: CeilingWriteBody, request: Request):
     """Canon §4.2 · §7.5 — auto-run ceiling changeable only via Change-a-Rule.
 
     Direct-write refused. Refusal envelope carries `outcome=refused`
     (governed refusal, escalatable) with the required change-a-rule route.
     """
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     return JSONResponse(
         status_code=422,
         content={
@@ -275,10 +298,11 @@ async def refuse_direct_ceiling_write(
 
 
 @router.get("/ceiling")
-async def read_ceiling(
-    identity: Identity = Depends(require_authenticated_identity),
-) -> Dict[str, Any]:
+async def read_ceiling(request: Request):
     """Read the effective auto-run ceiling (Canon §4.2 initial $1,000)."""
+    identity, denial = await _resolve_identity(request)
+    if denial is not None:
+        return denial
     return {
         "ceiling_usd": AUTO_RUN_CEILING_USD_INITIAL,
         "currency": "USD",

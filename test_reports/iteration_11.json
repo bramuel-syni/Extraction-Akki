@@ -1,0 +1,24 @@
+{
+  "summary": "UI-1-A (Use Data) module verified end-to-end. Backend: server healthy at parity_count=36 (/api/readyz, /api/system/build_info). All 17 new G-UD1..G-UD17 invariants pass (tests/invariants/test_use_data_commission_verdict.py). Full backend regression = 1464 passed + 1 skipped = 1465 (matches Owner target). New HTTP suite tests/test_use_data_http_iter11.py = 14/14 passed against preview URL covering: ceiling read/write (Change-a-Rule-only refusal 422), 3 valid doors + 4th door rejection (422), commit outcomes (runs_now / refused-absolute-no-route / refused-escalatable-with-route / held_for_check with dpo_countersign_required=true / anonymous-read-401). Frontend: /use-data landing renders 3 doors (no 4th), Canon §11.1 verbatim ('Conversation shapes; the card commits.') present, pipeline strip shows In progress + Ready + $1,000 USD Change-a-Rule ceiling note. Wizard split view renders all 6 cards (reflection/intel/test/plan-preview/sample-results/commission) + dialogue pane. Plan-preview halt-note byte-identical to frozen Literal. Commission commit button disabled until all 5 values_confirmed checked; then commit produces verdict-panel with verdict-runs-now on all-pass. Doctrine 5 break-in verified: rights_declared=null yields use-data-verdict-refused-absolute AND use-data-verdict-refusal-no-affordance-beacon visible AND use-data-verdict-refusal-route-affordance count=0 (byte-absent). Dialogue input/Send posts a turn and both operator and agent turns render. Ask Console nav: console-nav-toggle opens menu; console-nav-link-use-data (href=/use-data) present; retired 'Operator Home' and 'Engineer' entries absent. All 6 retirement redirects (/operator, /operator/commission, /engineer/register, /engineer/first-call, /engineer/administer, /engineer/onboarding) resolve to /use-data (no white-screen). Jest: 22 suites / 169 tests / 0 fail. Zero backend or frontend defects found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/invariants/test_use_data_commission_verdict.py",
+    "/app/backend/tests/test_use_data_http_iter11.py",
+    "/app/test_reports/pytest/iter11_use_data_http.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "UseDataWizardPage.jsx is 764 lines — approaching the 700-line split threshold; consider extracting the Commission form (~130 lines) and Reflection card into sibling components for maintainability. Non-blocking.",
+    "Dialogue turn role is 'user' in the rendered testid ('use-data-dialogue-turn-user') though the request phrased it as 'operator turn'; harmless naming difference — the two turns (USER + AGENT) render correctly. Verify convention matches Canon §6 vocabulary in the next canon-tie pass.",
+    "React Router v6 future-flag warnings (v7_startTransition, v7_relativeSplatPath) appear on every navigation. Adding the future flags to <BrowserRouter> is a one-line cleanup. Non-blocking."
+  ],
+  "updated_files": ["/app/backend/tests/test_use_data_http_iter11.py"],
+  "success_rate": {"backend": "100% (1464 passed + 1 skipped = 1465; 17/17 G-UD; 14/14 HTTP iter11)", "frontend": "100% (Jest 169/169; 6/6 UI flows including Doctrine 5 break-in)"},
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw — POST /api/auth/login → 200 with access_token stored under localStorage['rms.b1.auth.access_token'].",
+  "seed_data_creation": "None. Sessions created during commit tests are ephemeral wizard sessions; no persistent seed data introduced.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "UI-1-A shipped clean at parity 36/36. Contracts UseDataWizardSession@v0 and CommissionVerdict@v0 remain frozen. Doctrine 5 break-in (absolute refusal renders zero approval affordance) is enforced at BOTH backend (route_to_approval=null on absolute) and frontend (use-data-verdict-refusal-route-affordance is byte-absent from DOM, only use-data-verdict-refusal-no-affordance-beacon appears). The Plan-preview halt-note ('Halts at ceiling. A halted run resumes only after you raise it or narrow the objective.') is byte-identical. Ceiling change requires Change-a-Rule ceremony (POST /api/use_data/ceiling returns 422 outcome=refused reason=auto_run_ceiling_change_a_rule_only). Retired operator/engineer routes redirect to /use-data with no white-screen. Next agent can rely on tests/test_use_data_http_iter11.py as regression coverage for the /api/use_data/* surface.",
+  "rca of the issue": "N/A — no defects found."
+}
