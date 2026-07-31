@@ -235,3 +235,70 @@ The root **`/`** serves the Canon OS shell (single-thread trace rail retained).
 - [x] Close report · journal · FPR rows · re-measured enforcement count.
 
 **UI-1-B ready for Owner independent verification before UI-1-C dispatch.**
+
+---
+
+## 11 · Defect addendum · Owner iter16 verdict → iter17-19 resolution (2026-08-01)
+
+### 11.1 · Third-occurrence honest record
+
+Owner independent verification of the iter16 close-report returned **2/3 PASS, 1 FAIL**. Failure category was the identical class already remediated twice previously:
+
+| Occurrence | Where | Nature |
+|------------|-------|--------|
+| 1 (UI-1-A iter11-13) | Use Data landing page sample rows | Sample seeded but no visible badge in DOM |
+| 2 (UI-1-A iter14) | Admin identity sample rows | Admin missed from seed identity set; no badge |
+| 3 (UI-1-B iter16) | **Govern Trust Center record buckets** | Sample rows seeded in `compliance_refusals` + `checker_requests` but the aggregate-only `/api/govern/trust_center_record` payload dropped per-row identity + `is_sample` flag; frontend renderer had no per-row iteration or per-row SAMPLE badge component |
+
+This is a systemic pattern: fixture-marking exists in the persistence tier but the render path drops the flag, so the surface shows counts without the invariant that "no fixture goes unmarked." **The defect class is now closed at the systemic level, not the surface level.**
+
+### 11.2 · Fix (per Owner ruling)
+
+1. `/api/govern/trust_center_record` extended to enumerate `rows[]` per fixture-capable bucket (refusals · holds · rule_changes), each row carrying `is_sample: bool`.
+2. `GovernHomePage.jsx::RecordBucket` renders each row inline with a keyed SAMPLE badge (`data-testid="govern-record-bucket-{bucket}-row-sample-badge-{rowId}"`) whenever the row's `is_sample===true`.
+3. `UseDataLandingPage.jsx::SampleBadge` accepts `sessionId` prop and emits `data-testid="use-data-sample-badge-{sessionId}"` (keyed per row) plus stable `data-sample-badge="true"` selector for count-style assertions.
+
+### 11.3 · Systemic Jest gate (whack-a-mole ends here)
+
+`/app/frontend/src/__tests__/systemic/sample_marking_systemic_gate.test.js` implements a **single** gate with a registry:
+
+```
+SAMPLE_MARKING_REGISTRY = [
+  { surface_id: 'use_data_landing_pipeline',    Component: UseDataLandingPage,  ... },
+  { surface_id: 'govern_trust_center_record',   Component: GovernHomePage,       ... },
+  { surface_id: 'govern_holds_surface',         Component: GovernHoldsPage,      ... },
+  // UI-1-C · Connect surfaces — REGISTER HERE
+  // UI-1-D · Registry/Prove surfaces — REGISTER HERE
+  // UI-1-E · Team surfaces — REGISTER HERE
+]
+```
+
+For each registered surface the gate:
+- Mocks the surface's endpoints with payload carrying at least one `is_sample=true` row.
+- Renders the surface.
+- Walks the mock payload, collects every `is_sample=true` row's identifier.
+- Asserts each such id has at least one matching DOM element with a testid that (a) contains the row id AND (b) matches the surface's badge-testid regex.
+- Fails with a diagnostic that names the exact surface + row id + present testids when a badge is missing.
+
+Backend companion gates: G-B16 (record buckets enumerate rows with is_sample under **admin** identity) and G-B17 (row shape stable for the frontend renderer). Both pytest gates now green.
+
+### 11.4 · Downstream discipline (all future sub-cycles)
+
+Any future sub-cycle that lands a surface with fixture-capable rows MUST add its entry to `SAMPLE_MARKING_REGISTRY` **in the same PR that lands the surface**. The systemic Jest gate will fail on the next CI run if a new fixture endpoint returns `is_sample=true` rows that the surface does not render as SAMPLE badges. No per-surface whack-a-mole.
+
+### 11.5 · Iter17-19 verification chain
+
+| Iteration | Item | Result |
+|-----------|------|--------|
+| iter17 primary | SAMPLE badges as **admin** on /govern | 10 badges in record buckets · 2 in Use Data · 5 in Holds = **17 total** rendered SAMPLE indicators — GREEN |
+| iter17 systemic | Retired-vocab audit / parity / analyst 403 | All GREEN |
+| iter18 T1 | Registries asymmetry as **admin** | GREEN (additions commit; removals/edits refused with route to Change-a-Rule) |
+| iter18 T2 | Ceremony countdown+cancel as **admin** | RED · found HIGH bug: Countdown wired to `effective_at` (null in pending_delay) instead of `countdown_ends_at_iso` |
+| iter18 T3 | Holds reverse-route as **admin** | GREEN (5 sample holds; reverse-route resolves; verdict envelope + SAMPLE banner + read-only banner all render) |
+| iter19 fix | Countdown wired to `countdown_ends_at_iso` (fallback to `effective_at`); new `govern-change-rule-awaiting-countersign` panel for `pending_counter_sign` state | GREEN (tightening_unilateral → visible ticking countdown; dual_control → awaiting-countersign panel — Canon-correct: dual_control has no delay window by design) |
+
+Final testing status: Backend **1516 pass · 2 skip · 0 fail**. Jest **16 suites · 127 pass · 3 skipped-to-salvage · 0 fail**. Live-preview iter17+18+19 all GREEN with `retest_needed: False`.
+
+Parity remains **36/36** — no frozen contract touched during the entire remediation.
+
+**UI-1-B close · third-occurrence pattern remediated at the systemic level · ready for Owner re-verification before UI-1-C dispatch.**

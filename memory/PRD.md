@@ -3,9 +3,18 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-01 · **UI-1-B FULLY CLOSED · Canon §7 Govern rebuild live · Parity 36/36 · awaiting Owner independent verification**)
+## Current gate status (2026-08-01 late-day · **UI-1-B FULLY CLOSED after iter17-19 · third-occurrence SAMPLE-marking pattern remediated systemically · Parity 36/36 · awaiting Owner independent re-verification**)
 
-### UI-1-B close (2026-08-01) — Govern module rebuild per Canon §7
+### UI-1-B iter17-19 close (2026-08-01) — Owner iter16 verdict 2/3 → 3/3 · systemic gate now in force
+
+- **Third-occurrence fix (Owner ruling 2026-08-01).** `/api/govern/trust_center_record` now enumerates `rows[]` with `is_sample` per fixture-capable bucket (refusals · holds · rule_changes); `GovernHomePage::RecordBucket` renders each row with a KEYED SAMPLE badge (`data-testid="govern-record-bucket-{name}-row-sample-badge-{rowId}"`); `UseDataLandingPage::SampleBadge` now keyed per `session_id`. Admin sees **10 SAMPLE badges** rendered in the /govern record buckets (+ 2 in /use-data + 5 in /govern/holds = 17 total rendered SAMPLE indicators).
+- **SYSTEMIC gate lands.** `/app/frontend/src/__tests__/systemic/sample_marking_systemic_gate.test.js` walks a registry of fixture-capable surfaces (currently 3: Use Data pipeline · Govern record · Govern holds) and asserts, for every `is_sample=true` row in each mocked payload, that at least one badge element with a matching keyed testid renders in DOM. **Future sub-cycles (UI-1-C/D/E) MUST register their fixture-capable surfaces here** — the whack-a-mole ends at the systemic level.
+- **Iter18 addendum HIGH bug fix (ceremony countdown).** `GovernChangeRulePage::Countdown` was wired to `request.effective_at` (null during pending_delay). Fixed to prefer `request.countdown_ends_at_iso` (backend-served, derived from `initiated_at + effective_delay_seconds`) with `effective_at` fallback. Also added `govern-change-rule-awaiting-countersign` panel for `pending_counter_sign` state so dual_control ceremonies render an honest phase indicator (dual_control has no delay window by design per state_machine — this is Canon-correct).
+- **Regression:** Backend pytest **1516 pass · 2 skip · 0 fail** (+ G-B16, G-B17). Frontend Jest **16 suites · 127 pass · 3 skipped-to-salvage · 0 fail** (+ systemic gate 4 cells). Parity **36/36** held constant throughout.
+- **Verification chain:** iter17 primary GREEN (17 rendered SAMPLE badges as admin), iter17 regression sweep GREEN (parity/analyst 403/retired-vocab), iter18 T1+T3 GREEN, iter18 T2 RED (countdown bug found), **iter19 T2 fix GREEN** (tightening_unilateral produces visible ticking countdown; dual_control produces awaiting-countersign panel).
+- **Close report:** `/app/docs/rulings/ui1b_close_report_2026-08-01.md` (12 sections; §11 defect addendum documents third-occurrence pattern + systemic remediation verbatim).
+
+### UI-1-B close (2026-08-01 initial · superseded by iter17-19 above)
 
 - **§7.1 Trust Center two halves** — `/govern` renders `govern-half-rule-inventory` + `govern-half-record`; doctrine line verbatim; 7 record buckets (refusals/holds/masking/access/deletions/rule-changes/memory); `canon_ref=Canon §7.1`.
 - **§7.2 Enforcement Class SPLIT headline** — 3 sub-figures (`govern-headline-machinery/attestation/monitored`); plain-language line contains "Neither is superior; both are recorded"; no conversion urging.
