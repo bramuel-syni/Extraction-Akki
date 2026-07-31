@@ -26,6 +26,8 @@
 | Filename | Location | SHA-256 |
 | --- | --- | --- |
 | AKKI_OS_BUILD_DISPATCH_v1.md | `docs/mandates/AKKI_OS_BUILD_DISPATCH_v1.md` | 201e16c30b0e04b6d191b387e9021bd4545eaa86cb6d74b3847e6a5cc329abbb |
+| **AKKI_OS_FRONTEND_BRIEF_v2.md** (supplied 2026-07-30 cycle 3) | `docs/mandates/AKKI_OS_FRONTEND_BRIEF_v2.md` | **d6111202203c77af0cf08ad39d26d1573429d74fdc99e19fcf35e07e2b0ba82b** |
+| AKKI_OS_BUILD_DISPATCH_v1_ERRATUM_2026-07-30.md | `docs/mandates/AKKI_OS_BUILD_DISPATCH_v1_ERRATUM_2026-07-30.md` | (dispatch §6 heading amendment; body governs) |
 
 ## Amendment notes in this pack (append-only history)
 

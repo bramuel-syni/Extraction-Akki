@@ -1,0 +1,19 @@
+{
+  "schema_version": "memory_refusal_reasons_v0",
+  "authored": "2026-07-30",
+  "authored_ruling": "docs/rulings/memory_service_option_b_owner_ruling_2026-07-30_cycle3.md",
+  "governance": {
+    "class": "closed reason set (Owner E2 governed-refusal taxonomy)",
+    "change_process": "Owner ruling + effective delay per BCR §3.11"
+  },
+  "reasons": [
+    {"code": "plane_not_found", "description": "The requested plane_id does not exist."},
+    {"code": "plane_revoked", "description": "The plane has been revoked; all subsequent operations are refused."},
+    {"code": "plane_scope_invalid", "description": "The requested retrieval_scope is malformed or names an estate slice not admitted for the caller's integration key."},
+    {"code": "contribution_over_class_cap", "description": "class_declared exceeds max(cited_source classes). Contribution refused."},
+    {"code": "contribution_rights_forbid", "description": "The declared rights_class exceeds what the cited sources authorise at birth."},
+    {"code": "contribution_shape_invalid", "description": "five_ring_stamp fails schema validation."},
+    {"code": "publication_gate_denied", "description": "Publication ceremony refused by quality or rights gate."},
+    {"code": "publication_quality_threshold_unset", "description": "PUBLICATION_QUALITY_THRESHOLD [SLOT] is unset; publication refused loud per SR-5."}
+  ]
+}

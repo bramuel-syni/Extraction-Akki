@@ -47,6 +47,6 @@ Per dispatch SR-3, this file states the gap and its consequences and STOPS. The 
 2. Document is committed to `docs/mandates/akki_os_pack_v1/` (following the Surfaces v2 pattern) with SHA-256 in the pack manifest.
 3. This file's Status line is updated in the same close pass.
 
-**Status:** OPEN · awaiting Owner supply. Blocks Phase 3 Stage A; does not block Phase 1 or Phase 2.
+**Status:** CLOSED · resolved-by-supply on 2026-07-30 (cycle 3). Owner supplied `AKKI_OS_FRONTEND_BRIEF_v2.md` at SHA-256 `d6111202203c77af0cf08ad39d26d1573429d74fdc99e19fcf35e07e2b0ba82b`; committed to `docs/mandates/AKKI_OS_FRONTEND_BRIEF_v2.md`; pack manifest updated. Phase 3 Stage A UNBLOCKED (still not started this cycle per Owner's backend-only ruling on Memory).
 
-— End of HAZARD-STOP. —
+— End of HAZARD-STOP (resolved-by-supply on 2026-07-30). —

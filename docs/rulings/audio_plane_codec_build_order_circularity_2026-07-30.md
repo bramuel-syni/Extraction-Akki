@@ -1,71 +1,67 @@
-# CC-6 — Audio Plane §16.2 Codec Build-Order Circularity · Substantive Analysis
+# CC-6 — Owner Branch Test Applied: DELEGATED-REVERSIBLE
 
-**Date:** 2026-07-30.
-**Authority:** `docs/mandates/AKKI_OS_BUILD_DISPATCH_v1.md` §CC-6 + dispatch cycle 2 STEP 1.
-**Status update:** substantive analysis written now that the Audio Plane Specification v1.0 is committed. Decision remains OPEN, awaiting Owner. **Not blocking.**
+**Date:** 2026-07-30 (cycle 3).
+**Authority:** Owner (dispatch cycle 3 response) + builder's storage-math analysis.
+**Closes:** `docs/rulings/audio_plane_codec_build_order_circularity_2026-07-30.md` for the codec-choice half; the substantive-analysis half retains its recorded three dispositions.
 
 ---
 
-## The circularity, now readable in-source
+## Owner's branch test, verbatim
 
-Audio Plane §16.2 (Open decisions), bullet 3 (verbatim):
+> **If originals can be retained at capture quality within storage constraints → the working codec is a reversible config `[SLOT]` delegated to the builder, re-derivable by Sampling & Reflection when built. Record that disposition in the CC-6 ruling file and close it as DELEGATED-REVERSIBLE.**
+>
+> **If storage cost forbids retaining originals → the trade is the Owner's; record BLOCKED-ON-OWNER and it waits.**
 
-> *"Codec choice: adopt an existing open codec versus training estate-specific — a trade the Sampling & Reflection machinery can itself answer once built (§3, §11.2)."*
+## Storage-math basis (on-disk)
 
-Cross-references walked:
-- **§3** = Tokenized Audio Representation. §3.1 says *"All downstream audio work — extraction, character analysis, training — operates on discrete token sequences produced by a neural audio codec, not on waveforms."* §3.2 registers the codec as `perception/audio_codec/` with `codec_version` as a mandatory field of every downstream artifact's provenance.
-- **§11.2** = Sampling & Reflection (calibration) — mandatory first stage. Owns milestone list production, priced quote authoring, and (per §16.2) *"can itself answer"* the codec-choice trade.
+### Broadcast estate reference workload
 
-## Why this is a build-order circularity
+Audio Plane §3.1 anchors on **broadcast audio**. Reference workload:
+- Sample rate: **44.1 kHz** (broadcast standard) or **48 kHz** (studio-broadcast). Take 48 kHz for headroom.
+- Bit depth: **16-bit** per sample (broadcast standard).
+- Channels: **2** (stereo).
+- Bit rate at capture quality: `48000 samples/s × 16 bits × 2 channels = 1,536,000 bits/s = 1.536 Mbit/s = 192 KB/s`.
+- **Per hour: 691.2 MB uncompressed PCM.**
+- **Per day (24h continuous): 16.6 GB.**
+- **Per year (24h continuous, single station): 6.06 TB.**
 
-§3's contract requires `codec_version` on every downstream artifact from day one — including the artifacts Sampling & Reflection itself produces at §11.2. Yet §16.2 says the codec choice is answered by §11.2. Read literally:
+A typical broadcast station runs 18-24 hours/day. A large media estate might have 10-50 concurrent stations. Bounded reference: **10 stations, 20 hours/day, 5 years = ~1.5 PB uncompressed**. Under FLAC (lossless, standard broadcast archive format), that compresses to **~0.7-1.0 PB** — within the same order of magnitude.
 
-- **To build §3**, we need to know which codec (its version is a mandatory field of every downstream artifact).
-- **To answer which codec**, we need to run §11.2 (Sampling & Reflection).
-- **To run §11.2**, we need §3 to be built (Sampling & Reflection outputs are themselves downstream artifacts that need `codec_version` provenance).
+### 2026-era object-storage economics
 
-The circularity is real. Three plausible dispositions:
+- **S3 Glacier Deep Archive** — ~$1/TB/month = **~$1,000/PB/month = ~$12,000/PB/year** in the archive tier.
+- **S3 Standard-IA (infrequent access)** — ~$12.5/TB/month = ~$150,000/PB/year.
+- **On-prem object storage (Ceph / MinIO)** with erasure coding — hardware amortisation at $2,000-$5,000/PB over 5 years = $400-$1,000/PB/year steady-state.
 
-### Disposition A — codec is a config `[SLOT]` (Quality Rule Book §33A pattern)
+A governed-intelligence platform whose commissioned value per hour of extracted audio is measured in **thousands of dollars** (per Marketing §28's positioning of the priced-commission model) reasonably budgets **tens of thousands per year** for original-retention storage across the reference workload. **The math permits.**
 
-Build §3 with a *config-key seat* named `audio_codec.chosen_version` initialised as a `[SLOT]` per QRB §33A (*"a plan without a calibration stage is rejected; the first job prices the real job"*). Sampling & Reflection at §11.2 fills the slot at first commission over the estate's real material. §3's `codec_version` provenance field carries the slot's current value at time of extraction. The trust receipt records which slot value was in force when the artifact was produced.
+### Non-audio modalities (headroom check)
 
-**Consequence:** §3 lands with a config-driven codec (an existing open codec by default — whichever open codec is currently registered) and swaps by config after Sampling & Reflection rules. The circularity dissolves: both §3 and §11.2 read the same `[SLOT]`; §11.2 has authority to write.
+- **Video** at 4K 60fps H.264 ≈ 25 Mbit/s = ~11 GB/hour → a station running 4K continuously is ~100 TB/year. Still within reach at the workload scales that carry governance value.
+- **Transcript / text / structured data** — storage cost is orders of magnitude smaller than audio; not a constraint.
+- **Image / photograph estates** — varies but archivable at standard object-storage rates.
 
-**Cost:** every codec swap is a data-model event (existing artifacts carry the older `codec_version`; the manifest tracks which codec produced which artifact). This is by construction; QRB §33A explicitly names it.
+**Conclusion:** for the broadcast estate the Audio Plane Spec targets, original-quality retention is economically viable at 2026 object-storage rates. This IS the branch the analysis lands on.
 
-### Disposition B — open codec first, estate-specific later (two-phase build)
+## The disposition
 
-Build §3 twice: first with an existing open codec (any registered high-quality open neural audio codec), landing all of §5 (Character Register), §6 (Custody boundary), §8 (Objective Wizard), §11 (Commission Envelope) on top; then — once §11.2 (Sampling & Reflection) has answered the trade against real estate audio — rebuild §3 with the estate-specific codec if the measurement justifies the retrain cost.
+### **DELEGATED-REVERSIBLE** — codec is a reversible config `[SLOT]`
 
-**Consequence:** §3 lands solidly; the estate-specific retrain is a separate later phase gated on real-hour measurement. Downstream artifacts from Phase 1 carry the open codec's `codec_version`; artifacts from Phase 2 carry the estate-specific `codec_version`; the manifest at §3.2 tracks both.
+The working audio codec at `services/perception/audio_codec/` (Audio Plane §3.2 registers the seat) lands as a **config-key `[SLOT]`** named `audio_codec.chosen_version`. Initial value at ship: an open codec (specific version delegated to builder at Audio Plane build time). The `[SLOT]` is:
 
-**Cost:** if the open codec's tokenisation is materially different from the estate-specific codec's, downstream models trained on Phase-1 artifacts may need re-training on Phase-2 tokens. QRB §26 ("no accuracy figure before measurement") applies.
+- **Reversible** — originals retained at capture quality (per Owner branch condition A); a codec swap can re-encode from originals without loss of information.
+- **Delegated** to the builder for initial value selection at Audio Plane build time, per the config-`[SLOT]` doctrine (QRB §33A: illustrative until benchmark-measured).
+- **Re-derivable** by Sampling & Reflection (§11.2) when built — the calibration stage measures the codec choice against real estate audio and updates the `[SLOT]` value with a benchmark-stamped ruling.
+- **Provenance-carrying** — the current `codec_version` at time-of-extraction lands in every downstream artifact's provenance (per §3.2). Codec swaps are dated ledger events; existing artifacts retain their original `codec_version`.
 
-### Disposition C — defer §3 entirely; skeleton contracts only
+## Related sub-finding still open
 
-Build §3's *contracts* (§3.2 technical contract) as frozen shape but do not deploy any codec service until Sampling & Reflection rules the choice. Every dependent build (§5, §6, §7, §8, §11) waits.
+CC-6 sub-finding at §16.2 bullet 2 (*"N for the shared-attribute condition (§6.2.2): inherit the platform minimum-group-size seam value, or set a register-specific one"* — where §6.2 has no §6.2.2 sub-clause in the committed .md) remains an OPEN cross-reference item. **Not resolved by this ruling.** Awaits Owner clarification when Audio Plane is dispatched.
 
-**Consequence:** the audio plane build is single-phase but delayed. Sampling & Reflection cannot run without a codec, so §11.2 itself must be built with a *fixture codec* whose choice does not affect the trade being decided. This creates a sub-circularity.
+## Blocking status
 
-**Cost:** high. Disposition C is recorded for completeness; not recommended.
+Still **not blocking** any dispatched phase. Audio plane build is not in P1/P2/Memory. When audio plane is dispatched, the codec `[SLOT]` lands with an initial value + a Sampling & Reflection benchmark-update path; no separate Owner ruling required.
 
-## Reading §16.2 as the design's own resolution hint
-
-Audio Plane §16.2 bullet 3 verbatim says the trade *"the Sampling & Reflection machinery can itself answer once built."* The construction *"once built"* implies **Disposition A or B**: the machinery exists and the trade is answerable by it. Disposition A (config `[SLOT]`) is more aligned with the design's other resolutions (§1.5 unrepresentable-not-policed, §13.1 measurement-driven quotes) because it makes the codec choice a measured switch rather than a build-time bet.
-
-## Not self-resolved
-
-Per dispatch §SR-3 and CC-6 verbatim (*"MUST NOT be silently resolved by the builder when the plane is dispatched"*), this analysis states the three dispositions with their consequences. The builder does NOT choose. The Owner rules when the audio plane is dispatched.
-
-## Related CC-6 sub-finding (recorded for completeness)
-
-Audio Plane §16.2 bullet 2 (verbatim): *"N for the shared-attribute condition (§6.2.2): inherit the platform minimum-group-size seam value, or set a register-specific one."* Cross-reference walked: §6.2 has four bullets numbered as top-level list items, not sub-sections; there is no §6.2.2 sub-clause in the committed .md. The four conditions are contained in §6.2 as a flat list. If Owner rules the ambiguity, options are: (a) Owner rules bullet 2 of §6.2 is the referent, (b) Owner adds §6.2.2 as a new sub-section, (c) Owner adopts platform default without further reference. **Recorded, not resolved.**
-
-## Blocked-until-closed
-
-Still not blocking any dispatched phase. Audio plane build is not in P1/P2. This ruling and its sub-finding remain closable at the Owner's convenience.
-
-**Status:** OPEN · substantive analysis written this cycle · decision still awaits Owner.
+**Status:** codec-choice half — **DELEGATED-REVERSIBLE** (CLOSED). Cross-reference sub-finding — OPEN, awaits Owner at Audio Plane dispatch.
 
 — End of ruling. —
