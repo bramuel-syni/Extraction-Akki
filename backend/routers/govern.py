@@ -157,16 +157,58 @@ async def get_trust_center_record(request: Request):
     absolute = await refusals_coll.count_documents({"class_hint": "absolute"})
     escalatable = await refusals_coll.count_documents({"class_hint": "escalatable"})
     held = await refusals_coll.count_documents({"class_hint": "held_for_check"})
+    # UI-1-B iter17 (Owner ruling 2026-08-01 · 3rd occurrence): every
+    # fixture-capable bucket MUST enumerate top rows with is_sample flag
+    # so seeded SAMPLE fixtures render as visible badges on admin's screen
+    # (not just aggregate counts).
+    refusal_rows: List[Dict[str, Any]] = []
+    async for doc in refusals_coll.find({}).sort("issued_at_iso", -1).limit(10):
+        refusal_rows.append({
+            "refusal_id": doc.get("refusal_id"),
+            "class_hint": doc.get("class_hint"),
+            "reason_code": doc.get("reason_code"),
+            "criterion_verbatim": doc.get("criterion_verbatim"),
+            "route_to_approval": doc.get("route_to_approval"),
+            "issued_at_iso": doc.get("issued_at_iso"),
+            "is_sample": bool(doc.get("is_sample", False)),
+        })
     # Holds: open = pending in checker state machine; totals include historical resolutions.
     checker_pending = await state_machine.list_pending()
     checker_coll = db.get_collection("checker_requests")
     released_count = await checker_coll.count_documents({"state": "effective"})
     suspended_count = await checker_coll.count_documents({"state": "suspended"})
+    # Enumerate top rule-change rows (§7.1 record right · §7.5 ceremony history).
+    rule_change_rows: List[Dict[str, Any]] = []
+    async for doc in checker_coll.find({}).sort("initiated_at", -1).limit(10):
+        rule_change_rows.append({
+            "request_id": doc.get("request_id"),
+            "state": doc.get("state"),
+            "rule_class": doc.get("rule_class"),
+            "from_value_ref": doc.get("from_value_ref"),
+            "to_value_ref": doc.get("to_value_ref"),
+            "consequence_class": doc.get("consequence_class"),
+            "prior_state": doc.get("prior_state"),
+            "suspend_reason": doc.get("suspend_reason"),
+            "initiated_at": doc.get("initiated_at"),
+            "effective_at": doc.get("effective_at"),
+            "suspended_at": doc.get("suspended_at"),
+            "is_sample": bool(doc.get("is_sample", False)),
+        })
     # Holds: number of Use Data sessions with verdict_outcome=held_for_check
     # (Canon §7.6 · reverse-route surface). Sidecar-flagged; no frozen
     # contract touched.
     ud_coll = db.get_collection("use_data_wizard_sessions")
     holds_open = await ud_coll.count_documents({"verdict_outcome": "held_for_check"})
+    hold_rows: List[Dict[str, Any]] = []
+    async for doc in ud_coll.find({"verdict_outcome": "held_for_check"}).sort("held_since_iso", -1).limit(10):
+        hold_rows.append({
+            "session_id": doc.get("session_id"),
+            "operator_id": doc.get("operator_id"),
+            "door": doc.get("door"),
+            "verdict_ref": doc.get("verdict_ref"),
+            "held_since_iso": doc.get("held_since_iso"),
+            "is_sample": bool(doc.get("is_sample", False)),
+        })
     # Memory activity summarised from planes collection.
     planes_coll = db.get_collection("memory_planes")
     planes_active = await planes_coll.count_documents({"state": "active"})
@@ -175,34 +217,41 @@ async def get_trust_center_record(request: Request):
             "absolute": absolute,
             "escalatable": escalatable,
             "held_for_check": held,
+            "rows": refusal_rows,
         },
         "holds": {
             "open": holds_open,
             "released": released_count,
             "confirmed_rejected": suspended_count,
+            "rows": hold_rows,
         },
         "masking": {
             "events_30d": 0,
             "recall_breaches_30d": 0,
             "seam_state": "dormant · lands with UI-1-D per Owner roadmap",
+            "rows": [],
         },
         "access_events": {
             "people_30d": 0,
             "applications_30d": 0,
             "seam_state": "dormant · Team/UI-1-E fold",
+            "rows": [],
         },
         "deletions": {
             "authorized_30d": 0,
             "seam_state": "reads /api/compliance/authorized_deletion ledger · seeded when a deletion runs",
+            "rows": [],
         },
         "rule_changes": {
             "pending": len(checker_pending),
             "effective_30d": released_count,
             "suspended_30d": suspended_count,
+            "rows": rule_change_rows,
         },
         "memory_activity": {
             "planes_active": planes_active,
             "seam_state": "reads memory observability totals; full per-plane summary in UI-1-D",
+            "rows": [],
         },
         "doctrine_line_verbatim": (
             "Violations post as plainly as successes; every violation carries "

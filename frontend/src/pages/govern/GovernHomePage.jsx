@@ -208,43 +208,122 @@ function RuleInventoryHalf({ rules }) {
   );
 }
 
-function RecordBucket({ testId, label, valueLine, secondLine, seamState, routeLabel, routeTo }) {
+function SampleBadge({ testId }) {
+  return (
+    <span
+      data-testid={testId}
+      style={{
+        display: 'inline-block',
+        padding: '2px 8px',
+        background: AKKI_V4_PALETTE.sage,
+        color: AKKI_V4_PALETTE.ink,
+        fontFamily: AKKI_V4_TYPOGRAPHY.labels,
+        fontSize: '0.62rem',
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em',
+        marginLeft: '6px',
+        verticalAlign: 'middle',
+      }}
+    >
+      SAMPLE
+    </span>
+  );
+}
+
+function RecordBucket({ testId, label, valueLine, secondLine, seamState, routeLabel, routeTo, rows, rowKind }) {
   return (
     <div
       data-testid={testId}
       style={{
         borderBottom: `1px solid ${AKKI_V4_PALETTE.mist}`,
         padding: '10px 0',
-        display: 'flex',
-        alignItems: 'baseline',
-        justifyContent: 'space-between',
-        gap: '12px',
       }}
     >
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.ink }}>{label}</div>
-        <div style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.8rem', color: AKKI_V4_PALETTE.sage, marginTop: '2px' }}>
-          {valueLine}
+      <div style={{
+        display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px',
+      }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.ink }}>{label}</div>
+          <div style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.8rem', color: AKKI_V4_PALETTE.sage, marginTop: '2px' }}>
+            {valueLine}
+          </div>
+          {secondLine && (
+            <div style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.75rem', color: AKKI_V4_PALETTE.sage }}>
+              {secondLine}
+            </div>
+          )}
+          {seamState && (
+            <div style={{ fontSize: '0.72rem', color: AKKI_V4_PALETTE.amber, marginTop: '2px' }}>
+              seam · {seamState}
+            </div>
+          )}
         </div>
-        {secondLine && (
-          <div style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.75rem', color: AKKI_V4_PALETTE.sage }}>
-            {secondLine}
-          </div>
-        )}
-        {seamState && (
-          <div style={{ fontSize: '0.72rem', color: AKKI_V4_PALETTE.amber, marginTop: '2px' }}>
-            seam · {seamState}
-          </div>
+        {routeTo && (
+          <Link
+            to={routeTo}
+            data-testid={`${testId}-route`}
+            style={{ color: AKKI_V4_PALETTE.navy, textDecoration: 'none', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+          >
+            {routeLabel} →
+          </Link>
         )}
       </div>
-      {routeTo && (
-        <Link
-          to={routeTo}
-          data-testid={`${testId}-route`}
-          style={{ color: AKKI_V4_PALETTE.navy, textDecoration: 'none', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+      {rows && rows.length > 0 && (
+        <ul
+          data-testid={`${testId}-rows`}
+          style={{ listStyle: 'none', padding: 0, margin: '8px 0 0 0' }}
         >
-          {routeLabel} →
-        </Link>
+          {rows.map((row, i) => {
+            const rowId = row.refusal_id || row.request_id || row.session_id || `row-${i}`;
+            const rowTestId = `${testId}-row-${rowId}`;
+            const badgeTestId = `${testId}-row-sample-badge-${rowId}`;
+            return (
+              <li
+                key={rowId}
+                data-testid={rowTestId}
+                data-row-sample={row.is_sample ? 'true' : 'false'}
+                style={{
+                  padding: '6px 8px',
+                  marginBottom: '4px',
+                  background: AKKI_V4_PALETTE.cream,
+                  border: `1px solid ${AKKI_V4_PALETTE.mist}`,
+                  fontSize: '0.75rem',
+                  color: AKKI_V4_PALETTE.ink,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.7rem', color: AKKI_V4_PALETTE.sage }}>
+                    {rowKind === 'refusal' && `${row.class_hint} · ${row.reason_code}`}
+                    {rowKind === 'rule_change' && `${row.state} · ${row.rule_class} · ${row.from_value_ref}→${row.to_value_ref}`}
+                    {rowKind === 'hold' && `${row.door} · ${row.verdict_ref}`}
+                  </span>
+                  {row.is_sample && <SampleBadge testId={badgeTestId} />}
+                </div>
+                {rowKind === 'refusal' && row.criterion_verbatim && (
+                  <div style={{ marginTop: '4px', color: AKKI_V4_PALETTE.oxblood, fontStyle: 'italic' }}>
+                    {row.criterion_verbatim}
+                  </div>
+                )}
+                {rowKind === 'rule_change' && row.state === 'suspended' && row.suspend_reason && (
+                  <div style={{ marginTop: '4px', color: AKKI_V4_PALETTE.oxblood, fontStyle: 'italic' }}>
+                    canceled — record, not deletion · {row.suspend_reason}
+                  </div>
+                )}
+                {rowKind === 'hold' && row.session_id && (
+                  <div style={{ marginTop: '4px' }}>
+                    <Link
+                      to={`/use-data/wizard/${row.session_id}`}
+                      data-testid={`${testId}-row-reverse-route-${row.session_id}`}
+                      style={{ color: AKKI_V4_PALETTE.navy, fontSize: '0.72rem', textDecoration: 'none' }}
+                    >
+                      Open Use Data session →
+                    </Link>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );
@@ -290,6 +369,8 @@ function RecordHalf({ record }) {
         secondLine="Every refusal carries its disposition (Canon §1.3)."
         routeLabel="Open refusal health"
         routeTo="/govern/refusal-health"
+        rows={record.refusals?.rows}
+        rowKind="refusal"
       />
       <RecordBucket
         testId="govern-record-bucket-holds"
@@ -298,6 +379,8 @@ function RecordHalf({ record }) {
         secondLine="Every hold reverse-routes to the Use Data session that produced it (Canon §7.6)."
         routeLabel="Open holds surface"
         routeTo="/govern/holds"
+        rows={record.holds?.rows}
+        rowKind="hold"
       />
       <RecordBucket
         testId="govern-record-bucket-masking"
@@ -323,6 +406,8 @@ function RecordHalf({ record }) {
         valueLine={`pending ${record.rule_changes?.pending ?? 0} · effective 30d ${record.rule_changes?.effective_30d ?? 0} · suspended 30d ${record.rule_changes?.suspended_30d ?? 0}`}
         routeLabel="Open Change-a-Rule"
         routeTo="/govern/change-rule"
+        rows={record.rule_changes?.rows}
+        rowKind="rule_change"
       />
       <RecordBucket
         testId="govern-record-bucket-memory"

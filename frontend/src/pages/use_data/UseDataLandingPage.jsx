@@ -88,15 +88,21 @@ function DoorCard({ door, onEnter }) {
   );
 }
 
-function SampleBadge() {
+function SampleBadge({ sessionId }) {
   /* AS-U2 — Owner viewable-build addendum verbatim:
    *   "seeded with fixture data VISIBLY MARKED as sample (AS-U2 — an
    *    unmarked sample is a hidden mock and prohibited)"
    * The badge renders on every row and detail whose `is_sample=true`.
+   *
+   * UI-1-B iter17 (Owner systemic ruling · 2026-08-01): the testid is
+   * KEYED to the row's session_id so the systemic sample-marking gate
+   * can verify one badge per is_sample row. `data-sample-badge="true"`
+   * is retained as a stable selector for count-style assertions.
    */
   return (
     <span
-      data-testid="use-data-sample-badge"
+      data-testid={sessionId ? `use-data-sample-badge-${sessionId}` : 'use-data-sample-badge'}
+      data-sample-badge="true"
       style={{
         display: 'inline-block',
         marginLeft: '8px',
@@ -133,7 +139,7 @@ function PipelineRow({ row, testIdPrefix, onOpen }) {
         <strong style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.78rem' }}>
           {row.door.replaceAll('_', ' ')}
         </strong>
-        {row.is_sample && <SampleBadge />}
+        {row.is_sample && <SampleBadge sessionId={row.session_id} />}
       </div>
       <div style={{ color: AKKI_V4_PALETTE.sage, fontSize: '0.75rem', marginTop: '2px' }}>
         {row.session_id}

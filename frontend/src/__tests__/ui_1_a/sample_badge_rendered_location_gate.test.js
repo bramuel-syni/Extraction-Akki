@@ -70,10 +70,11 @@ describe('UI-1-A · SAMPLE badge rendered-location gate (AS-U2)', () => {
       screen.getByTestId('use-data-pipeline-in-progress-row-s-sample-in-progress-abc123'),
     );
     const readyRow = screen.getByTestId('use-data-pipeline-ready-row-s-sample-ready-abc123');
-    const inProgBadge = within(inProgRow).getByTestId('use-data-sample-badge');
+    // Keyed testid per UI-1-B iter17 systemic gate; badge still lives inside the row.
+    const inProgBadge = within(inProgRow).getByTestId('use-data-sample-badge-s-sample-in-progress-abc123');
     expect(inProgBadge).toBeInTheDocument();
     expect(inProgBadge).toHaveTextContent(/^SAMPLE$/i);
-    const readyBadge = within(readyRow).getByTestId('use-data-sample-badge');
+    const readyBadge = within(readyRow).getByTestId('use-data-sample-badge-s-sample-ready-abc123');
     expect(readyBadge).toBeInTheDocument();
     expect(readyBadge).toHaveTextContent(/^SAMPLE$/i);
   });
@@ -81,7 +82,7 @@ describe('UI-1-A · SAMPLE badge rendered-location gate (AS-U2)', () => {
   test('total number of SAMPLE badges equals the count of is_sample=true rows', async () => {
     renderLanding();
     await waitFor(() => screen.getByTestId('use-data-pipeline-in-progress-row-s-sample-in-progress-abc123'));
-    const badges = screen.getAllByTestId('use-data-sample-badge');
+    const badges = document.querySelectorAll('[data-sample-badge="true"]');
     expect(badges).toHaveLength(2);
   });
 

@@ -433,3 +433,62 @@ async def test_g_b15_trust_center_record_buckets_carry_sample_rows():
     assert body["rule_changes"]["suspended_30d"] >= 1
     # Holds bucket now counts held Use Data sessions (§7.6), not checker pending.
     assert body["holds"]["open"] >= 1
+
+
+# ---------------------- SYSTEMIC · sample enumeration in record buckets --------
+# UI-1-B iter17 (Owner ruling 2026-08-01 · 3rd occurrence): every
+# fixture-capable bucket MUST enumerate top rows with is_sample flag
+# under the ADMIN identity (not just aggregate counts).
+
+
+@pytest.mark.asyncio
+async def test_g_b16_record_buckets_enumerate_rows_with_is_sample_admin():
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        # Login as ADMIN (the identity that matters per Owner iter17 ruling).
+        r = await ac.post("/api/auth/login", json={
+            "email": "admin@rms.example.com",
+            "password": "admin-b1-test-pw",
+        })
+        assert r.status_code == 200
+        token = r.json()["access_token"]
+        r = await ac.get(
+            "/api/govern/trust_center_record",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert r.status_code == 200
+    body = r.json()
+    # Every fixture-capable bucket MUST expose a `rows` list.
+    for bucket in ("refusals", "holds", "rule_changes"):
+        assert "rows" in body[bucket], f"bucket {bucket} missing rows[]"
+        rows = body[bucket]["rows"]
+        assert isinstance(rows, list)
+        # At least ONE sample-marked row surfaces for admin (seeded).
+        sample_rows = [r for r in rows if r.get("is_sample") is True]
+        assert len(sample_rows) >= 1, (
+            f"bucket {bucket} rows carry no is_sample=true rows for admin — "
+            f"seeder or endpoint has dropped the AS-U2 flag. Rows: {rows[:3]}"
+        )
+
+
+@pytest.mark.asyncio
+async def test_g_b17_record_bucket_row_shape_is_stable():
+    """Row shape must be stable for the frontend renderer to key on."""
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        token = await _login_dpo(ac)
+        r = await ac.get(
+            "/api/govern/trust_center_record",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    body = r.json()
+    for row in body["refusals"]["rows"]:
+        assert "refusal_id" in row
+        assert "class_hint" in row
+        assert "is_sample" in row
+    for row in body["rule_changes"]["rows"]:
+        assert "request_id" in row
+        assert "state" in row
+        assert "is_sample" in row
+    for row in body["holds"]["rows"]:
+        assert "session_id" in row
+        assert "verdict_ref" in row
+        assert "is_sample" in row
