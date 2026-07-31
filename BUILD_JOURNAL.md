@@ -2129,3 +2129,49 @@ The previously HUMAN_REQUIRED cross-key HTTP break-in case is now automatable en
 **Remaining for sub-cycle 3:** Govern module (compliance seams · registry-doctrine coverage-gap actioning · verifier surfaces).
 
 — End of Phase 3 sub-cycle 2 entry. —
+
+═══════════════════════════════════════════════════════════════════
+
+## 2026-08-02 · Phase 3 sub-cycle 3 CLOSED · Govern module surfaces
+
+**Cycle scope:** Govern module (5 frontend surfaces) per Frontend Brief v2 §A2/§A4-2 + Surfaces v2 amendment. Rule inventory + Rule change ceremony + Retention posture (with authorized-deletion) + Refusal health + Consequence-class pending queue. All backing endpoints are EXISTING committed endpoints — zero new endpoints landed this cycle.
+
+**Owner ruling authority:** sub-cycle 3 dispatch 2026-08-02.
+
+**What landed:**
+- Five new frontend routes: `/govern`, `/govern/retention`, `/govern/change-rule`, `/govern/refusal-health`, `/govern/pending` — all wired in `App.js` and reachable from `AskConsolePage` nav (Surfaces v2 shell rule).
+- Six new apiClient helpers (`checkerPending`/`checkerInitiate`/`checkerCountersign`/`checkerObject`/`complianceRetentionWrite`/`complianceAuthorizedDeletion`) — all over EXISTING endpoints (G-G8 AST gate asserts).
+- FPR supplement v0.9: 10 R4 reflexive rows (9 frontend surface + 1 backend verification-only). Machine YAML regenerated. Parser extended.
+- Enforcement cells: **+29** (18 backend G-G + 11 Jest UI). Suite totals: backend `1444 pass / 2 skip / 0 fail`; Jest `27 suites / 193 pass / 0 fail`.
+- Testing agent verdict `iteration_9.json`: 100% backend / 100% frontend, retest_needed=false, zero critical or minor issues, zero action items.
+- Live-preview verification via REACT_APP_BACKEND_URL: /govern renders cream #F3F2E9 with Georgia wordmark, ratified UNSET_RETENTION_BANNER verbatim, rule inventory with value-class + enforcement chips, MarkedOpenSlot on unset values, dormant chip on cumulative_disclosure_thresholds.
+
+**Parity:** unchanged at 34/34 (zero new frozen contracts this cycle · Owner directive respected).
+
+**Four response classes NEVER conflated:**
+- Rule-change refusal → `response-governed-refusal` (oxblood · `outcome=refused` / `outcome=pending_counter_sign`).
+- Wrong-capacity countersign → `response-access-control-denial` (navy · `{reason,detail}` · NO `outcome` key).
+- Testing agent verified byte-clean discipline end-to-end.
+
+**Ratified copy preserved verbatim:**
+- `UNSET_RETENTION_BANNER` — Govern home + Retention surface.
+- `REFUSAL_ACTION_TRIPLET` — every refusal-family card.
+- `FROZEN_IS_IMMUTABLE` — every effective rule-change card.
+
+**§A4-2 seam symmetry implemented:**
+- Loosening (from<to numerically) → Compliance countersign required (oxblood chip).
+- Tightening (from>to) → Admin sign-off (sage chip).
+- Loosening direct-write auto-routes through the consequence-class checker per Amendment G Ruling 6 (verified by G-G4).
+
+**Held items still held (unchanged):**
+- Grants-revision JWT claim PARKED (SR-5).
+- B1 GPU spend ceiling AWAITING OWNER FIGURE.
+- Data Engineer role default OPEN ITEM (Master Admin alias).
+- Wizard draft persistence improvement (not ruled in).
+- Publication ceremony live-writable action (SLOT unset by design).
+- Propose-attempt count chip on Estate Map (HOLD · next decision batch).
+- Cumulative disclosure thresholds + V3 overlay (closed seams · dormant only).
+
+**Remaining for sub-cycle 4:** Prove + Team modules (verifier surfaces · succession · claim ledger).
+
+— End of Phase 3 sub-cycle 3 entry. —

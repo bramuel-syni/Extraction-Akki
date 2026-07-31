@@ -3,7 +3,22 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **Phase 3 sub-cycle 2 CLOSED · Memory + Registry surfaces · Parity 34/34 unchanged**)
+## Current gate status (2026-08-02 · **Phase 3 sub-cycle 3 CLOSED · Govern module surfaces · Parity 34/34 unchanged**)
+
+- **Sub-cycle:** Phase 3 · sub-cycle 3 (Owner ruling 2026-08-02 sub-cycle 3 dispatch).
+- **Screens landed (5 new):** `/govern` (Rule inventory + DPO landing) · `/govern/retention` (posture + change ceremony + authorized-deletion) · `/govern/change-rule` (four-stage ceremony wizard with countdown) · `/govern/refusal-health` (coverage + families with FB-10 wizard-door flywheel) · `/govern/pending` (role-aware queue with Countersign + Object).
+- **Surfaces v2 shell rule respected:** all five routes reachable from `AskConsolePage` visible nav (`Govern · DPO Estate`).
+- **Backend:** ZERO new endpoints. ZERO new frozen contracts. All surfaces consume EXISTING committed endpoints (checker.pending/initiate/countersign/object + compliance.retention_config/refusals/refusals_coverage/authorized_deletion). AST gate G-G8 asserts no hand-rolled fetch/axios in Govern surfaces.
+- **FPR (AC-3):** 10 new R4 reflexive rows in `docs/registry/function_promise_registry_v0.9_supplement_phase3_subcycle3.md`; machine YAML regenerated.
+- **Testing agent verdict** (`iteration_9.json`): full-stack GREEN. Backend `1444 pass / 2 skip / 0 fail`; Jest `27 suites / 193 pass / 0 fail`. `retest_needed=false`; success_rate backend 100% / frontend 100%; zero critical or minor issues; zero action items.
+- **Four response classes NEVER conflated (audit-verified):** rule-change refusal → `response-governed-refusal` (oxblood, `outcome=refused` / `outcome=pending_counter_sign`); wrong-capacity countersign → `response-access-control-denial` (navy, `{reason,detail}`, no `outcome` key). Byte-clean discipline end-to-end.
+- **Ratified copy preserved verbatim:** `UNSET_RETENTION_BANNER` (Govern home + Retention); `REFUSAL_ACTION_TRIPLET` (every refusal-family card); `FROZEN_IS_IMMUTABLE` (every effective rule-change card).
+- **§A4-2 symmetry implemented:** loosening=oxblood/Compliance countersign; tightening=sage/Admin sign-off; loosening direct-write auto-routes through checker (Amendment G Ruling 6 · G-G4 verifies HTTP 202 `outcome:pending_counter_sign`).
+- **Enforcement cells re-measured:** +29 new (18 backend G-G · 11 Jest UI). Cumulative recent cycles (Cycle 3 + Phase-3-Sub-1 + Sub-2 + Sub-3): 131 new cells.
+- **Owner holds preserved:** grants-revision JWT claim PARKED (SR-5); Data Engineer role mandate OPEN ITEM (Master Admin alias); B1 GPU spend ceiling AWAITING OWNER FIGURE; Wizard draft persistence NOT RULED IN; propose-attempt count chip on Estate Map HOLD (next decision batch).
+- **Close report:** `docs/close_reports/phase3_subcycle3_govern_module_2026-08-02.md`. **Journal entry:** appended.
+
+## Prior gate status (2026-08-02 · **Phase 3 sub-cycle 2 CLOSED · Memory + Registry surfaces · Parity 34/34 unchanged**)
 
 - **Sub-cycle:** Phase 3 · sub-cycle 2 (Owner ruling 2026-08-02). Six Owner rulings recorded verbatim in `docs/rulings/phase3_subcycle2_memory_and_registry_2026-08-02.md`.
 - **Screens landed (4 new):** `/memory` (plane list · server-side scope · access-control-denial on 403) · `/memory/planes/:planeId` (envelope + class-with-claim + publication ceremony with SLOT-unset fail-loud governed refusal + revocation section removed on frozen) · `/memory/planes/:planeId/observability` (four aggregate sections · MarkedOpenSlot when attempted==0 or landed==0) · `/registry` (Estate Map · declaration-baseline day-zero · three method chips · every unmeasured row + Propose census action).
