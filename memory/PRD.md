@@ -3,9 +3,22 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-07-31 late-day · **UI-1-A FULLY CLOSED after iter14 · Owner blockers resolved · Parity 36/36 · Canon OS shell live**)
+## Current gate status (2026-08-01 · **UI-1-B FULLY CLOSED · Canon §7 Govern rebuild live · Parity 36/36 · awaiting Owner independent verification**)
 
-### Iter14 blocker close (2026-07-31) — Owner iter13 verdict 2/3 → 3/3 · UI-1-A ready for close-dispatch
+### UI-1-B close (2026-08-01) — Govern module rebuild per Canon §7
+
+- **§7.1 Trust Center two halves** — `/govern` renders `govern-half-rule-inventory` + `govern-half-record`; doctrine line verbatim; 7 record buckets (refusals/holds/masking/access/deletions/rule-changes/memory); `canon_ref=Canon §7.1`.
+- **§7.2 Enforcement Class SPLIT headline** — 3 sub-figures (`govern-headline-machinery/attestation/monitored`); plain-language line contains "Neither is superior; both are recorded"; no conversion urging.
+- **§7.3 Estate Rules Record (four classes S/O/E/D)** — `/govern/rules`; S read-only; O routes to `/govern/change-rule`; D routes to `/govern/registries`; every row carries `read_only` + `change_authority` verbatim.
+- **§7.4 Registries submodule** — `/govern/registries` upload→diff→confirm three-step. Additions immediate; removals+edits refused server-side with `approval_required=True`; client mirrors with route to Change-a-Rule. Versioned JSON persistence (`D_registries` collection), no new frozen contracts.
+- **§7.5 Rule Change ceremony** — visible countdown polling `/api/checker/request/:id` every 2s (authoritative server clock); cancel routes through `/api/checker/cancel/:id` (master_admin/admin only server-side); canceled proposal renders as `govern-change-rule-suspended-record` with `suspend_reason` verbatim (RECORD, not deletion).
+- **§7.6 Holds surface** — `/govern/holds`; each row carries verdict envelope reference + SAMPLE badge + reverse-route to `/use-data/wizard/{session_id}`. Cross-operator READ admitted for DPO/admin/master_admin/compliance (oversight-legitimate); mutations remain operator-gated. Destination renders `use-data-wizard-hold-envelope` + `use-data-wizard-read-only-banner` when viewer is not the operator.
+- **Sample fixtures per demo identity** — extended seeder now guarantees, per identity (including admin + master): 1 in-progress sample + 1 ready sample + 1 HELD sample + 3 sample refusal ledger rows (absolute/escalatable/held) + 2 sample rule-change history rows (effective + suspended). Idempotent across `supervisorctl restart backend`.
+- **Regression:** Backend pytest **1510 pass · 2 skip · 0 fail** (up from 1491). Frontend Jest **15 suites · 123 tests · 3 skipped-to-salvage · 0 fail** (up from 14/120). Parity 36/36 held constant — no frozen contracts touched.
+- **Owner directives 1-7 honored** verbatim (Jest gates on rendered DOM; cancel via real checker state machine; §7.6 reverse-route with envelope+sample+read-only carry-through; viewable-build standing incl. mobile 390px; parity 36/36; SLOT-4 candidates by filed-path reference; build→gates→testing agent→close report order).
+- **Close report:** `/app/docs/rulings/ui1b_close_report_2026-08-01.md` (10 sections + FPR rows + WHAT-TO-LOOK-AT).
+
+### UI-1-A close (2026-07-31 · iter14) — historical reference retained below
 
 - **Blocker A (SAMPLE seeding for admin) — CLOSED.** Identity resolver unioned `DEMO_IDENTITIES ∪ ADMIN_EMAIL ∪ master@rms.example.com`. `admin@rms.example.com` now returns `in_progress[0].is_sample=true` + `ready[0].is_sample=true` on `GET /api/use_data/sessions`, pinned above real test-exercise sessions. Idempotent across `supervisorctl restart backend`. 2 rendered SAMPLE badges verified in DOM for admin. Same contract for all 5 identities.
 - **Blocker B (Escalatable route grammar) — CLOSED.** `UseDataVerdictPanel.jsx` `resolveApprovalDestination()` maps route-text substrings to Canon-live Govern surfaces (`/govern/pending`, `/govern/change-rule`, `/govern/retention`). Refused-escalatable + held-for-check both render `<a data-testid="use-data-verdict-*-route-affordance" href="/govern/*">Open Govern · … →</a>` — interactive Link components. Absolute-refusal path unchanged: zero anchors, zero buttons, Doctrine 5 asymmetry witnessed. New Jest gate `refusal_grammar_paired_break_in_gate.test.js` (5 tests).

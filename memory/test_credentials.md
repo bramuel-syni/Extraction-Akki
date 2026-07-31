@@ -45,21 +45,20 @@ All demo emails end in `@demo.rms.example.com` so they are visually distinct fro
 
 ## Sample seeded state (AS-U2 · visibly marked)
 
-On startup the backend idempotently seeds, per demo identity above:
+On startup the backend idempotently seeds, per demo identity above (and permanent seed identities `admin@rms.example.com` + `master@rms.example.com`):
 - `s-sample-in-progress-{uid[-12:]}` — an **Integrate-an-App** conversation with reflection fields populated (three set, one assumed with amber chip, one open), IntelCard grounded claims, Plan preview coverage/cost range, no commission yet.
 - `s-sample-ready-{uid[-12:]}` — an **Export/License** commission with `verdict_ref` populated (RUNS_NOW simulated), all values_confirmed.
+- `s-sample-held-{uid[-12:]}` — **UI-1-B (2026-08-01)** — a **Train-a-Model** commission held for check (proposed spend $1,450 exceeds auto-run ceiling $1,000, verdict_ref `trcv-sample-held-train-a-model-fixture`). Excluded from the `/use-data/sessions` pipeline listing; surfaces on the Holds page at `/govern/holds` with reverse-route to `/use-data/wizard/{session_id}`.
+- **UI-1-B refusal ledger** — three sample refusal rows in `compliance_refusals`: `sample-refusal-absolute-rights` (absolute · rights_compatibility_bar), `sample-refusal-escalatable-privacy` (escalatable · privacy_floor_below_threshold), `sample-refusal-held-ceiling` (held_for_check · auto_run_ceiling_exceeded).
+- **UI-1-B rule-change history** — two sample rows in `checker_requests`: `sample-rc-effective-retention` (effective · loosening_symmetric retention_windows 180d→365d), `sample-rc-suspended-source-standing` (suspended · tightening_unilateral canceled BEFORE effect · record preserved not deleted).
 
-Both rows carry the sidecar `is_sample=true` flag on the persistence doc, and the surface renders a prominent **SAMPLE** badge + wizard banner on every one. **No unmarked fixtures.**
+Every seeded row carries the sidecar `is_sample=true` flag on the persistence doc; surfaces render a prominent **SAMPLE** badge + wizard banner. **No unmarked fixtures.**
 
-## Backend testing surface — engineer-key issuance
-Engineer keys for `/api/memory/*` and any external-integrator surface are minted server-side by an admin/master_admin call to `POST /api/engineer/keys/grant`. Testing agent may either:
-  1. Log in as admin (above), grant an engineer key to a fresh identity, then use the resulting JWT for engineer-key-scoped calls; OR
-  2. Log in as admin directly and use admin scope for `/api/memory/*` (admin has full plane scope per `routers/memory.py::_authorize_plane_access`).
-
-## Backend health (UI-1-A · 2026-07-31)
+## Backend health (UI-1-B · 2026-08-01)
 - `/api/readyz` returns `{"status":"ready","parity_count":36,"expected_parity":36,"db":"ok"}`
 - `/api/system/build_info` returns `parity_count = 36`
-- Backend Pytest: **1479 passed · 2 skipped · 0 failed** (1465 + 14 iter11 HTTP + no regressions from Mongo migration).
+- Backend Pytest: **1510 passed · 2 skipped · 0 failed** (UI-1-B added 15 invariant gates + 10 iter15 gates).
+- Frontend Jest: **15 suites · 123 passed · 3 skipped-to-salvage · 0 failed** (UI-1-B added 6 gate cells).
 
 ## Environment
 - Backend URL: `REACT_APP_BACKEND_URL` from `/app/frontend/.env` — used verbatim.
