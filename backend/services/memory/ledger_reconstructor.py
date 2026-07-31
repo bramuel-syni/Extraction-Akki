@@ -101,3 +101,94 @@ async def rebuild_state(plane_id: str) -> Optional[Dict[str, Any]]:
             state["revoked_at"] = stamp.get("revoked_at")
 
     return state
+
+
+# --------------------------------------------------------------------------
+# Phase 3 sub-cycle 2 · observability aggregator (Owner Ruling 2 · plane-
+# observability panel rides sub-cycle 2). Read-only over the same ledger
+# rows the reconstructor consumes; buckets contributions by class and
+# computes publication acceptance rate + revocation history.
+#
+# NOT a frozen contract — response is an untyped aggregate JSON body.
+# Owner directive: "Zero new frozen contracts; if you find you need one,
+# HAZARD-STOP and report instead." — this aggregator does not require one.
+# --------------------------------------------------------------------------
+
+
+async def rebuild_observability(plane_id: str) -> Optional[Dict[str, Any]]:
+    """Read-only observability aggregate for the panel.
+
+    Extends rebuild_state with:
+      * contribution_class_counts: {fact, utterance, non_factual} (buckets
+        computed from stamp_audit.class_declared on landed rows).
+      * publication_acceptance_rate: landed / attempted (or None when
+        attempted == 0; the metric is undefined without attempts).
+      * revocation_history: list of {revoked_by, revoked_at, reason}
+        (typically 0 or 1 entries for a plane).
+
+    Reads the same Northena ledger rows the reconstructor uses. No new
+    hot-path Mongo collection.
+    """
+    rows = await _rows_for_plane(plane_id)
+    if not rows:
+        return None
+
+    result: Dict[str, Any] = {
+        "plane_id": plane_id,
+        "state": "active",
+        "issued_at": None,
+        "revoked_at": None,
+        "revoked_by": None,
+        "revocation_reason": None,
+        "integration_key": None,
+        "tenant_id": None,
+        "contribution_class_counts": {"fact": 0, "utterance": 0, "non_factual": 0},
+        "contribution_counts": {"landed": 0, "refused": 0},
+        "publication_counts": {"attempted": 0, "landed": 0, "refused": 0},
+        "publication_acceptance_rate": None,
+        "revocation_history": [],
+    }
+
+    for row in rows:
+        stamp = row.get("stamp_audit") or {}
+        dc = stamp.get("data_class", "")
+        if dc == "memory_plane_issued":
+            result["issued_at"] = stamp.get("issued_at") or row.get("at")
+            result["integration_key"] = stamp.get("integration_key")
+            result["tenant_id"] = stamp.get("tenant_id")
+        elif dc == "memory_contribution_landed":
+            result["contribution_counts"]["landed"] += 1
+            cls = stamp.get("class_declared") or "utterance"
+            if cls in result["contribution_class_counts"]:
+                result["contribution_class_counts"][cls] += 1
+            # If a novel class ever arrives, bucket it honestly under its own key.
+            else:
+                result["contribution_class_counts"].setdefault(cls, 0)
+                result["contribution_class_counts"][cls] += 1
+        elif dc == "memory_contribution_refused":
+            result["contribution_counts"]["refused"] += 1
+        elif dc == "memory_publication_attempted":
+            result["publication_counts"]["attempted"] += 1
+        elif dc == "memory_publication_landed":
+            result["publication_counts"]["landed"] += 1
+        elif dc == "memory_publication_refused":
+            result["publication_counts"]["refused"] += 1
+        elif dc == "memory_plane_revoked":
+            result["state"] = "revoked"
+            result["revoked_at"] = stamp.get("revoked_at")
+            result["revoked_by"] = stamp.get("revoked_by")
+            result["revocation_reason"] = stamp.get("reason")
+            result["revocation_history"].append({
+                "revoked_by": stamp.get("revoked_by"),
+                "revoked_at": stamp.get("revoked_at"),
+                "reason": stamp.get("reason"),
+            })
+
+    # Publication acceptance rate. Owner Stage-A gate: null when attempted==0
+    # (the metric is undefined without attempts — never present 0/0 as 0%).
+    attempted = result["publication_counts"]["attempted"]
+    if attempted > 0:
+        result["publication_acceptance_rate"] = (
+            result["publication_counts"]["landed"] / attempted
+        )
+    return result

@@ -165,6 +165,38 @@ export const api = {
     client
       .post('/connect/sources', payload, { validateStatus: (s) => s >= 200 && s < 600 })
       .then((r) => ({ status: r.status, body: r.data })),
+  // Phase 3 sub-cycle 2 — Memory Service + Registry (Owner ruling 2026-08-02).
+  memoryListPlanes: () =>
+    client
+      .get('/memory/planes', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  memoryGetPlane: (planeId) =>
+    client
+      .get(`/memory/planes/${planeId}`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  memoryGetPlaneObservability: (planeId) =>
+    client
+      .get(`/memory/planes/${planeId}/observability`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  memoryGetReconstructedState: (planeId) =>
+    client
+      .get(`/memory/planes/${planeId}/reconstructed_state`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  memoryAttemptPublish: (planeId, contributionId, qualityScore) =>
+    client
+      .post(`/memory/planes/${planeId}/publish`,
+        { contribution_id: contributionId, quality_score: qualityScore },
+        { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  memoryRevokePlane: (planeId, reason) =>
+    client
+      .post(`/memory/planes/${planeId}/revoke`,
+        { reason }, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  registryReadDimension: (kind) =>
+    client
+      .get(`/census/dimensions/registry/${kind}`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
   // Phase 8 Stage B-3 — Engineer surface (§4 key-grant CRUD).
   engineerListKeyGrants: (granteeEmail) =>
     client

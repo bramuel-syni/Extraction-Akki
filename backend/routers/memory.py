@@ -444,3 +444,39 @@ async def get_reconstructed_state(plane_id: str, request: Request):
             detail=f"No ledger rows for plane {plane_id!r}.",
         ))
     return state
+
+
+@router.get("/planes/{plane_id}/observability")
+async def get_observability(plane_id: str, request: Request):
+    """Plane observability aggregate — Phase 3 sub-cycle 2 (Owner Ruling 2).
+
+    Read-only over Northena ledger rows. Response shape:
+      * plane_id, state, issued_at, revoked_at, revoked_by, revocation_reason
+      * contribution_class_counts {fact, utterance, non_factual}
+      * contribution_counts {landed, refused}
+      * publication_counts {attempted, landed, refused}
+      * publication_acceptance_rate (null when attempted == 0 — the metric
+        is UNDEFINED without attempts; never present 0/0 as 0%)
+      * revocation_history
+
+    Scope enforcement identical to /planes/{id}: admin full-scope;
+    engineer-key holder same-key only. 403 auth_scope_insufficient on
+    cross-key (no `outcome` key).
+
+    NOT a frozen contract — untyped aggregate. Owner-directive-compliant.
+    """
+    identity, deny = await _require_memory_authority(request)
+    if deny is not None:
+        return deny
+    plane = await plane_registry.get_plane(plane_id)
+    if plane is not None:
+        scope_deny = _authorize_plane_access(plane=plane, identity=identity)
+        if scope_deny is not None:
+            return scope_deny
+    result = await ledger_reconstructor.rebuild_observability(plane_id)
+    if result is None:
+        return _governed(MemoryGovernedRefusal(
+            "plane_not_found",
+            detail=f"No ledger rows for plane {plane_id!r}.",
+        ))
+    return result
