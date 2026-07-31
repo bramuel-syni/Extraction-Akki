@@ -129,7 +129,10 @@ async def refresh(request: Request):
     user_doc = await user_store.get_by_id(claims["sub"])
     if user_doc is None:
         return auth_refusal.emit("auth_missing", detail="User not found.")
-    identity = user_store.user_doc_to_identity(user_doc)
+    # Single-source-of-truth (2026-07-31): derive active key_grants from
+    # `engineer_key_grants` collection at refresh time so revoked grants
+    # DO NOT survive a token refresh. EE-R4 no-parallel-mechanism.
+    identity = await user_store.resolve_identity(user_doc)
     return _issue_token_pair(identity)
 
 

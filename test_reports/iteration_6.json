@@ -1,0 +1,23 @@
+{
+  "summary": "Cycle 3 engineer-key grant single-source propagation fix verified end-to-end. Ran full backend suite (1403 pass / 1 skip / 0 fail — no regressions). All 7 M-G-E2E invariant cells (test_memory_engineer_key_grant_e2e_propagation.py) pass. Additionally exercised the propagation invariants over HTTP against the external REACT_APP_BACKEND_URL with fresh uuid-suffixed users: register-without-grant-denied, admin-grant→relogin→identity.key_grants carries grant → memory plane POST succeeds with issued_to_integration_key == grant_id, cross-key break-in on GET/contribute/revoke → 403 auth_scope_insufficient (no outcome key), admin full-scope read succeeds, revocation propagates on next login AND through refresh with an OLD refresh token minted pre-revocation (single-source discipline holds through refresh path). Governed refusal envelope carries outcome=refused+reason+detail. Auth denials omit outcome. /api/readyz and /api/system/build_info both report parity_count=34. OpenAPI ContributeRequest schema example carries all 7 required fields and all 5 rings. Backend restarted; no 'Duplicate Operation ID' warning in fresh startup logs (docs_bundle GET/HEAD split with distinct operation_ids is effective).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_http_e2e_grant_test.py",
+    "/app/backend/tests/invariants/test_memory_engineer_key_grant_e2e_propagation.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Single-source discipline (EE-R4) correctly implemented: user_store.resolve_identity + engineer_key_grant_service.resolve_active_grants_for_email are the sole derivation path; login and refresh both go through it. Verified live over HTTP.",
+    "docs_bundle.py cleanly split into @router.get + @router.head with distinct operation_ids (download_docs_bundle_get / download_docs_bundle_head) — startup logs after restart carry no 'Duplicate Operation ID' warning.",
+    "ContributeRequest schema example lives on the schema object (components.schemas.ContributeRequest.example) rather than requestBody.content.application/json.example — behaves identically for Swagger UI integrator copy-paste; test asserts the schema-level location."
+  ],
+  "updated_files": ["/app/backend/tests/backend_http_e2e_grant_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "n/a"},
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Each HTTP e2e test registers unique uuid-suffixed emails (m-g-e2e-http-*). No cleanup for these residual users is performed by the HTTP suite (invariants pytest suite has autouse cleanup for m-g-e2e-* users, grants, and tenant-e2e planes).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Full backend suite: 1403 pass / 1 skip / 0 fail (~51s). New HTTP e2e file /app/backend/tests/backend_http_e2e_grant_test.py contains 6 tests exercising propagation through the external REACT_APP_BACKEND_URL; may be reused as regression. Cycle-3 defect fully closed."
+}

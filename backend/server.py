@@ -222,6 +222,15 @@ async def _startup() -> None:
         _admin_password = _os.environ.get("ADMIN_PASSWORD")
         if _admin_email and _admin_password:
             await auth_user_store.seed_admin_if_absent(_admin_email, _admin_password)
+            # Single-source of grant truth (2026-07-31 verification fix per EE-R4):
+            # admin's derivation-visible grant lives in `engineer_key_grants`
+            # collection alongside all other grants. No `users.key_grants` mirror.
+            from services.auth.engineer_key_grant_service import (
+                ensure_indexes as _grant_ensure_indexes,
+                seed_admin_grant_if_absent,
+            )
+            await _grant_ensure_indexes()
+            await seed_admin_grant_if_absent(admin_email=_admin_email)
     except Exception:
         log.exception("rms.startup: async delivery substrate boot failed")
         raise

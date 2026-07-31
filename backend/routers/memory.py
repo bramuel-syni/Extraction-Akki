@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Body, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from services.auth import auth_refusal
 from services.auth.dependencies import require_identity_or_deny
@@ -141,6 +141,43 @@ class IssuePlaneRequest(BaseModel):
 
 
 class ContributeRequest(BaseModel):
+    """POST /api/memory/planes/{plane_id}/contribute body.
+
+    Required top-level fields (all present in this shape are required
+    per Owner Stage A §7 five-ring + class-cap + rights-at-birth):
+      * content_ref — URI-form pointer to the artifact whose extraction
+        this contribution captures (five-ring stamp is the shape;
+        content lives at the ref).
+      * five_ring_stamp — dict carrying ALL five rings: content,
+        provenance, defensibility, context, re_extraction_handle.
+      * class_declared — Solva class ∈ {fact, utterance, non_factual};
+        must not exceed max(cited_source_classes).
+      * cited_sources — non-empty list of source refs.
+      * cited_source_classes — parallel non-empty list of Solva classes.
+      * rights_class — defaults to internal_only (widening requires
+        the separate publication ceremony).
+      * intended_scope — defaults to mind_context_only (registry
+        publication is a separate governed act).
+    """
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "content_ref": "artifacts/tenant-alpha/hour-1/extraction-v0.json",
+                "five_ring_stamp": {
+                    "content": {"text": "Sample utterance."},
+                    "provenance": {"source_ref": "src-1"},
+                    "defensibility": {"class": "utterance"},
+                    "context": {"note": "Contextual metadata"},
+                    "re_extraction_handle": {"handle_id": "h-1"},
+                },
+                "class_declared": "utterance",
+                "cited_sources": ["src-1"],
+                "cited_source_classes": ["utterance"],
+                "rights_class": "internal_only",
+                "intended_scope": "mind_context_only",
+            }
+        }
+    )
     content_ref: str = Field(..., min_length=1)
     five_ring_stamp: Dict[str, Any]
     class_declared: str = Field(..., min_length=1)

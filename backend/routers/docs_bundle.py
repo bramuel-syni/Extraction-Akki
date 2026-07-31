@@ -35,12 +35,11 @@ async def list_bundles() -> dict:
     return {"bundles": names}
 
 
-@router.api_route("/{filename}", methods=["GET", "HEAD"])
-async def download_bundle(filename: str) -> FileResponse:
-    """Serve a named docs bundle as application/gzip.
+async def _serve_bundle(filename: str) -> FileResponse:
+    """Shared implementation for GET / HEAD. Path traversal is refused.
 
-    Path traversal is refused: filename must not contain `/` or `..`,
-    must end with `.tar.gz`, and must resolve inside BUNDLE_DIR.
+    filename must not contain `/` or `..`, must end with `.tar.gz`, and must
+    resolve inside BUNDLE_DIR.
     """
     if "/" in filename or ".." in filename or not filename.endswith(".tar.gz"):
         raise HTTPException(status_code=404, detail="not found")
@@ -54,3 +53,18 @@ async def download_bundle(filename: str) -> FileResponse:
         media_type="application/gzip",
         filename=filename,
     )
+
+
+
+@router.get("/{filename}", operation_id="download_docs_bundle_get")
+async def download_bundle(filename: str) -> FileResponse:
+    """Serve a named docs bundle as application/gzip (GET)."""
+    return await _serve_bundle(filename)
+
+
+@router.head("/{filename}", operation_id="download_docs_bundle_head")
+async def head_bundle(filename: str) -> FileResponse:
+    """HEAD variant — same guardrails as GET; distinct operation_id
+    (fixes cosmetic FastAPI duplicate-op-id warning flagged at
+    independent verification 2026-07-31)."""
+    return await _serve_bundle(filename)

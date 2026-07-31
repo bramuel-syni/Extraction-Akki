@@ -23,7 +23,18 @@ async def ensure_indexes() -> None:
 
 
 def user_doc_to_identity(doc: Dict[str, Any]) -> Identity:
-    """Convert a Mongo user doc to an Identity. Strips password_hash."""
+    """Convert a Mongo user doc to an Identity. Strips password_hash.
+
+    NOTE (2026-07-31 single-source fix): the `key_grants` field on the
+    Mongo user doc is VESTIGIAL — it is retained only for backward
+    compatibility with pre-2026-07-31 seeded users, and is never
+    read for auth purposes. The authoritative store for key-grants is
+    the `engineer_key_grants` collection (single-source per EE-R4).
+
+    For a real auth flow, use `resolve_identity(doc)` instead of this
+    helper directly — `resolve_identity` derives `key_grants` from the
+    single-source collection at identity-resolution time.
+    """
     return Identity(
         user_id=str(doc["_id"]),
         email=doc["email"],
@@ -32,6 +43,25 @@ def user_doc_to_identity(doc: Dict[str, Any]) -> Identity:
         key_grants=[KeyGrant(**g) for g in (doc.get("key_grants") or [])],
         created_at=doc.get("created_at", datetime.now(timezone.utc)),
     )
+
+
+async def resolve_identity(doc: Dict[str, Any]) -> Identity:
+    """Async identity resolver — SINGLE-SOURCE grant derivation.
+
+    Owner ruling 2026-07-31 cycle 3 verification fix: engineer_key_grants
+    collection is the ONE store of grant truth (EE-R4 no-parallel-mechanism).
+    This helper builds the base Identity from the user doc and OVERWRITES
+    `key_grants` with the derivation from the collection.
+
+    Revocation of a grant naturally takes effect on the next call to this
+    function (typically at token issuance time — login or refresh).
+    """
+    from services.auth.engineer_key_grant_service import (
+        resolve_active_grants_for_email,
+    )
+    base = user_doc_to_identity(doc)
+    derived_grants = await resolve_active_grants_for_email(base.email)
+    return base.model_copy(update={"key_grants": derived_grants})
 
 
 async def get_by_email(email: str) -> Optional[Dict[str, Any]]:
@@ -73,13 +103,17 @@ async def create_user(
 
 
 async def authenticate(email: str, password_plaintext: str) -> Optional[Identity]:
-    """Verify credentials. Returns Identity on success, None on failure."""
+    """Verify credentials. Returns Identity on success, None on failure.
+
+    Single-source-of-truth (2026-07-31): derives `key_grants` from the
+    `engineer_key_grants` collection at login time via `resolve_identity`.
+    """
     doc = await get_by_email(email)
     if doc is None:
         return None
     if not verify_password(password_plaintext, doc.get("password_hash", "")):
         return None
-    return user_doc_to_identity(doc)
+    return await resolve_identity(doc)
 
 
 async def seed_admin_if_absent(

@@ -162,3 +162,89 @@ async def revoke_grant(
         event_type="revoked", grant=updated, trace_id=trace_id,
     )
     return updated
+
+
+# --------------------------------------------------------------------------
+# Single-source identity ↔ key-grants derivation
+# (Owner ruling 2026-07-31 cycle 3 verification fix; EE-R4 no-parallel-mechanism):
+# `engineer_key_grants` collection is the SINGLE source of truth. Identity
+# resolution at token-issue derives active grants from this collection so
+# there is no `users.key_grants` mirror to drift. Revocation naturally
+# takes effect on next login (the derivation filter excludes revoked rows).
+# See docs/rulings/memory_service_engineer_grant_propagation_fix_2026-07-31.md
+# --------------------------------------------------------------------------
+
+
+async def resolve_active_grants_for_email(email: str) -> list:
+    """Return the list of `KeyGrant` values (identity.py shape) for a grantee.
+
+    Reads `engineer_key_grants` collection filtered by
+      * grantee_email == email (lowercased)
+      * revoked_at IS None (active only)
+
+    Returned shape matches `services.auth.identity.KeyGrant` — audit fields
+    (grantor_id, justification, lawful_basis_ref, issued_at, revoked_at,
+    revocation_reason) live on the ledger + collection row; the JWT claim
+    intentionally carries ONLY the scope-tuple subset.
+    """
+    from services.auth.identity import KeyGrant
+
+    email_norm = (email or "").lower().strip()
+    if not email_norm:
+        return []
+    cursor = db[COLLECTION].find({
+        "grantee_email": email_norm,
+        "revoked_at": None,
+    })
+    grants = []
+    async for doc in cursor:
+        # Skip revoked defensively (some legacy rows may have {"revoked_at": null}
+        # vs missing key; the query above handles the None case explicitly).
+        if doc.get("revoked_at") is not None:
+            continue
+        try:
+            grant = KeyGrant(
+                grant_id=doc["grant_id"],
+                key_class=doc["key_class"],
+                path=doc["path"],
+                floor=doc["floor"],
+                scope=doc["scope"],
+            )
+        except Exception:
+            # Malformed grant row (e.g., older audit-only row before the
+            # runtime record landed) — skip rather than crash the login.
+            continue
+        grants.append(grant)
+    return grants
+
+
+async def seed_admin_grant_if_absent(
+    *,
+    admin_email: str,
+    grant_id: str = "admin-seed-external-live-query-floor-utterance-scope-estate",
+) -> None:
+    """Idempotent seed of the admin's derivation-visible grant row.
+
+    Single-source discipline (2026-07-31 fix): admin's grant lives in
+    `engineer_key_grants` collection alongside all other grants — no
+    `users.key_grants` mirror. Called during startup after
+    `seed_admin_if_absent`.
+    """
+    existing = await db[COLLECTION].find_one({"grant_id": grant_id})
+    if existing is not None:
+        return
+    await db[COLLECTION].insert_one({
+        "grant_id": grant_id,
+        "grantee_email": admin_email.lower().strip(),
+        "grantor_id": "system-seed",
+        "key_class": "external",
+        "path": "live_query",
+        "floor": "utterance",
+        "scope": "estate",
+        "justification": "Admin seed grant provisioned on system initialization "
+                         "(single-source of grant truth per EE-R4).",
+        "lawful_basis_ref": "system:seed:2026-07-31",
+        "issued_at": datetime.now(timezone.utc),
+        "revoked_at": None,
+        "revocation_reason": None,
+    })
