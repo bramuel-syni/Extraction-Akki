@@ -2043,3 +2043,48 @@ CI initially came back with 1 failure at `test_manifest_entry_resolves[frontend/
 The previously HUMAN_REQUIRED cross-key HTTP break-in case is now automatable end-to-end.
 
 — End of Cycle-3 addendum entry. —
+
+
+---
+
+## 2026-08-01 — Phase 3 sub-cycle 1 close · real-material readiness slice
+
+**Owner ruling:** Phase 3 approved · re-sequenced (sub-cycle 1 = real-material readiness slice, vertical over module completion). Six Owner rulings recorded verbatim in `docs/rulings/phase3_subcycle1_owner_rulings_2026-08-01.md`.
+
+**Stage A proposal (AC-1):** `docs/stage_a_proposals/phase3_subcycle1_real_material_readiness.md` — design-only; HAZARD-STOP cleared (no doc-vs-doc conflict).
+
+**Delivered atomically:**
+
+1. **Design-system utilities (single source of truth):** `frontend/src/design/akkiv4_design_system.js` (Akki v4 palette frozen + 4-class response taxonomy + classifyResponse); `ratified_copy.js` (Ruling 4 verbatim strings + frozen tuple); `MarkedOpenSlot.jsx` (dashed sage "— open —"); `ResponseClassPanel.jsx` (GovernedRefusalCard / AccessControlDeniedPanel / ValidationErrorPanel / InfrastructureFaultPanel — refusal inline in answer position, role=alert, not modal/toast); `AkkiShell.jsx` (Georgia wordmark + trace-thread audit rail + DormantCapabilityChip + AgentAssumedChip).
+
+2. **Connect module (thin governed stub):** `backend/routers/connect.py` — `GET /api/connect/capabilities` lists 4 capabilities all dormant + awaiting OT-1a; `GET /api/connect/sources` returns empty + posture marker; `POST /api/connect/sources` refuses with HTTP 501 + governed envelope `outcome=refused reason=connect_seam_dormant`. Frontend `/connect` + `/connect/new` render honestly-marked dormant capability inventory + governed-refusal on submit.
+
+3. **Wizard extension (FB-4 + FB-6):** `backend/services/wizard/milestones.py` sidecar CRUD + agree operation (propose resets agreed — anti-laundering). 3 new endpoints on `/api/wizard/operator/{sid}/milestones{,/agree}`. Freeze endpoint gated: refuses `outcome=refused reason=milestones_not_agreed` when list not agreed. Frontend commission wizard grows a milestone-capture panel below the chat pane; Review-&-freeze CTA disabled until milestones agreed AND lawful basis supplied; draft rail shows lawful basis in red "REQUIRED · not yet supplied" until set. Milestone-agreement chip in rail shows agreement state.
+
+4. **Commission View (FB-5):** `frontend/src/pages/commission_view/CommissionViewHomePage.jsx` + `CommissionRunDetailPage.jsx` — front page shows milestone checklist + spend-vs-quote; missed styled with same visual weight as done (oxblood vs green, both fontWeight 700); technical evidence lives inside `<details>` drill-down — never leads. Reads only existing artifacts (no new backend compute path per Stage A promise).
+
+5. **Design law bound to every screen (Owner cycle-3 verbatim):** no build state; class-with-claim headline; refusal in answer position; four response classes never conflated; agent-assumed marking; one trace thread; plain language; Akki v4 palette + Georgia serif wordmark + Helvetica labels. Ratified copy (Ruling 4) VERBATIM byte-identical; all other Appendix A slots render marked-open via `<MarkedOpenSlot>` — never invented copy.
+
+**Test results (operative close signal):**
+- Backend: `1413 passed / 1 skipped / 0 failed / 0 regressions` in ~53s. 10 new sub-cycle-1 cells in `test_phase3_subcycle1_gates.py`.
+- Frontend Jest: `25 suites / 167 passed / 0 failed`. 13 new sub-cycle-1 cells in `test_design_law_and_ratified_copy.test.js`.
+- Parity: `34/34` unchanged (sidecar pattern — no new frozen contract seat). MRR gates all GREEN.
+- Preview-URL browser verification (Owner discipline · REACT_APP_BACKEND_URL not just curl): testing agent Playwright-navigated all 4 new routes + wizard extension. Every visual + copy invariant confirmed. Georgia serif wordmark rendered; Akki v4 palette rendered exactly; refusal action triplet rendered verbatim; dormant capability chips present; marked-open slots present; class-with-claim headlines present; trace_id in audit rail on every screen.
+
+**FPR registration (AC-3):** 23 new R4 reflexive rows across 5 sections in `docs/registry/function_promise_registry_v0.7_supplement_phase3_subcycle1.md`. Regenerated into `docs/registry/machine/registry.yaml` (parser SUPPLEMENT_PATHS extended per governance §14). MRR-G-Parity gate at 34/34.
+
+**Enforcement-cell count re-measured:** 23 new cells (10 backend + 13 Jest). Cycle-3 + Phase-3-Sub-1 cumulative recent-cycles total: 79 new cells.
+
+**Testing agent verdict (`iteration_7.json`):** full-stack sub-cycle-1 CONFIRMED GREEN. retest_needed=false.
+
+**Close report:** `docs/close_reports/phase3_subcycle1_real_material_readiness_2026-08-01.md`.
+
+**Owner-flagged holds preserved:**
+- Plane-observability panel NOT built (Ruling 2 · sub-cycle 2).
+- Grants-revision JWT claim PARKED (Ruling 3 · SR-5).
+- Data Engineer role mandate OPEN ITEM (Ruling 5 · defaults to Master Admin alias).
+- B1 GPU spend ceiling AWAITING OWNER FIGURE (Ruling 6 · gates Phase 2 Stage B only).
+
+**Remaining for sub-cycle 2:** Memory + Registry frontend surfaces + plane-observability panel + FB-9..FB-16 journey completions (Owner sequence).
+
+— End of Phase 3 sub-cycle 1 entry. —
