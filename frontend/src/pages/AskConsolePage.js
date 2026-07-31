@@ -170,6 +170,11 @@ const CONSOLE_NAV_ITEMS = [
   { path: '/extraction/console', label: 'Extraction Console', gate: 'auth' },
   { path: '/extraction/registry-admin', label: 'Registry Admin', gate: 'auth' },
   { path: '/opportunity-briefs', label: 'Opportunity Briefs', gate: 'public' },
+  // Phase 3 sub-cycle 2 — Memory Service + Registry Estate Map surfaces
+  // (Owner ruling 2026-08-02 · Surfaces v2 shell rule: new routes must be
+  // reachable from visible navigation, not deep-linked only).
+  { path: '/memory', label: 'Memory Service', gate: 'auth' },
+  { path: '/registry', label: 'Registry · Estate Map', gate: 'auth' },
   { path: '/auth/login', label: 'Sign in', gate: 'public' },
 ];
 

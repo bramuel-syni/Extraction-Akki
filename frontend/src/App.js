@@ -33,6 +33,12 @@ import ConnectNewSourcePage from './pages/connect/ConnectNewSourcePage';
 // Phase 3 sub-cycle 1 — Commission View (FB-5).
 import CommissionViewHomePage from './pages/commission_view/CommissionViewHomePage';
 import CommissionRunDetailPage from './pages/commission_view/CommissionRunDetailPage';
+// Phase 3 sub-cycle 2 — Memory Service surface + Plane observability panel
+// + Registry Estate Map (Owner ruling 2026-08-02).
+import MemoryHomePage from './pages/memory/MemoryHomePage';
+import MemoryPlaneDetailPage from './pages/memory/MemoryPlaneDetailPage';
+import MemoryPlaneObservabilityPage from './pages/memory/MemoryPlaneObservabilityPage';
+import RegistryEstateMapPage from './pages/registry/RegistryEstateMapPage';
 import { AuthProvider } from './hooks/useAuth';
 
 // Phase 8 Stage B-1 — Auth landing (Owner E1 ratified: custom JWT + bcrypt).
@@ -86,6 +92,12 @@ export default function App() {
           {/* Phase 3 sub-cycle 1 · Commission View (FB-5). */}
           <Route path="commission-view" element={<CommissionViewHomePage />} />
           <Route path="commission-view/:sessionId" element={<CommissionRunDetailPage />} />
+          {/* Phase 3 sub-cycle 2 · Memory Service surface + Plane
+              observability panel + Registry Estate Map. */}
+          <Route path="memory" element={<MemoryHomePage />} />
+          <Route path="memory/planes/:planeId" element={<MemoryPlaneDetailPage />} />
+          <Route path="memory/planes/:planeId/observability" element={<MemoryPlaneObservabilityPage />} />
+          <Route path="registry" element={<RegistryEstateMapPage />} />
           {/* Anything else falls back to the Ask Console (single ingress per UI Spec §3.1). */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

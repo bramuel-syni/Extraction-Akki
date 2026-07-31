@@ -25,8 +25,10 @@ supplements:
     sha256: 4b23407558e42ee6c19c57ec8038ee3ae68d80e1984d80da9247d2d34d29b8b8
   - path: docs/registry/function_promise_registry_v0.7_supplement_phase3_subcycle1.md
     sha256: ccd3b063769242ff289ff068798d7f9048e18c76c5f78ec63b3db993b6498076
+  - path: docs/registry/function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    sha256: d8b13903dc24fc4d87de8493b3d7c292ad804b847b437ecc1e13f641f0e458e8
 
-# Row totals: promises=47 · functions=193 · findings=12
+# Row totals: promises=47 · functions=205 · findings=12
 
 promises:
   - promise_id: PROM-S1-provable-envelope-inheritance
@@ -3327,6 +3329,186 @@ functions:
     ladder_rung: 1 · Deterministic
     owner: Owner
     source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.memory_home_lists_scoped_planes
+    governor: Named surfaces (Memory · frontend)
+    mandate: "`/memory` renders `GET /api/memory/planes` payload verbatim; the caller sees only planes bound to their own integration key. Server-side scope enforcement lives in the router; the frontend passes the token, never invents scope. A first-class scope note describes the discipline."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/memory/MemoryHomePage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · M-U1)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.memory_plane_detail_five_ring_visible
+    governor: Named surfaces (Memory · frontend)
+    mandate: "`/memory/planes/:planeId` renders envelope + contribution history + publication ceremony + revocation section. Each surfaced item carries class-with-claim discipline (`class · plane_v0` marker sits with the headline)."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/memory/MemoryPlaneDetailPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · M-U2)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.memory_revoked_plane_frozen_state_honestly_rendered
+    governor: Named surfaces (Memory · frontend)
+    mandate: "Revoked plane shows a distinct frozen chip carrying ratified copy `Frozen is immutable.` verbatim. Revoke section is REMOVED from the DOM (not just disabled). Publish button is visually disabled. Contribute CTA does not appear."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/memory/MemoryPlaneDetailPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · M-U3)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.memory_publication_slot_unset_governed_refusal
+    governor: Named surfaces (Memory · frontend)
+    mandate: "Attempting publication on a plane whose PUBLICATION_QUALITY_THRESHOLD [SLOT] is unset renders `<GovernedRefusalCard>` with the three verbatim Ruling 4 action-triplet buttons. Oxblood accent (never navy). Distinct from access-control-denial rendering."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/memory/MemoryPlaneDetailPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · M-U4)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.memory_scoped_cross_key_denied_via_ui
+    governor: Named surfaces (Memory · frontend)
+    mandate: "Engineer-key holder navigating to a plane owned by another key or hitting `/memory` under a different key triggers a 403 that renders via `<AccessControlDeniedPanel>` (navy · never governed-refusal · envelope carries `{reason, detail}` and NEVER `outcome`)."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/memory/MemoryHomePage.jsx + MemoryPlaneDetailPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · M-U5)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.plane_observability_panel_reads_reconstructor
+    governor: Named surfaces (Memory · observability)
+    mandate: "`/memory/planes/:planeId/observability` reads the aggregator endpoint only; the endpoint reads Northena ledger rows only. Four aggregate sections rendered (envelope · class-counts · publication rate · revocation history). Discipline: (a) publication acceptance rate renders `<MarkedOpenSlot slotName=\"publication_rate\">` when `attempted==0` — NEVER `0/0` as `0%`; (b) contribution class buckets render `<MarkedOpenSlot slotName=\"class_{cls}\">` when total landed is zero — unset-vs-empty per FB-13; (c) revocation history renders inline plainly on revoked plane, never hidden. Zero new frozen contract."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/memory/MemoryPlaneObservabilityPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · O-U1/O-U2/O-U3/O-U4) + pytest (O-G1/O-G3/O-G4)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.backend.memory_plane_observability_aggregator_endpoint
+    governor: Named surfaces (Memory · observability)
+    mandate: "`GET /api/memory/planes/{plane_id}/observability` returns a read-only aggregate: contribution counts by class + publication counts + honest publication acceptance rate (null when attempted==0) + revocation history. Reads Northena ledger rows via `services/memory/ledger_reconstructor.rebuild_observability`. No new frozen contract; no new hot-path Mongo collection."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "backend/routers/memory.py::get_observability + backend/services/memory/ledger_reconstructor.py::rebuild_observability"
+    enforcement: pytest (test_memory_observability_o_g1_to_o_g6.py · O-G1..O-G6)
+    cost: 1 cell · ms class
+    dependencies: FastAPI + Motor
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.backend.memory_observability_scope_enforced
+    governor: Named surfaces (Memory · observability)
+    mandate: "The observability aggregator enforces scope identically to `GET /api/memory/planes/{id}`: admin/master_admin full-scope; engineer-key holders same-key only. Cross-key access returns 403 with `{reason:\"auth_scope_insufficient\", detail}` — NEVER `outcome`."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: "backend/routers/memory.py::get_observability"
+    enforcement: pytest (test_memory_observability_o_g1_to_o_g6.py · O-G2)
+    cost: 1 cell · µs class
+    dependencies: FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.registry_estate_map_measured_vs_unmeasured_first_class
+    governor: Named surfaces (Registry · frontend)
+    mandate: "`/registry` estate map renders every dimension either lit (measured) or hatched (unmeasured, via `<MarkedOpenSlot slotName=\"figure_{slug}\">`). Never `0` for an unmeasured dimension. Day-zero: declaration-baseline is the only measured method, so every row surfaces as a coverage gap."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/registry/RegistryEstateMapPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · R-U1)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.registry_figures_carry_method
+    governor: Named surfaces (Registry · frontend)
+    mandate: "Every figure column on the estate map carries a `<MethodChip>` with the method identifier (`declaration_baseline` this cycle · `measured_census` and `inference_overlay` visible in the posture banner). No figure renders without a method marker."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/registry/RegistryEstateMapPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · R-U2)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.registry_inference_overlay_dormant
+    governor: Named surfaces (Registry · frontend)
+    mandate: "The inference-overlay column renders `<DormantCapabilityChip label=\"inference_overlay\">` on every row. No numeric value; no fake number. Closed seam, honestly marked (four designed states discipline)."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/registry/RegistryEstateMapPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · R-U3)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.registry_coverage_gap_paired_with_action
+    governor: Named surfaces (Registry · frontend)
+    mandate: "Every coverage gap on the map pairs with a `Propose census →` action link routing to `/operator/commission` (the wizard door). Gap NEVER renders without an action affordance."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/registry/RegistryEstateMapPage.jsx
+    enforcement: Jest (test_memory_and_registry_ui_gates.test.js · R-U4)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
     rulings: []
 
 findings:
