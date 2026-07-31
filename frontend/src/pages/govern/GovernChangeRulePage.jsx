@@ -324,9 +324,33 @@ export default function GovernChangeRulePage() {
               letterSpacing: '0.06em',
             }}>{FROZEN_IS_IMMUTABLE}</div>
           )}
-          {request.state === 'pending_delay' && request.effective_at && (
+          {request.state === 'pending_delay' && (request.countdown_ends_at_iso || request.effective_at) && (
             <div style={{ marginTop: '10px' }}>
-              <Countdown effectiveAtIso={request.effective_at} />
+              <Countdown effectiveAtIso={request.countdown_ends_at_iso || request.effective_at} />
+            </div>
+          )}
+          {request.state === 'pending_counter_sign' && (
+            <div
+              data-testid="govern-change-rule-awaiting-countersign"
+              style={{
+                marginTop: '10px',
+                padding: '10px 14px',
+                border: `1px solid ${AKKI_V4_PALETTE.amber}`,
+                background: AKKI_V4_PALETTE.cream,
+                fontSize: '0.85rem',
+                color: AKKI_V4_PALETTE.ink,
+              }}
+            >
+              <div style={{
+                fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.68rem',
+                color: AKKI_V4_PALETTE.amber, textTransform: 'uppercase',
+                letterSpacing: '0.06em', marginBottom: '4px',
+              }}>
+                Awaiting counter-sign
+              </div>
+              A dual-control rule change needs a second identity to countersign
+              before it enters the delay window. No timer applies at this phase
+              — the ceremony holds until countersigned or canceled.
             </div>
           )}
           {(request.state === 'pending_counter_sign' || request.state === 'pending_delay') && (
