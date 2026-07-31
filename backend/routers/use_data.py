@@ -85,6 +85,17 @@ def _forbid_other_operator(session: UseDataWizardSession, identity: Identity) ->
     return None
 
 
+def _can_read_across_operators(identity: Identity) -> bool:
+    """UI-1-B · §7.6 reverse-route.
+
+    DPO / admin / master_admin have oversight-legitimate need to READ any
+    Use Data session that produced a hold (to review before countersign).
+    They cannot MUTATE the session — only the operator who opened it can.
+    """
+    roles = set(getattr(identity, "roles", []) or [])
+    return bool(roles & {"dpo", "admin", "master_admin", "compliance"})
+
+
 class OpenSessionBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     door: Door
@@ -148,11 +159,23 @@ async def get_session(session_id: str, request: Request):
     if row is None:
         raise HTTPException(status_code=404, detail="session not found")
     session: UseDataWizardSession = row["session"]
-    forbidden = _forbid_other_operator(session, identity)
-    if forbidden is not None:
-        return forbidden
+    # Cross-operator READ admitted for DPO / admin / master_admin
+    # (Canon §7.6 · reverse-route from Holds surface). All mutation
+    # endpoints below still enforce operator-only.
+    if session.operator_id != identity.user_id and not _can_read_across_operators(identity):
+        return _forbid_other_operator(session, identity)
     payload = session.model_dump()
     payload["is_sample"] = row["is_sample"]
+    # Carry the hold envelope sidecars so the wizard can render the
+    # verdict envelope reference + SAMPLE badge on the reverse-route
+    # destination. Mutations remain gated to the original operator.
+    raw = await session_store.get_raw(session_id)
+    if raw is not None:
+        for k in ("verdict_outcome", "verdict_ref", "proposed_spend_usd",
+                  "auto_run_ceiling_usd", "held_since_iso", "hold_reason_verbatim"):
+            if k in raw and raw[k] is not None:
+                payload[k] = raw[k]
+        payload["viewer_can_mutate"] = (session.operator_id == identity.user_id)
     return payload
 
 

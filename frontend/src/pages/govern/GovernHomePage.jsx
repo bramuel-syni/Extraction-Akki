@@ -130,7 +130,8 @@ function RuleInventoryHalf({ rules }) {
       <p style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.sage, margin: '0 0 14px 0' }}>
         Every rule in force · who set it · number of checks enforcing it · class.
       </p>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+      <div style={{ overflowX: 'auto', maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: 0 }}>
         <thead>
           <tr style={{ background: AKKI_V4_PALETTE.mist }}>
             <th style={{ textAlign: 'left', padding: '6px 8px', fontWeight: 500, letterSpacing: '0.02em' }}>Rule</th>
@@ -179,6 +180,7 @@ function RuleInventoryHalf({ rules }) {
           ))}
         </tbody>
       </table>
+      </div>
       <div style={{ marginTop: '12px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
         <Link
           to="/govern/rules"
@@ -373,7 +375,7 @@ export default function GovernHomePage() {
         data-testid="govern-two-halves"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: '20px',
           alignItems: 'start',
         }}

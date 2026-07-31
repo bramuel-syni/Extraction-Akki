@@ -1,0 +1,27 @@
+{
+  "summary": "UI-1-B iter16 re-verification on live preview https://governance-scan-3.preview.emergentagent.com — BOTH open bugs from iter15 are now GREEN. BUG#1 (mobile 390px overflow on /govern rule-inventory): retest at 390x844 as demo.dpo shows documentElement.scrollWidth=390, clientWidth=390, bodyScrollWidth=390 (zero horizontal overflow). Two halves stack cleanly: govern-half-rule-inventory box (x=24,y=629,w=342,h=1936) with record half starting at y=2586 below. Overflow-x:auto wrapper around the rule inventory <table> + AkkiShell main overflow-x:hidden + minmax(min(100%,320px),1fr) grid all working as claimed. BUG#2 (DPO reverse-route through /govern/holds): all 5 held sample sessions now open at /use-data/wizard/{session_id} with 200 OK — the new _can_read_across_operators admittance for dpo/admin/master_admin/compliance is functioning. Response envelope carries the promised sidecars: verdict_outcome='held_for_check', verdict_ref='trcv-sample-held-*' (verbatim), hold_reason_verbatim non-empty, held_since_iso non-empty, viewer_can_mutate present. All 5 render data-testid='use-data-wizard-hold-envelope' containing the trcv-sample-held- verdict ref verbatim; all 5 render data-testid='use-data-wizard-sample-banner'; 4 of 5 render data-testid='use-data-wizard-read-only-banner' (the 5th is the DPO's own seeded session s-sample-held-a2df857a2765 — viewer_can_mutate=true — which correctly suppresses the read-only banner). Regression sweep GREEN: (a) /use-data landing for demo.dpo still renders exactly 1 in-progress + 1 ready SAMPLE row (s-sample-in-progress-c3e79dbb67b6 + s-sample-ready-c3e79dbb67b6), i.e. held sessions remain excluded from /use-data/sessions listing per session_store.list_by_operator held-exclusion filter. (b) demo.analyst GET /api/use_data/session/s-sample-held-a2df857a2765 → 403 auth_scope_insufficient — cross-operator read admittance is scoped correctly (analyst has neither dpo/compliance/admin/master_admin). (c) /api/readyz parity_count=36 expected_parity=36 unchanged. (d) All 25 iter15+invariants tests still GREEN (10/10 iter15 + 15/15 invariants). (e) Admin identity (which has all roles) also reads held session successfully. New pytest module /app/backend/tests/test_govern_ui1b_iter16.py added — 6/6 PASS.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_govern_ui1b_iter16.py",
+    "/app/test_reports/pytest/iter16_govern.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "_can_read_across_operators is scoped cleanly to READ only — mutation endpoints remain operator-only. Doctrine 5 asymmetry preserved: DPO can inspect but cannot commit through another operator's wizard.",
+    "viewer_can_mutate sidecar is the right primitive — client renders the read-only banner off it rather than diffing identities client-side. Clean server-authoritative pattern.",
+    "verdict_ref + hold_reason_verbatim + held_since_iso + proposed_spend_usd + auto_run_ceiling_usd sidecars in the GET envelope give the wizard everything it needs to render the hold ceremony without any extra roundtrips.",
+    "Mobile fix via wrapper overflow-x:auto (rather than collapsing to cards) preserves the tabular affordance while removing the page-level overflow — right compromise for the rule-inventory density."
+  ],
+  "updated_files": ["/app/backend/tests/test_govern_ui1b_iter16.py"],
+  "success_rate": {
+    "backend": "100% (6/6 iter16 + 25/25 iter15 & invariants regressions)",
+    "frontend": "100% (bug#1 mobile overflow fixed, bug#2 reverse-route wizard opens with envelope+sample+read-only banners on all 5 held sessions, /use-data landing SAMPLE rows regression GREEN)"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw ; demo.dpo@demo.rms.example.com / demo-dpo-pw ; demo.analyst@demo.rms.example.com / demo-analyst-pw. Token stored at localStorage['rms.b1.auth.access_token']. From /app/memory/test_credentials.md.",
+  "seed_data_creation": "None — leveraged existing startup-seeded s-sample-held-* sessions (5 per DPO identity). No ephemeral state added this iteration.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "iter16 closed both open UI-1-B bugs. Regression tests to preserve on any future edit to /app/backend/routers/use_data.py or /app/backend/services/use_data/session_store.py: pytest backend/tests/test_govern_ui1b_iter16.py backend/tests/test_govern_ui1b_iter15.py backend/tests/invariants/test_govern_ui1b_gates.py — all 31 must remain GREEN. For UI: Playwright at 390x844 must show doc.scrollWidth==clientWidth on /govern; and /govern/holds reverse-route must render use-data-wizard-hold-envelope + use-data-wizard-sample-banner on all held sessions plus use-data-wizard-read-only-banner on any that are cross-operator (viewer_can_mutate=false). Parity floor remains 36/36.",
+  "rca of the issue": "No open issues — both prior bugs are resolved and evidence is captured above. iter15 RCA was accurate: (1) rule-inventory <table> intrinsic width (~470px) exceeded 390px viewport, fixed by overflow-x:auto wrapper + AkkiShell overflow-x:hidden guard + minmax(min(100%,320px),1fr) two-halves grid. (2) /api/use_data/session/{id} was gating on session-owner match; new _can_read_across_operators admits dpo/compliance/admin/master_admin capacities for READ while mutation endpoints still require operator ownership."
+}

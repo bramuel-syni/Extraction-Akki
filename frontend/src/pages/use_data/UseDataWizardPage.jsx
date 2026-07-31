@@ -585,6 +585,15 @@ export default function UseDataWizardPage() {
   const [sending, setSending] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [verdict, setVerdict] = useState(null);
+  const [holdEnvelope, setHoldEnvelope] = useState({
+    viewer_can_mutate: true,
+    verdict_outcome: null,
+    verdict_ref: null,
+    hold_reason_verbatim: null,
+    proposed_spend_usd: null,
+    auto_run_ceiling_usd: null,
+    held_since_iso: null,
+  });
   const [commitForm, setCommitForm] = useState({
     rights_declared: null,
     training_rights_inheritable: false,
@@ -614,10 +623,31 @@ export default function UseDataWizardPage() {
         navigate('/use-data');
         return;
       }
-      // Response envelope shape: full session model + sidecar is_sample flag.
-      const { is_sample: sample, ...sessionFields } = r.body || {};
+      // Response envelope shape: full session model + sidecar is_sample flag
+      // + UI-1-B holds sidecars (verdict_outcome / verdict_ref / hold_reason
+      // / viewer_can_mutate) for the §7.6 reverse-route destination.
+      const {
+        is_sample: sample,
+        viewer_can_mutate: canMutate,
+        verdict_outcome: verdictOutcome,
+        verdict_ref: verdictRef,
+        hold_reason_verbatim: holdReason,
+        proposed_spend_usd: propSpend,
+        auto_run_ceiling_usd: ceiling,
+        held_since_iso: heldSince,
+        ...sessionFields
+      } = r.body || {};
       setSession(sessionFields);
       setIsSample(!!sample);
+      setHoldEnvelope({
+        viewer_can_mutate: canMutate !== false,  // undefined = own session
+        verdict_outcome: verdictOutcome || null,
+        verdict_ref: verdictRef || null,
+        hold_reason_verbatim: holdReason || null,
+        proposed_spend_usd: propSpend || null,
+        auto_run_ceiling_usd: ceiling || null,
+        held_since_iso: heldSince || null,
+      });
     })();
   }, [sessionId, navigate]);
 
@@ -737,6 +767,55 @@ export default function UseDataWizardPage() {
           }}
         >
           SAMPLE FIXTURE · This is seeded demo data (AS-U2). It is not a live commission.
+        </div>
+      )}
+      {holdEnvelope.verdict_outcome === 'held_for_check' && (
+        <div
+          data-testid="use-data-wizard-hold-envelope"
+          style={{
+            padding: '12px 16px', marginBottom: '18px',
+            border: `1px solid ${AKKI_V4_PALETTE.oxblood}`,
+            background: AKKI_V4_PALETTE.mist,
+            fontSize: '0.85rem',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: AKKI_V4_TYPOGRAPHY.labels,
+              fontSize: '0.68rem',
+              color: AKKI_V4_PALETTE.oxblood,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '6px',
+            }}
+          >
+            HELD FOR CHECK · Canon §7.6 reverse-route destination
+          </div>
+          <div data-testid="use-data-wizard-verdict-ref" style={{ fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.78rem', color: AKKI_V4_PALETTE.sage, marginBottom: '4px' }}>
+            verdict envelope · {holdEnvelope.verdict_ref}
+          </div>
+          <div style={{ color: AKKI_V4_PALETTE.ink, marginBottom: '4px' }}>
+            proposed spend · ${Number(holdEnvelope.proposed_spend_usd || 0).toLocaleString()} · ceiling · ${Number(holdEnvelope.auto_run_ceiling_usd || 0).toLocaleString()}
+          </div>
+          <div data-testid="use-data-wizard-hold-reason" style={{ color: AKKI_V4_PALETTE.oxblood, fontStyle: 'italic' }}>
+            {holdEnvelope.hold_reason_verbatim}
+          </div>
+        </div>
+      )}
+      {holdEnvelope.viewer_can_mutate === false && (
+        <div
+          data-testid="use-data-wizard-read-only-banner"
+          style={{
+            padding: '10px 14px', marginBottom: '18px',
+            background: AKKI_V4_PALETTE.navy,
+            color: AKKI_V4_PALETTE.cream,
+            fontFamily: AKKI_V4_TYPOGRAPHY.labels,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+          }}
+        >
+          READ-ONLY · You are viewing another operator's session (compliance oversight).
         </div>
       )}
       <p

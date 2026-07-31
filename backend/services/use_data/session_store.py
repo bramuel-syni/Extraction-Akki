@@ -114,6 +114,19 @@ async def get_with_sample_flag(session_id: str) -> Optional[Dict[str, Any]]:
     return {"session": _from_doc(doc), "is_sample": bool(doc.get("is_sample", False))}
 
 
+async def get_raw(session_id: str) -> Optional[Dict[str, Any]]:
+    """Return the raw Mongo doc (including sidecar fields like verdict_outcome).
+
+    Used by the Holds reverse-route destination to carry the verdict envelope
+    reference and SAMPLE badge sidecars through to the wizard payload.
+    """
+    doc = await db[COLLECTION].find_one({"session_id": session_id})
+    if doc is None:
+        return None
+    doc.pop("_id", None)
+    return doc
+
+
 async def list_by_operator(operator_id: str) -> List[Dict[str, Any]]:
     """List sessions belonging to an operator with sample flag preserved.
 

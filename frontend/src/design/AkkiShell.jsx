@@ -58,7 +58,7 @@ export function AkkiShell({ traceId, title, subtitle, children, right }) {
         </div>
         <div>{right}</div>
       </header>
-      <main style={{ padding: '24px' }}>
+      <main style={{ padding: '24px', overflowX: 'hidden', boxSizing: 'border-box' }}>
         {children}
       </main>
       {traceId && (
