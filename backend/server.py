@@ -259,14 +259,27 @@ async def _startup() -> None:
         )
         await use_data_session_store.ensure_indexes()
         await seed_demo_identities_if_absent()
-        # Resolve the demo operators' user_ids so the fixture seeder can
-        # attach sessions to real Mongo _id values.
-        _demo_ops: list[dict] = []
-        for spec in DEMO_IDENTITIES:
-            doc = await auth_user_store.get_by_email(spec["email"])
+        # Resolve every identity that should carry the two sample rows:
+        # (1) the four demo identities per Owner viewable-build addendum,
+        # (2) the permanent seed identities (admin + master) per Owner
+        #     iter14 addendum: "the startup seeder must idempotently
+        #     guarantee the two marked sample rows per EVERY demo
+        #     identity INCLUDING admin".
+        _sample_ops: list[dict] = []
+        _sample_ops_emails = [spec["email"] for spec in DEMO_IDENTITIES]
+        # Permanent seed identities (ADMIN_EMAIL from env + the standing
+        # master_admin email seeded by earlier phases).
+        if _admin_email:
+            _sample_ops_emails.append(_admin_email)
+        _sample_ops_emails.append("master@rms.example.com")
+        # Uniq while preserving order.
+        _seen = set()
+        _uniq_emails = [e for e in _sample_ops_emails if not (e in _seen or _seen.add(e))]
+        for email in _uniq_emails:
+            doc = await auth_user_store.get_by_email(email)
             if doc is not None:
-                _demo_ops.append({"email": spec["email"], "user_id": str(doc["_id"])})
-        await seed_sample_fixtures_if_absent(_demo_ops)
+                _sample_ops.append({"email": email, "user_id": str(doc["_id"])})
+        await seed_sample_fixtures_if_absent(_sample_ops)
     except Exception:
         log.exception("rms.startup: async delivery substrate boot failed")
         raise

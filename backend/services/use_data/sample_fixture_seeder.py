@@ -132,8 +132,17 @@ def _fixture_ready(session_id: str, operator_id: str) -> UseDataWizardSession:
 async def seed_sample_fixtures_if_absent(operator_email_and_id: List[dict]) -> None:
     """Idempotent — skips per-session-id if already present.
 
-    `operator_email_and_id`: list of {email, user_id} from resolved demo
-    identities (caller provides).
+    Called at startup for BOTH the demo-marked identities AND the
+    permanent-seed identities (`admin`, `master`) so every user the
+    Owner may log in with lands on `/use-data` with the two AS-U2
+    marked sample rows visible above the fold.
+
+    Owner iter14 addendum verbatim (2026-07-31):
+        "the startup seeder must idempotently guarantee the two marked
+         sample rows per EVERY demo identity INCLUDING admin"
+
+    `operator_email_and_id`: list of {email, user_id} — every operator
+    who should carry the two sample rows. Caller resolves.
     """
     coll = db[COLLECTION]
     for op in operator_email_and_id:
