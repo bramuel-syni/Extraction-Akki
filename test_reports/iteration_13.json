@@ -1,0 +1,36 @@
+{
+  "summary": "UI-1-A re-verification (iter13) — ALL acceptance checks PASS on live preview https://governance-scan-3.preview.emergentagent.com. (1) Canon OS root shell renders at / with document.title='Akki OS', wordmark 'Akki OS', canon-os-preview-what-this-serves lists four lit modules (Connect · Registry · Use Data · Govern), canon-os-canon-11-1-verbatim contains 'Conversation shapes; the card commits.'. (2) All six canon-nav-tile testids present in exact DOM order [connect,registry,use-data,govern,prove,team]; connect/registry/use-data/govern wrapped in Link (canon-nav-link-* present, canon-nav-tile-nolink-* absent); prove/team NOT Links (canon-nav-tile-nolink-* present); registry shows PARTIAL badge, prove and team show DORMANT badges. (3) R1 vocab gate — zero occurrences of any of: 'RMS Intelligence','Ask Console','AskConsole','ask-first landing','Objectives','Ambitions','Approval Queue','Operator Home','Engineer Register','Extract','My Objectives' in DOM at /. (4) R2 legacy redirects — all 14 tested legacy paths (/operator, /operator/commission, /engineer/register, /engineer/first-call, /engineer/administer, /engineer/onboarding, /ask, /ask-console, /console, /compliance, /compliance/prove, /compliance/rulebook, /extraction/console, /opportunity-briefs) redirect cleanly to / (12), /prove (3 compliance paths), or /registry (2 extraction/opportunity-briefs) — no 404, no white-screen, no legacy page. (5) /prove renders prove-dormant-panel with prove-dormant-heading='Dormant · UI-1-D fold'; /team renders team-dormant-panel with team-dormant-heading='Dormant · UI-1-E fold'. (6) /use-data/verdict-panel redirects to /use-data/verdict-demo (previously unreachable). (7) /use-data/verdict-demo loads in 757ms (well under 5s); all four sections mount: verdict-demo-section-runs-now, held-for-check, refused-escalatable, refused-absolute. (8) Doctrine 5 break-in verified in DOM on refused-absolute section: use-data-verdict-refused-absolute present, use-data-verdict-refusal-no-affordance-beacon present with text 'No approval route exists.', use-data-verdict-refusal-route-affordance ABSENT within the section, ZERO buttons/links matching /approve|approval|override|request|escalate|resubmit|retry/, use-data-verdict-refusal-bar-source present with 'Source: Canon §1.3 · Doctrine 5'. (9) SAMPLE marking (iter12 defect 1) — logged in as demo.operator: /use-data page shows exactly 2 use-data-sample-badge elements (one in in_progress row, one in ready row); DOM substring 'sample' occurs 8 times; backend GET /api/use_data/sessions returns in_progress[0].is_sample=true (id s-sample-in-progress-*) AND ready[0].is_sample=true (id s-sample-ready-*) — sample rows PINNED to top even with a fresh non-sample session present. (10) Clicking the sample in-progress row navigates to wizard; use-data-wizard-sample-banner present with text 'SAMPLE FIXTURE · This is seeded demo data (AS-U2). It is not a live commission.'. (11) Backend regression subset: 26/26 pass on tests/test_use_data_iter12_addendum.py + tests/test_use_data_http_iter11.py in 20.55s (full 1491-test suite not run due to iteration budget; no failures observed on scoped surface). (12) Frontend Jest UI-1-A gates: 3 suites (canon_os_root_vocab_gate, verdict_absolute_no_affordance_gate, sample_badge_rendered_location_gate) — 26/26 tests PASS.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_use_data_iter12_addendum.py",
+    "/app/backend/tests/test_use_data_http_iter11.py",
+    "/app/frontend/src/__tests__/ui_1_a/canon_os_root_vocab_gate.test.js",
+    "/app/frontend/src/__tests__/ui_1_a/verdict_absolute_no_affordance_gate.test.js",
+    "/app/frontend/src/__tests__/ui_1_a/sample_badge_rendered_location_gate.test.js"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "React Router v6 future-flag warnings (v7_startTransition, v7_relativeSplatPath) still fire in Jest output — trivial one-line opt-in on BrowserRouter/MemoryRouter would silence and future-proof.",
+    "Iter12's flagged session_store._from_doc brittleness (whitelist-by-model_fields instead of stop-list) remains a valid hardening recommendation; not encountered in this iter's scoped runs but worth carrying forward.",
+    "Iter12's wizard mobile-overflow (390px scrollWidth=495) was not re-verified this iter; still noted in iter12 report as non-blocking."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (26/26 on scoped iter11+iter12 use_data suites; sample pinning contract confirmed live: in_progress[0].is_sample=true, ready[0].is_sample=true)",
+    "frontend": "100% (all iter13 acceptance criteria verified via Playwright on live preview; 26/26 Jest tests across the three new UI-1-A gates)"
+  },
+  "test_credentials": "demo.operator@demo.rms.example.com / demo-operator-pw (verified 200 login, token key rms.b1.auth.access_token). Preview URL: https://governance-scan-3.preview.emergentagent.com.",
+  "seed_data_creation": "None. Verified existing seeded sample rows (1 in_progress + 1 ready) for demo.operator via GET /api/use_data/sessions.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iter13 fully verified UI-1-A owner rulings R1–R4 + Doctrine 5 break-in + iter12 sample marking defect on the LIVE preview. Canon OS shell (CanonOSShellPage.jsx) is standing at /; six-tile Canon §3.1 nav with correct link/nolink states and PARTIAL/DORMANT badges; 14 legacy paths redirect to /, /prove, or /registry; verdict-demo renders all 4 states instantly from local fixtures with Doctrine 5 (no approval affordance) verifiable in DOM; SAMPLE badges + wizard banner render for demo.operator with backend sort pinning is_sample DESC. Preview was healthy throughout (no Cloudflare 502s encountered). Only carry-forwards from prior iters: (a) session_store._from_doc whitelist hardening, (b) /use-data/wizard mobile overflow at 390px, (c) React Router v6 future-flag warnings. Full 1491-test pytest and full 13-suite Jest regressions were NOT re-run in-full this iter due to iteration budget; scoped subsets (26 backend + 26 frontend gate tests) all pass.",
+  "rca of the issue": "Iter12 SAMPLE-marking defect root cause was confirmed by iter13 to be a transient Cloudflare 502 during iter12's screenshot pass (not a real DOM defect). Iter13 verified live that (a) use-data-sample-badge is present exactly 2× on /use-data, (b) DOM substring 'sample' occurs 8×, (c) wizard sample banner ('SAMPLE FIXTURE · AS-U2') renders on click. Backend fix in /app/backend/routers/use_data.py list_sessions (sort by is_sample DESC + opened_at_iso ASC) confirmed pinning: with a fresh non-sample in-progress session present (s-bfa70c660cc1), the sample row (s-sample-in-progress-*) still occupies index 0 of the in_progress list. No remaining action items."
+}

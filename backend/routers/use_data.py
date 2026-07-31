@@ -132,6 +132,10 @@ async def list_sessions(request: Request):
             ready.append(payload)
         else:
             in_progress.append(payload)
+    # Sample rows pinned to the top of both lists — demo UX affordance so
+    # the SAMPLE badge sits above the fold on every operator's landing.
+    in_progress.sort(key=lambda p: (not p["is_sample"], p["opened_at_iso"]))
+    ready.sort(key=lambda p: (not p["is_sample"], p["opened_at_iso"]))
     return {"in_progress": in_progress, "ready": ready}
 
 
