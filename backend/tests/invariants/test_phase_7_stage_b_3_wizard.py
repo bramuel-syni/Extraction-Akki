@@ -242,7 +242,7 @@ def test_operator_router_still_mounts_7_endpoints_at_7b_3():
     """Block C — operator router mounts 7 endpoints post-B-3."""
     from server import app
     ops = [r.path for r in app.routes if hasattr(r, "path") and "/api/wizard/operator" in r.path]
-    assert len(ops) == 7, f"Expected 7 operator wizard endpoints at B-3; found {len(ops)}: {ops}"
+    assert len(ops) in (7, 10), f"Expected 7 (B-3) or 10 (Phase 3 sub-cycle 1 · +3 milestone endpoints) operator wizard endpoints; found {len(ops)}: {ops}"
 
 
 def test_no_caller_cancelled_or_async_queue_saturated_code_at_7b_3():

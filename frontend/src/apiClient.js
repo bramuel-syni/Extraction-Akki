@@ -139,6 +139,32 @@ export const api = {
     client
       .get(`/wizard/operator/${sid}`, { validateStatus: (s) => s >= 200 && s < 500 })
       .then((r) => ({ status: r.status, body: r.data })),
+  // Phase 3 sub-cycle 1 — FB-4 milestone endpoints (Owner 2026-08-01).
+  wizardOperatorGetMilestones: (sid) =>
+    client
+      .get(`/wizard/operator/${sid}/milestones`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  wizardOperatorPostMilestones: (sid, milestones) =>
+    client
+      .post(`/wizard/operator/${sid}/milestones`, { milestones }, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  wizardOperatorAgreeMilestones: (sid, agreedBy) =>
+    client
+      .post(`/wizard/operator/${sid}/milestones/agree`, { agreed_by: agreedBy }, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  // Phase 3 sub-cycle 1 — Connect module (thin governed stub).
+  connectCapabilities: () =>
+    client
+      .get('/connect/capabilities', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectListSources: () =>
+    client
+      .get('/connect/sources', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectRegisterSource: (payload) =>
+    client
+      .post('/connect/sources', payload, { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
   // Phase 8 Stage B-3 — Engineer surface (§4 key-grant CRUD).
   engineerListKeyGrants: (granteeEmail) =>
     client

@@ -27,6 +27,12 @@ import ExtractionConsoleHomePage from './pages/extraction/ExtractionConsoleHomeP
 import RegistryAdminView from './pages/extraction/RegistryAdminView';
 // §3.15 Opportunity Briefs — UI Spec v2.2 §3.7 · advisory · Registry-read grounded.
 import OpportunityBriefsPage from './pages/opportunity_briefs/OpportunityBriefsPage';
+// Phase 3 sub-cycle 1 — Connect module (Owner ruling 2026-08-01).
+import ConnectHomePage from './pages/connect/ConnectHomePage';
+import ConnectNewSourcePage from './pages/connect/ConnectNewSourcePage';
+// Phase 3 sub-cycle 1 — Commission View (FB-5).
+import CommissionViewHomePage from './pages/commission_view/CommissionViewHomePage';
+import CommissionRunDetailPage from './pages/commission_view/CommissionRunDetailPage';
 import { AuthProvider } from './hooks/useAuth';
 
 // Phase 8 Stage B-1 — Auth landing (Owner E1 ratified: custom JWT + bcrypt).
@@ -74,6 +80,12 @@ export default function App() {
           <Route path="extraction/registry-admin" element={<RegistryAdminView />} />
           {/* §3.15 Opportunity Briefs — advisory surface (UI Spec v2.2 §3.7) */}
           <Route path="opportunity-briefs" element={<OpportunityBriefsPage />} />
+          {/* Phase 3 sub-cycle 1 · Connect module (Owner ruling 2026-08-01). */}
+          <Route path="connect" element={<ConnectHomePage />} />
+          <Route path="connect/new" element={<ConnectNewSourcePage />} />
+          {/* Phase 3 sub-cycle 1 · Commission View (FB-5). */}
+          <Route path="commission-view" element={<CommissionViewHomePage />} />
+          <Route path="commission-view/:sessionId" element={<CommissionRunDetailPage />} />
           {/* Anything else falls back to the Ask Console (single ingress per UI Spec §3.1). */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -191,6 +191,13 @@ app.include_router(docs_bundle_router.router, prefix="/api")
 from routers import memory as memory_router  # noqa: E402
 app.include_router(memory_router.router, prefix="/api")
 
+# Phase 3 sub-cycle 1 · Connect module (Owner ruling 2026-08-01).
+# Thin governed-stub seam at /api/connect/* — refuses source registration
+# with the honest connect_seam_dormant reason. No live capability until
+# Owner OT-1a facts arrive.
+from routers import connect as connect_router  # noqa: E402
+app.include_router(connect_router.router, prefix="/api")
+
 
 @app.on_event("startup")
 async def _startup() -> None:

@@ -229,8 +229,8 @@ def test_operator_router_untouched_at_7b_2():
     text = p.read_text()
     n_post = len(re.findall(r"^@router\.post\(", text, re.MULTILINE))
     n_get = len(re.findall(r"^@router\.get\(", text, re.MULTILINE))
-    assert n_post in (5, 6, 7), f"Expected 5-7 POST endpoints on operator router; found {n_post}"
-    assert n_get == 1, f"Expected 1 GET endpoint on operator router; found {n_get}"
+    assert n_post in (5, 6, 7, 8), f"Expected 5-8 POST endpoints on operator router (5-7 pre-Phase-3; 8 post Phase 3 sub-cycle 1 milestone endpoints); found {n_post}"
+    assert n_get in (1, 2), f"Expected 1-2 GET endpoints on operator router; found {n_get}"
 
 
 def test_frozen_contract_snapshot_parity_now_28_post_9_1():
@@ -271,4 +271,4 @@ def test_operator_router_still_mounts_6_endpoints_at_7b_2():
     either posture."""
     from server import app
     ops = [r.path for r in app.routes if hasattr(r, "path") and "/api/wizard/operator" in r.path]
-    assert len(ops) in (6, 7), f"Expected 6 (B-2) or 7 (B-3) operator wizard endpoints; found {len(ops)}"
+    assert len(ops) in (6, 7, 10), f"Expected 6 (B-2) / 7 (B-3) / 10 (Phase 3 sub-cycle 1 · +3 milestone endpoints) operator wizard endpoints; found {len(ops)}"

@@ -1,0 +1,32 @@
+{
+  "summary": "Phase 3 sub-cycle 1 (real-material readiness slice) — full-stack testing. Backend: 1413 passed / 1 skipped / 0 failed. New sub-cycle gates: all 10 cells green (tests/invariants/test_phase3_subcycle1_gates.py). Frontend Jest: 25 suites / 167 passed / 0 failed. MRR gates all GREEN (Parity 34/34). Preview-URL HTTP verification: /api/connect/capabilities returns 4 dormant capabilities each awaiting OT-1a; /api/connect/sources returns empty + posture=connect_seam_dormant; POST /api/connect/sources refuses 501 with governed envelope outcome=refused reason=connect_seam_dormant. Wizard milestone endpoints verified against live session: GET returns empty non-agreed, POST propose returns milestones + agreed=false, POST agree flips agreed=true, POST freeze with empty body refuses 422 with Guard 1 violations. Taxonomy discipline held: auth denial (401) has NO outcome key; governed refusal (422) has outcome=refused. Browser tests (Playwright over REACT_APP_BACKEND_URL preview URL): /connect renders Akki OS Georgia serif wordmark, posture banner (dashed), all 4 dormant capability cards with sage dormant chips + '— open —' dashed sage open-slot markers on unmeasured dimensions. /connect/new -> Attempt Registration CTA renders GovernedRefusalCard (data-testid=response-governed-refusal) with oxblood #7E3038 (rgb(126,48,56)) left-border accent, headline 'Refused · connect_seam_dormant', trace_id in audit rail, and the three ratified action buttons rendered VERBATIM ('Accept as recorded statement', 'Narrow the objective', 'Lower the standard'). /commission-view has home-entry + session-input + open-btn. /commission-view/some-session-id honestly shows 'No session found for this id, or read is in-flight.' (no build-state skeleton, no 'coming soon'). Wizard /operator/commission after admin login: milestone-capture-panel (FB-4) present with agreement chip 'milestone list · NOT agreed' (red); adding milestone + clicking Agree flips chip to 'milestone list · agreed' (sage/green); Lawful basis renders 'REQUIRED · not yet supplied' in red (FB-6 gate visible); draft rail displays all 8 Appendix A slots with '— open —' marked-open glyphs.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/operator/commission milestone panel", "issues": ["Minor copy inconsistency after agree: local FB-4 chip reads 'agreed · commit CTA enabled (also requires lawful basis)' while sidebar correctly says 'Commit disabled until both are set'. The word 'enabled' in the FB-4 chip line could momentarily read as if commit is unlocked; recommend rewording to 'FB-4 satisfied · lawful basis still required (FB-6)'. Not blocking; commit CTA is correctly gated by FB-18 preflight."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/invariants/test_phase3_subcycle1_gates.py",
+    "/app/frontend/src/__tests__/phase3_subcycle1/test_design_law_and_ratified_copy.test.js"
+  ],
+  "action_items": [
+    "OPTIONAL — reword the FB-4 chip local hint after agree from 'commit CTA enabled (also requires lawful basis)' to something like 'FB-4 satisfied · lawful basis still required (FB-6)' to avoid the momentary implication that commit is enabled."
+  ],
+  "critical_code_review_comments": [
+    "Sub-cycle discipline held throughout: no build-state skeletons, no 'coming soon' strings, every Appendix A copy slot rendered as marked-open with dashed sage border and '— open —' glyph rather than invented copy.",
+    "Four response classes remain visually distinct: GovernedRefusalCard uses oxblood border + 'GOVERNED REFUSAL' class label; auth denial (curl-verified) carries only reason+detail with no outcome key. Taxonomy is not conflated anywhere I could exercise.",
+    "Connect module honestly presents as dormant at both DOM level (dormant chips, hatched/sage backgrounds, no 'live' or 'coming soon' language) and HTTP level (POST /sources 501 governed refusal). No silent-fallback success path found.",
+    "Ratified copy (Ruling 4) renders byte-identical in DOM: 'Accept as recorded statement', 'Narrow the objective', 'Lower the standard' — verified inside GovernedRefusalCard after CTA click."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Created one wizard session via /api/wizard/operator/session and one milestone list (TEST_do_thing) during browser flow. No persistent seed data added.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sub-cycle 1 lands as SIDECAR — parity remains 34/34, no new frozen contract seat. All 10 new backend invariant cells + 13 new Jest cells pass. If sub-cycle 2 (plane-observability panel) lands next, re-run the same suites plus any new invariant tests. Correct testids for future scripts: capability cards use `connect-capability-{capability_id}` (not `-chip-`); the Connect new-source CTA is `connect-new-submit`; GovernedRefusalCard root is `response-governed-refusal`; commission-view Open CTA is `commission-view-open-btn`; detail empty state is `commission-detail-empty`. Wizard milestone testids: `milestone-agreement-chip`, `milestone-input-description`, `milestone-input-done-condition`, `milestone-input-owner`, `milestone-add-btn`, `milestone-agree-btn`.",
+  "rca of the issue": "N/A — no failing bugs found. Only a minor cosmetic wording nit on the FB-4 chip status line."
+}

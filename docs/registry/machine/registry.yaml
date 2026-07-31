@@ -23,8 +23,10 @@ supplements:
     sha256: d2d0c5f4c37dcbe525ff99a757687d7ae81446cd738719341e2b7884d4ac778f
   - path: docs/registry/function_promise_registry_v0.6_supplement_memory_stage_a.md
     sha256: 4b23407558e42ee6c19c57ec8038ee3ae68d80e1984d80da9247d2d34d29b8b8
+  - path: docs/registry/function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    sha256: ccd3b063769242ff289ff068798d7f9048e18c76c5f78ec63b3db993b6498076
 
-# Row totals: promises=47 · functions=170 · findings=12
+# Row totals: promises=47 · functions=193 · findings=12
 
 promises:
   - promise_id: PROM-S1-provable-envelope-inheritance
@@ -2980,6 +2982,351 @@ functions:
     ladder_rung: 1 · Deterministic
     owner: Owner
     source: function_promise_registry_v0.6_supplement_memory_stage_a.md
+    rulings: []
+  - function_id: akki.frontend.design_law_palette_locked
+    governor: Named surfaces (frontend)
+    mandate: "Akki v4 palette (cream #F3F2E9 · navy #16304F · oxblood #7E3038 · sage #8A8F7C · amber #B07C2A) frozen in `frontend/src/design/akkiv4_design_system.js`; Georgia serif wordmark; Helvetica labels. All sub-cycle-1 screens import from this single source."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/akkiv4_design_system.js
+    enforcement: "Jest (test_design_law_and_ratified_copy.test.js: palette hex codes canonical + Object.isFrozen assertion)"
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.response_class_taxonomy_four_visual
+    governor: Named surfaces (frontend)
+    mandate: "Four response-class visual treatments distinct: governed_refusal (oxblood) · validation_error (amber) · infrastructure_fault (sage) · access_control_denial (navy). Never conflated per Owner cycle-3 design law."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/akkiv4_design_system.js + ResponseClassPanel.jsx
+    enforcement: "Jest (test: each class has a distinct accent color + distinct test-id + classifyResponse mapping)"
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.ratified_copy_verbatim
+    governor: Named surfaces (frontend)
+    mandate: "Refusal action triplet + \"Frozen is immutable.\" + unset-retention banner render byte-identical to Ruling 4 verbatim strings. Frozen tuple; mutation prohibited."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/ratified_copy.js
+    enforcement: "Jest (test_design_law_and_ratified_copy.test.js: byte-identical string assertions + Object.isFrozen)"
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.open_copy_slot_marker
+    governor: Named surfaces (frontend)
+    mandate: "Every suspended Appendix A copy slot renders `<MarkedOpenSlot>` with dashed sage border + \"— open —\" glyph. No invented copy per Ruling 4."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/MarkedOpenSlot.jsx
+    enforcement: Jest (renders marker + slot name + dashed sage style)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.class_with_claim_headline
+    governor: Named surfaces (frontend)
+    mandate: "Every headline in answer position carries `<ClassBadge>` + claim; claim alone is prohibited. Governed refusal: \"Refused · <reason>\". Access denial: \"Not authorised · <reason>\"."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/ResponseClassPanel.jsx
+    enforcement: "Jest (test-ids `refusal-class-with-claim`, `acl-class-with-claim`, `validation-class-with-claim`, `infra-class-with-claim`)"
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.refusal_in_answer_position
+    governor: Named surfaces (frontend)
+    mandate: "Refusals render inline where the answer would render — NOT as modal (no `role=dialog`) and NOT as toast (no `position:fixed`)."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/ResponseClassPanel.jsx
+    enforcement: "Jest (role attribute is `alert` not `dialog`; position style is not `fixed`)"
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.agent_assumed_amber_chip
+    governor: Named surfaces (frontend)
+    mandate: "Agent-assumed fields carry `<AgentAssumedChip>` (amber #B07C2A) + XOR-with-supplied source tag. Draft rail three visual states preserved."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/AkkiShell.jsx + operator draft-rail
+    enforcement: Jest (existing test_operator_draft_rail_three_visual_states.test.js — extended-compat)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.one_trace_thread_audit_rail
+    governor: Named surfaces (Northena)
+    mandate: "Every sub-cycle-1 screen renders `trace_id` in the audit rail (AkkiShell footer). N-INV thread invariant preserved."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/AkkiShell.jsx + ResponseClassPanel.jsx
+    enforcement: "Jest (`akki-shell-trace-rail` + `*-trace-id` test-ids)"
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.frontend.no_build_state_on_any_surface
+    governor: Named surfaces (frontend)
+    mandate: "No \"coming soon\" / loading skeleton framed as capability. Every capability is either lit (measured) or dormant (visibly unlit/hatched via `<DormantCapabilityChip>`). Owner cycle-3 directive verbatim."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/design/AkkiShell.jsx (DormantCapabilityChip)
+    enforcement: manual + integration
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.connect.module_home_lists_dormant_capabilities_honestly
+    governor: Named surfaces (Connect)
+    mandate: "`/connect` frontend + `/api/connect/capabilities` backend list source-connection capabilities; each carries \"dormant · awaiting OT-1a\" chip. No live-connected claim. Four unmeasured dimensions per capability (throughput / latency / cost_per_hour)."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/connect/ConnectHomePage.jsx + backend/routers/connect.py
+    enforcement: pytest (test_connect_capabilities_lists_dormant_only) + manual UI
+    cost: 1 cell · ms class
+    dependencies: FastAPI + React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.connect.new_source_stub_seam_honestly_marked
+    governor: Named surfaces (Connect)
+    mandate: "`/connect/new` renders the source-registration form + a governed refusal path. Submit refuses with `connect_seam_dormant` envelope. Form present so shape is inspectable; never presented as live."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/connect/ConnectNewSourcePage.jsx
+    enforcement: integration (GovernedRefusalCard renders on submit)
+    cost: 1 cell · ms class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.connect.backend_seam_governed_stub
+    governor: Named surfaces (Connect)
+    mandate: "`POST /api/connect/sources` refuses with HTTP 501 + `{outcome:\"refused\", reason:\"connect_seam_dormant\", detail: ...}`. Honest governed stub; never silent fallback."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: backend/routers/connect.py
+    enforcement: pytest (test_connect_post_sources_refuses_governed)
+    cost: 1 cell · µs class
+    dependencies: FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.wizard.milestone_capture_step_landed
+    governor: Named surfaces (Wizard)
+    mandate: "Commission wizard gains a milestone-capture panel below the chat pane. Each milestone: description + done-condition + owner + order-index + status. Persisted in sidecar collection `wizard_session_milestones` — WizardCommitState_v0 frozen snapshot byte-identical."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/operator/CommissionWizardPage.js + backend/services/wizard/milestones.py + backend/routers/wizard_operator.py milestone endpoints
+    enforcement: pytest (test_wizard_milestones_endpoints_land)
+    cost: 1 cell · ms class
+    dependencies: Motor + FastAPI + React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.wizard.milestone_agreement_gates_commit_cta
+    governor: Named surfaces (Wizard)
+    mandate: "Commit CTA is DISABLED until (a) milestone list agreed AND (b) lawful_basis supplied. Anti-laundering: propose resets agreed flag."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "frontend/src/pages/operator/CommissionWizardPage.js `commitCtaDisabled` + backend freeze gate"
+    enforcement: pytest (test_wizard_freeze_refuses_when_milestones_not_agreed + test_wizard_milestones_propose_resets_agreed_flag)
+    cost: 1 cell · ms class
+    dependencies: React + FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.wizard.lawful_basis_mandatory_at_commit
+    governor: Named surfaces (Wizard)
+    mandate: Lawful basis is a mandatory field per Guard 1 (pre-existing) + rendered as REQUIRED in draft rail. Freeze refuses with mandatory-field violation when empty.
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: contracts/wizard_commit_state.py Guard 1 (pre-existing) + frontend draft-lawful-basis red highlight
+    enforcement: pytest (test_gate_four_response_class_envelope_shapes_distinct implicitly + existing wizard Guard 1 tests)
+    cost: 1 cell · ms class
+    dependencies: React + FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.wizard.commit_review_separates_supplied_from_assumed
+    governor: Named surfaces (Wizard)
+    mandate: "Commit review renders `you_supplied` vs `agent_assumed_items` per-value with confirm-or-change buttons. Source XOR discipline."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/operator/CommitReviewPage.js (pre-existing) + draft-rail three-state gate
+    enforcement: "Jest (test_operator_draft_rail_three_visual_states.test.js: three visual states coexist)"
+    cost: 1 cell · ms class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.commission_view.milestone_front_page_landed
+    governor: Named surfaces (Commission-View)
+    mandate: "`/commission-view/:sessionId` renders milestone checklist + spend-vs-quote at the top level. Front page discipline (FB-5)."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "frontend/src/pages/commission_view/CommissionRunDetailPage.jsx `MilestoneFrontPage`"
+    enforcement: "integration + manual UI (renders test-ids `commission-milestone-front-page` + `milestone-list` + `spend-vs-quote-row`)"
+    cost: 1 cell · ms class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.commission_view.reads_only_existing_artifacts
+    governor: Named surfaces (Commission-View)
+    mandate: "No new backend compute path. Reads existing wizard-operator `GET /api/wizard/operator/{sid}` + milestone sidecar `GET /api/wizard/operator/{sid}/milestones` only. No new hot-path SQL."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/commission_view/CommissionRunDetailPage.jsx
+    enforcement: manual (endpoint inventory — no new commission-view backend route)
+    cost: 1 cell · ms class
+    dependencies: axios
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.commission_view.missed_milestone_renders_as_plainly_as_done
+    governor: Named surfaces (Commission-View)
+    mandate: Missed styled with same visual weight (fontWeight 700) as done, distinct color (oxblood vs green). Never hidden. Never soft-toned.
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/commission_view/CommissionRunDetailPage.jsx STATUS_STYLE map
+    enforcement: inspection (STATUS_STYLE map + Jest snapshot pending)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.commission_view.drill_down_evidence_never_leads
+    governor: Named surfaces (Commission-View)
+    mandate: "Drill-down evidence lives inside `<details>` element (progressive disclosure). Milestone panel + spend-vs-quote render ABOVE. FB-5 discipline."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: "frontend/src/pages/commission_view/CommissionRunDetailPage.jsx `<details data-testid=\"commission-detail-evidence-toggle\">`"
+    enforcement: inspection (DOM order)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.backend.wizard_state_carries_milestones_via_sidecar
+    governor: Named surfaces (Wizard)
+    mandate: "Milestone list persisted in sidecar collection `wizard_session_milestones` keyed by session_id. WizardCommitState_v0 frozen contract UNCHANGED (byte-identical snapshot). D4b assessment: internal state; no env boundary; LIVE prior — implemented as sidecar rather than contract extension."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: backend/services/wizard/milestones.py + WizardCommitState_v0 (unchanged)
+    enforcement: pytest + parity 34/34 unchanged
+    cost: 1 cell · ms class
+    dependencies: Motor
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.backend.wizard_freeze_refuses_when_milestones_not_agreed
+    governor: Named surfaces (Wizard)
+    mandate: "Wizard freeze endpoint refuses if milestones not agreed → HTTP 422 `{outcome:\"refused\", reason:\"milestones_not_agreed\", detail:...}`. FB-4 gate_commit_requires_agreed_milestones."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: "backend/routers/wizard_operator.py::freeze"
+    enforcement: pytest (test_wizard_freeze_refuses_when_milestones_not_agreed)
+    cost: 1 cell · µs class
+    dependencies: FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
+    rulings: []
+  - function_id: akki.backend.wizard_freeze_refuses_when_lawful_basis_empty
+    governor: Named surfaces (Wizard)
+    mandate: Wizard freeze endpoint refuses via Guard 1 preflight when lawful_basis empty. FB-6 gate_commit_requires_lawful_basis (pre-existing enforcement).
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: backend/contracts/wizard_commit_state.py Guard 1 (pre-existing)
+    enforcement: pytest (pre-existing wizard tests)
+    cost: 1 cell · µs class
+    dependencies: Pydantic
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.7_supplement_phase3_subcycle1.md
     rulings: []
 
 findings:

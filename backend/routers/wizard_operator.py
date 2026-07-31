@@ -329,6 +329,26 @@ async def post_freeze(session_id: str, request: Request):
             status_code=422,
             content={"violations": violations, "ready_to_freeze": False},
         )
+    # Phase 3 sub-cycle 1 gate (FB-4 · FB-18 gate_commit_requires_agreed_milestones):
+    # the commission does not open until the milestone list is agreed.
+    # Owner ruling 2026-08-01 Ruling 4 refusal-shape discipline: return a
+    # GOVERNED REFUSAL envelope (outcome=refused), not a validation error.
+    from services.wizard import milestones as milestones_service
+    ml = await milestones_service.get_milestone_list(session_id)
+    if not ml.agreed:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "outcome": "refused",
+                "reason": "milestones_not_agreed",
+                "detail": (
+                    "The milestone list is not yet agreed. The commission does "
+                    "not open until the milestones (each carrying a done-condition "
+                    "and an owner) are agreed by the operator."
+                ),
+                "milestones": [m.model_dump(mode="json") for m in ml.milestones],
+            },
+        )
     try:
         frozen = osm.freeze(session, frozen_objective_ref=None)
     except Exception as exc:  # pydantic ValidationError etc.
@@ -429,3 +449,79 @@ async def _has_body(request: Request) -> bool:
     not error on `await request.json()`."""
     body_bytes = await request.body()
     return bool(body_bytes and body_bytes.strip())
+
+
+
+# ============================================================================
+# Phase 3 sub-cycle 1 — FB-4 milestone-list endpoints
+# ============================================================================
+
+
+@router.get("/{session_id}/milestones")
+async def get_milestones(session_id: str, request: Request):
+    """Return the milestone list for a session (empty non-agreed if not
+    yet proposed). Owner ruling 2026-08-01 · FB-4."""
+    denied = await _check_session_ownership_or_deny(session_id, request)
+    if denied is not None:
+        return denied
+    from services.wizard import milestones as milestones_service
+    ml = await milestones_service.get_milestone_list(session_id)
+    return ml.model_dump(mode="json")
+
+
+@router.post("/{session_id}/milestones")
+async def post_milestones(session_id: str, request: Request):
+    """Propose a milestone list for a session. Every propose resets the
+    agreed flag — operator must re-agree deliberately (Ruling 4 anti-
+    laundering pattern applied to the milestones seam).
+
+    Body: `{milestones: [{description, done_condition, owner, order_index?, status?}, ...]}`.
+    """
+    denied = await _check_session_ownership_or_deny(session_id, request)
+    if denied is not None:
+        return denied
+    body = await request.json() if await _has_body(request) else {}
+    payload = body.get("milestones") or []
+    for m in payload:
+        for required in ("description", "done_condition", "owner"):
+            if not m.get(required):
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "reason": "malformed_payload",
+                        "detail": f"Milestone missing required field {required!r}.",
+                    },
+                )
+    from services.wizard import milestones as milestones_service
+    ml = await milestones_service.propose_milestones(
+        session_id=session_id, milestones_payload=payload,
+    )
+    return ml.model_dump(mode="json")
+
+
+@router.post("/{session_id}/milestones/agree")
+async def post_milestones_agree(session_id: str, request: Request):
+    """Mark the milestone list as agreed. Refuses with governed refusal
+    envelope if the list is empty or a milestone is missing a mandatory
+    field."""
+    denied = await _check_session_ownership_or_deny(session_id, request)
+    if denied is not None:
+        return denied
+    body = await request.json() if await _has_body(request) else {}
+    agreed_by = body.get("agreed_by") or "operator"
+    from services.wizard import milestones as milestones_service
+    try:
+        ml = await milestones_service.agree_milestones(
+            session_id=session_id, agreed_by=agreed_by,
+        )
+    except ValueError as exc:
+        reason, _, _ = str(exc).partition(":")
+        return JSONResponse(
+            status_code=422,
+            content={
+                "outcome": "refused",
+                "reason": reason,
+                "detail": str(exc),
+            },
+        )
+    return ml.model_dump(mode="json")

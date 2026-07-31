@@ -88,6 +88,24 @@ jest.mock('../../apiClient', () => {
           agent_assumptions: [],
         },
       }),
+    // Phase 3 sub-cycle 1 · milestone stub (empty non-agreed) — the
+    // draft-rail three-state gate does NOT depend on milestone state.
+    wizardOperatorGetMilestones: () =>
+      Promise.resolve({
+        status: 200,
+        body: {
+          session_id: 'wiz-jest-3vs-abc123',
+          milestones: [],
+          agreed: false,
+          agreed_at: null,
+          agreed_by: null,
+          updated_at: '2026-08-01T00:00:00Z',
+        },
+      }),
+    wizardOperatorPostMilestones: () =>
+      Promise.resolve({ status: 200, body: { milestones: [], agreed: false } }),
+    wizardOperatorAgreeMilestones: () =>
+      Promise.resolve({ status: 200, body: { agreed: true } }),
   };
   return {
     __esModule: true,

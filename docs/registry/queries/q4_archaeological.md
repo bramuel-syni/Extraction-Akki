@@ -19,6 +19,7 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 - `docs/registry/function_promise_registry_v0.4_supplement.md`: `d1fa1949a206d5fb73481864962f93efaa888a4ef4793efad82a53681fc3dc1b`
 - `docs/registry/function_promise_registry_v0.5_supplement.md`: `d2d0c5f4c37dcbe525ff99a757687d7ae81446cd738719341e2b7884d4ac778f`
 - `docs/registry/function_promise_registry_v0.6_supplement.md`: `4b23407558e42ee6c19c57ec8038ee3ae68d80e1984d80da9247d2d34d29b8b8`
+- `docs/registry/function_promise_registry_v0.7_supplement.md`: `ccd3b063769242ff289ff068798d7f9048e18c76c5f78ec63b3db993b6498076`
 
 **Baseline count:** 0 archaeological entries this run (Q4 first landing · seed baseline).
 
