@@ -176,3 +176,95 @@ Plus Owner-item values (§6 Dispatch v2):
 ═══════════════════════════════════════════════════════════════════
 
 *End of Canon intake · Part 3 delta log addendum. SR v3 · verbatim carrier · never self-resolve.*
+
+═══════════════════════════════════════════════════════════════════
+
+## Canon Intake · Part 4 (final batch · 2026-07-31)
+
+### §11 · Files intook in this batch
+
+| Item | Canonical path | Supplied form | Recorded-Canon SHA | On-disk SHA | Match | Bytes |
+|---|---|---|---|---|---|---|
+| Brief v1 re-upload | `docs/handoff/frontend_uiux_brief_v1_2026-07-27.docx` | .docx | `22426315…` (manifest row 12) | `22426315…` (committed in Part 2) | ✓ BYTE-IDENTICAL | 60 723 |
+| Artifact manifest | `docs/registers/artifact_manifest.md` | extracted from PDF | recorded on Owner side, not published | `969bc76e1333d9e095c35475dfe4c75f6a02faeffdc29f5b821549cde965bbda` (derived from PDF) | ✗ PDF-derived · content canonical | 11 290 |
+| UI-1 Stage A | `docs/stage_a_proposals/ui_1_stage_a.md` | extracted from PDF | recorded on Owner side, not published | `57c86c1a7596e6a6160ecb624600dabd6391a5ac6d8237017d26b3974a60a5b4` (derived from PDF) | ✗ PDF-derived · content canonical | 102 854 |
+| Source PDF (preserved) | `docs/handoff/canon_originals/final_batch_2026-07-31.pdf` | .pdf | — | `76a38499a388d13a94cff1e1daecb06cb42e450a1d689d65c53faa84a28af18b` | reference | 552 490 |
+
+**SHA discipline honestly recorded:** the two extracted `.md` files derive from PDF text extraction (pymupdf); their derived-md SHAs do NOT byte-match the Canon-recorded conversion path SHAs — expected for a different conversion tool. Content is treated as canon per Owner delivery.
+
+### §12 · Artifact manifest inventory (Owner said "25 rows"; delivery confirms)
+
+**Manifest structure:** 13 primary rows (Filed artifacts) + 12 backfill rows (SHAs harvested from close reports) = **25 rows total**. Matches Brief v1 §J.
+
+**Manifest state per own admission:**
+
+| Row | Path | State |
+|---:|---|---|
+| 1-7 | Blinded assessment · Role Register · Operating Model · Analyze Acquisition (`.docx` + `.md` each) | FILED |
+| 8-9 | `docs/mandates/akki_source_condition_spec.md/.docx` | **NOT PRESENT · pending** (manifest self-declares) |
+| 10-11 | `docs/mandates/akki_condition_coverage_amendment_v1.0.md/.docx` | **NOT PRESENT · pending** (manifest self-declares) |
+| 12-13 | Frontend UI/UX Brief v1 (`.docx` + `.md`) | FILED (row 12 byte-identical to Part 2 intake) |
+| B-1 | `docs/rulings/owner_change_order_2026-07-25.md` | SHA-verified (backfill; matches Part 2 intake) |
+| B-2..B-6 | Close reports (change_order · g_13 · g2 · g3 · phase_8_b_3) | on-disk citations |
+| B-7 | `docs/registry/function_promise_registry_v1.md` (SHA `d6ad136f…`, 133 379 B, 671 lines) | on-disk citation · **NOT ON THIS TREE** |
+| B-8 | `docs/registers/phase_ledger_v1.md` | on-disk citation · **NOT ON THIS TREE** |
+| B-9 | `docs/registers/owner_decisions_v1.md` | on-disk citation · **NOT ON THIS TREE** |
+| B-10..B-12 | Contract snapshots (admission_refusal · composed_conclusion · admission_refusal_reasons v0) | contracts/snapshots (some on this tree) |
+
+**Manifest self-flagged missing paths (surfaced for Owner reconciliation):**
+- `backend/contracts/mandate_spec.py` (G-13 seal-cited SHA `0d3f6de6…`) — NOT PRESENT at expected path.
+- `backend/tests/invariants/mandate_spec.contract_snapshot.json` (G-13 seal SHA `5eb216b9…`) — NOT PRESENT at expected path.
+
+### §13 · UI-1 Stage A structural inventory (delivered, not re-authored)
+
+The delivered `docs/stage_a_proposals/ui_1_stage_a.md` is **already a complete Stage A** authored 2026-07-27 (predates Dispatch v2). Structure (34 sections):
+- **§1** Purpose + scope (Owner-verbatim A1 absorption · filed-canon-only)
+- **§2** Band (provisional-anchor per A8.5)
+- **§3** Registry v1 + Contracts citations (D-11 canon-before-attest)
+- **§4** Fold enumeration · 9 UI surfaces (§4.A landing · §4.B wizard · §4.C test bench · §4.D commission card · §4.E held-for-check · §4.F Ready · §4.G Developer Surface · §4.H ceiling-countersign · §4.I renames + Cancel) + §4.J tally + §4.K Rules Taxonomy classification
+- **§5** Tier-1 escalation surfaces E1-E4 (E1 conversational wizard session state · E2 held-queue location · E3 Developer routing · E4 admissibility refusal envelope) + **§5.5 gate-cell roster (13 named gates)** + §5.6 CONFLICT rows for unfiled second Change Order collisions
+- **§6** R4 sidecar (proposed path)
+- **§7-11** D-7 fence · D-10 self-audit · D-11 canon-read log · QA-1..QA-7 attest · Phase Ledger update
+
+**Retired-vocabulary H.9 audit (Dispatch v2 §3 requirement) — CLEAN:** 0 hits across frontend for `My Objectives`, `Run Tracking`, `Extracted Intel`, `Approval Queue`, `Awaiting approval`, `Run/Commission Approver`, `Data Engineer`. Full frontend already conforms on the H.9 vocabulary front.
+
+### §14 · What is STILL MISSING (despite Owner "all missing docs")
+
+**HONEST INVENTORY per Owner directive:**
+
+| Item | Awaited per | Present? |
+|---|---|---|
+| `docs/registers/artifact_manifest.md` (25 rows) | Brief v1 §J | ✓ DELIVERED |
+| `docs/stage_a_proposals/ui_1_stage_a.md` (~100 032 B) | Brief v1 §J | ✓ DELIVERED (102 854 B PDF-derived; ~100 KB target hit) |
+| `docs/mandates/module_specs/*.md` (Brief v1 claimed "20 files") | Brief v1 §J | **✗ ZERO delivered** |
+| `docs/mandates/akki_source_condition_spec.md/.docx` (rows 8-9) | manifest self | **✗ Manifest self-declares NOT PRESENT · pending** |
+| `docs/mandates/akki_condition_coverage_amendment_v1.0.md/.docx` (rows 10-11) | manifest self | **✗ Manifest self-declares NOT PRESENT · pending** |
+| `docs/registry/function_promise_registry_v1.md` (B-7) | manifest backfill | **✗ NOT on this tree** (Registry v1 · 133 KB · SHA `d6ad136f…`) |
+| `docs/registers/phase_ledger_v1.md` (B-8) | manifest backfill | **✗ NOT on this tree** |
+| `docs/registers/owner_decisions_v1.md` (B-9) | manifest backfill | **✗ NOT on this tree** |
+| Contract `backend/contracts/mandate_spec.py` (G-13 seal) | manifest reconciliation | **✗ NOT at expected path** |
+| Contract snapshot `mandate_spec.contract_snapshot.json` | manifest reconciliation | **✗ NOT at expected path** |
+| §6.1 B1 GPU spend ceiling · numeric + currency | Dispatch v2 §6.1 | **✗ STILL BLANK** |
+| §6.5 Commission auto-run ceiling value · numeric + currency (∞ permitted) | Dispatch v2 §6.5 | **✗ STILL BLANK** · needed at `connect/` sub-cycle |
+
+**Module_specs discrepancy:** Brief v1 §J's "20 module_specs files, NOT re-read this pass" figure is NOT corroborated by the artifact manifest (which does not track module_specs). The Stage A itself references 4 module_specs by path (`use_data_module_v1_2026_07_25.md`, `approval_inversion_v1_2026_07_25.md`, `user_stories_delta_v1_2026_07_25.md`, `cross_cutting_record_v1_2026_07_25.md`) as **already-filed canon** it depends on. NONE of these 4 module_specs are present on this tree. The "20 files" figure may be Brief v1 misreport OR aspirational; the Stage A treats **4 named module_specs as filed canon**. This is a discrepancy that requires Owner reconciliation — the Stage A cannot be executed without the module_specs it depends on.
+
+### §15 · HAZARD-STOP class raised
+
+**HAZARD-STOP (§3.8): missing filed-canon module_specs referenced by ui_1_stage_a as canon-before-attest reads.**
+
+The delivered `ui_1_stage_a.md` §9 (D-11 canon-before-ruling read log) cites 4 module_specs as filed canon that MUST have been read before this Stage A was authored. On THIS tree, those 4 files are absent — the tree cannot support the Stage A's D-11 attestation without them. Per Owner directive: *"HAZARD-STOP on any doc-vs-doc or wire-vs-Canon conflict (§3.8) — never self-resolve."*
+
+The missing module_specs:
+1. `docs/mandates/module_specs/use_data_module_v1_2026_07_25.md` (Change Order A1 sibling · SHA `4bb725703652cf11a569d53118339c79c607e1f0e66fa5703821768b130ee6bd` per Stage A §1.2)
+2. `docs/mandates/module_specs/approval_inversion_v1_2026_07_25.md` (Change Order A2 sibling)
+3. `docs/mandates/module_specs/user_stories_delta_v1_2026_07_25.md` (Change Order A7 sibling)
+4. `docs/mandates/module_specs/cross_cutting_record_v1_2026_07_25.md` (Change Order A8 sibling)
+
+Plus (from the manifest itself): 2 additional pending Canon mandates (`akki_source_condition_spec` + `akki_condition_coverage_amendment_v1.0` × docx+md = 4 files) that even the Canon manifest self-declares NOT PRESENT.
+
+**Consequence:** Brief v2 filing per §1.4 CAN proceed (uses only intook material). UI-1 Stage A EXECUTION cannot proceed — the Stage A is delivered but its cited canon dependencies (module_specs) are missing on this tree, and Owner-side "all missing docs" statement is contradicted by the Stage A's own D-11 read log.
+
+═══════════════════════════════════════════════════════════════════
+
+*End of Canon intake · Part 4. Standing Rule v3 · honest-record discipline · HAZARD-STOP raised per §3.8.*

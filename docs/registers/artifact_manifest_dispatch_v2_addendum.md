@@ -53,3 +53,14 @@ Delta log: `docs/canon_intake_delta_log_part2_2026-07-31.md`.
 | `docs/rulings/owner_brief_enforcement_class_on_estate.md` | (new · not in original 8) | `7c6d0192220927ab160988ff1effd48144f738bdfc0a7fe7b4f73d643205c088` | ✓ new source | 7 202 |
 
 Also written duplicate: `docs/rulings/owner_brief_blinded_assessment_and_coverage_layer.md` (artifact-trail companion to item 5, byte-identical to canonical path).
+
+## Canon intake · Part 4 (2026-07-31 final batch)
+
+| Path | Supplied SHA | On-disk SHA | Notes | Bytes |
+|---|---|---|---|---|
+| `docs/handoff/frontend_uiux_brief_v1_2026-07-27.docx` re-upload | `22426315…` | `22426315…` (already committed) | ✓ BYTE-IDENTICAL to committed | 60 723 |
+| `docs/registers/artifact_manifest.md` | (PDF-derived) | `969bc76e1333d9e095c35475dfe4c75f6a02faeffdc29f5b821549cde965bbda` | Extracted from `final_batch_2026-07-31.pdf` · content canonical per Owner delivery | 11 290 |
+| `docs/stage_a_proposals/ui_1_stage_a.md` | (PDF-derived) | `57c86c1a7596e6a6160ecb624600dabd6391a5ac6d8237017d26b3974a60a5b4` | Extracted from PDF · 34 sections · content canonical | 102 854 |
+| `docs/handoff/canon_originals/final_batch_2026-07-31.pdf` | `76a38499…` | `76a38499a388d13a94cff1e1daecb06cb42e450a1d689d65c53faa84a28af18b` | Source PDF preserved (39 pages) | 552 490 |
+
+Delta log part 4: `docs/canon_intake_delta_log_part2_2026-07-31.md` §§11-15.
