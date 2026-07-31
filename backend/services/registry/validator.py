@@ -308,18 +308,18 @@ def check_mrr_g4_findings_coverage(model: Any) -> tuple[bool, list[str]]:
 
 
 def check_mrr_g_parity(model: Any) -> tuple[bool, list[str]]:
-    """MRR-G-Parity : V1-G7 parity 34/34 byte-identical unaffected.
+    """MRR-G-Parity : V1-G7 parity 36/36 byte-identical unaffected.
 
-    Post-Memory Service Stage B (2026-07-31, Owner (c2) 2026-07-30 cycle 3):
-    parity 32 → 34 via memory_plane_v0 + memory_write_back_v0 seal events.
+    Post-UI-1-A (2026-07-31): parity 34 → 35 → 36 via
+    use_data_wizard_session + commission_verdict seal events.
     """
     errs: list[str] = []
     contract_count = len(list(CONTRACTS_DIR.glob("*.py")))
     snapshot_count = len(list(SNAPSHOTS_DIR.glob("*.contract_snapshot.json")))
-    if contract_count != 34:
-        errs.append(f"contract count {contract_count} ≠ 34")
-    if snapshot_count != 34:
-        errs.append(f"snapshot count {snapshot_count} ≠ 34")
+    if contract_count != 36:
+        errs.append(f"contract count {contract_count} ≠ 36")
+    if snapshot_count != 36:
+        errs.append(f"snapshot count {snapshot_count} ≠ 36")
     return (len(errs) == 0), errs
 
 

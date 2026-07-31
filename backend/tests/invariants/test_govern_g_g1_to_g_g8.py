@@ -5,7 +5,7 @@ All rows exclusively consume EXISTING committed endpoints. Zero new
 endpoints; zero new frozen contracts; parity remains 34/34.
 
 Gate roster:
-    G-G1  parity_unchanged        — EXPECTED_PARITY == 34.
+    G-G1  parity_unchanged        — EXPECTED_PARITY == 36.
     G-G2  retention_read_shape     — GET /api/compliance/retention_config
                                      returns the v2.1 §4.3 shape.
     G-G3  checker_pending_scoped   — GET /api/checker/pending?role=X returns
@@ -84,7 +84,7 @@ def _analyst_token() -> str:
 
 
 def test_g_g1_parity_unchanged():
-    assert EXPECTED_PARITY == 34, (
+    assert EXPECTED_PARITY == 36, (
         "G-G1 VIOLATED: EXPECTED_PARITY changed. Sub-cycle 3 must NOT add "
         "any frozen contract."
     )

@@ -69,6 +69,8 @@ CONTRACT_TO_SNAPSHOT: Dict[str, str] = {
     "trust_receipt_v1.py":               "trust_receipt_v1.contract_snapshot.json",  # P1 close 2026-07-30 · Owner condition (i)
     "memory_plane_v0.py":                "memory_plane_v0.contract_snapshot.json",   # Memory Service Stage B 2026-07-31 · Owner (c2) FREEZE per D4b
     "memory_write_back_v0.py":           "memory_write_back_v0.contract_snapshot.json",  # Memory Service Stage B 2026-07-31 · Owner (c2) FREEZE per D4b
+    "use_data_wizard_session.py":        "use_data_wizard_session.contract_snapshot.json",  # UI-1-A seal 2026-07-31 · Canon §6.2/§6.3 · parity 34→35
+    "commission_verdict.py":             "commission_verdict.contract_snapshot.json",       # UI-1-A seal 2026-07-31 · Canon §6.4 · parity 35→36
 }
 
 

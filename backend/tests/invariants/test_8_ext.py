@@ -297,7 +297,7 @@ def test_v1_g7_attestation_28_contracts_byte_identical_at_8_ext_close() -> None:
     """
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 34, (
+    assert len(snapshots) == 36, (
         f"Post-Memory-Service-Stage-B: expected 34 snapshots. Actual: {len(snapshots)}."
     )
 

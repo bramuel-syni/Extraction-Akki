@@ -338,7 +338,7 @@ async def test_o_g6_unknown_plane_returns_governed_refusal():
 
 
 def test_o_g_parity_expected_parity_unchanged_at_34():
-    assert EXPECTED_PARITY == 34, (
+    assert EXPECTED_PARITY == 36, (
         "O-G-Parity VIOLATED: EXPECTED_PARITY changed. Phase 3 sub-cycle 2 "
         "must not add a frozen contract (Ruling 2 · zero new frozen contracts "
         "unless a shape crosses an env boundary — then D4b FREEZE, not now)."

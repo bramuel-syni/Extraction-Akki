@@ -39,15 +39,15 @@ def test_readyz_parity_34():
     assert r.status_code == 200
     b = r.json()
     assert b.get("status") == "ready"
-    assert b.get("parity_count") == 34
-    assert b.get("expected_parity") == 34
+    assert b.get("parity_count") == 36
+    assert b.get("expected_parity") == 36
     assert b.get("db") == "ok"
 
 
 def test_build_info_parity_34():
     r = requests.get(f"{BASE}/api/system/build_info", timeout=10)
     assert r.status_code == 200
-    assert r.json().get("parity_count") == 34
+    assert r.json().get("parity_count") == 36
 
 
 def test_openapi_has_memory_paths():

@@ -58,7 +58,7 @@ def test_composed_conclusion_snapshot_parity_at_18():
     """
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 34, (
+    assert len(snapshots) == 36, (
         f"Post-Memory-Service-Stage-B snapshot count must be exactly 34 "
         f"(32 pre-Memory + memory_plane_v0 + memory_write_back_v0 additive). "
         f"Actual: {len(snapshots)}.\nSnapshots: {sorted(p.name for p in snapshots)}"

@@ -202,7 +202,7 @@ def test_v1_g7_byte_identity_all_prior_frozen_contracts() -> None:
     # Parity count 34 post-Memory Service Stage B (Owner (c2) 2026-07-31 additive
     # memory_plane_v0 + memory_write_back_v0). Prior: 32 post-P1 (trust_receipt_v1);
     # 31 post-Artifact-Store (Owner AS-E1 α additive OuterGateReceipt_v1).
-    assert len(CONTRACT_TO_SNAPSHOT) == 34, (
+    assert len(CONTRACT_TO_SNAPSHOT) == 36, (
         "V1-G7 parity: expected 34 declared-frozen contracts post-Memory-Service-Stage-B."
     )
 

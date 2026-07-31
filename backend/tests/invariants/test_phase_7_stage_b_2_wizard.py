@@ -239,7 +239,7 @@ def test_frozen_contract_snapshot_parity_now_28_post_9_1():
     # Parity count 34 post-Memory Service Stage B (Owner (c2) 2026-07-31 additive
     # memory_plane_v0 + memory_write_back_v0). Prior: 32 post-P1 (trust_receipt_v1);
     # 31 post-Artifact-Store (Owner AS-E1 α additive OuterGateReceipt_v1).
-    assert len(CONTRACT_TO_SNAPSHOT) == 34
+    assert len(CONTRACT_TO_SNAPSHOT) == 36
 
 
 def test_no_caller_cancelled_or_async_queue_saturated_code_at_7b_2():

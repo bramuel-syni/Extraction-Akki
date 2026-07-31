@@ -585,8 +585,8 @@ def test_m_g_registry_v4_landed_additive_from_v3_with_authority():
 
 def test_m_g_parity_34_at_memory_service_stage_b_close():
     from services.health import EXPECTED_PARITY, count_frozen_contract_snapshots
-    assert count_frozen_contract_snapshots() == 34
-    assert EXPECTED_PARITY == 34
+    assert count_frozen_contract_snapshots() == 36
+    assert EXPECTED_PARITY == 36
 
 
 def test_m_g_two_frozen_snapshots_present_and_byte_identical():

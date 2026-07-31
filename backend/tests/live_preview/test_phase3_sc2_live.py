@@ -25,8 +25,8 @@ def test_readyz_parity_34():
     r = requests.get(f"{BASE}/api/readyz", timeout=10)
     assert r.status_code == 200
     data = r.json()
-    assert data["parity_count"] == 34
-    assert data["expected_parity"] == 34
+    assert data["parity_count"] == 36
+    assert data["expected_parity"] == 36
 
 
 def test_admin_login_returns_token(admin_token):

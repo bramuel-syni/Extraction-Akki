@@ -1,0 +1,254 @@
+{
+  "$defs": {
+    "AutoRunCeilingCheck": {
+      "additionalProperties": false,
+      "description": "Canon \u00a74.2 auto-run ceiling \u2014 the seventh check embedded in verdict.\n\nValue at Owner ruling 2026-07-31 initial: $1,000 USD. Changeable ONLY\nvia Change-a-Rule ceremony (Canon \u00a77.5); direct-write refused server-side.",
+      "properties": {
+        "at_or_under": {
+          "description": "True iff proposed_spend_usd \u2264 ceiling_usd.",
+          "title": "At Or Under",
+          "type": "boolean"
+        },
+        "ceiling_usd": {
+          "description": "Current effective ceiling. Read via the versioned rule store; direct-write refused.",
+          "minimum": 0.0,
+          "title": "Ceiling Usd",
+          "type": "number"
+        },
+        "dpo_countersign_required": {
+          "description": "True iff proposed_spend_usd > ceiling_usd. Enters 'Pending policy check' requiring single DPO countersign. Cannot be bypassed.",
+          "title": "Dpo Countersign Required",
+          "type": "boolean"
+        },
+        "proposed_spend_usd": {
+          "description": "This commission's ceiling read from the wizard's Plan preview.",
+          "minimum": 0.0,
+          "title": "Proposed Spend Usd",
+          "type": "number"
+        }
+      },
+      "required": [
+        "ceiling_usd",
+        "proposed_spend_usd",
+        "at_or_under",
+        "dpo_countersign_required"
+      ],
+      "title": "AutoRunCeilingCheck",
+      "type": "object"
+    },
+    "CheckName": {
+      "description": "Canon \u00a76.4 \u2014 the five commission checks.",
+      "enum": [
+        "rights_compatibility",
+        "privacy_floor",
+        "pii_posture",
+        "budget_ceiling",
+        "scope_resolvability"
+      ],
+      "title": "CheckName",
+      "type": "string"
+    },
+    "CheckResult": {
+      "additionalProperties": false,
+      "description": "One per-check row on the verdict.\n\nEvery referenced value renders in plain language on the Commission card\n(Canon \u00a76.4).",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckName"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Longer narrative when helpful (e.g. named source lacking rights).",
+          "title": "Detail"
+        },
+        "plain_language_summary": {
+          "description": "One-line plain-language explanation of the result.",
+          "title": "Plain Language Summary",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CheckStatus"
+        }
+      },
+      "required": [
+        "check",
+        "status",
+        "plain_language_summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "CheckStatus": {
+      "description": "Per-check outcome cell.",
+      "enum": [
+        "passed",
+        "failed",
+        "held"
+      ],
+      "title": "CheckStatus",
+      "type": "string"
+    },
+    "RefusalDetail": {
+      "additionalProperties": false,
+      "description": "Canon \u00a71.3 refusal grammar.\n\nPresent iff outcome==refused. Absent iff outcome==runs_now.\nOn held_for_check, present as a policy-check reason with kind==escalatable.",
+      "properties": {
+        "bar_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where the bar comes from (Canon section \u00b7 rule id \u00b7 rights source). Present on absolute refusals to name the source; may be None on escalatable where the criterion+value tell the story.",
+          "title": "Bar Source"
+        },
+        "criterion": {
+          "description": "The named criterion that was breached (plain language).",
+          "title": "Criterion",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/RefusalKind"
+        },
+        "reason_code": {
+          "description": "Machine-stable reason code (versioned reason set).",
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "route_to_approval": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Escalation route text. Present on escalatable. MUST be None on absolute (Canon \u00a71.3: no approval affordance).",
+          "title": "Route To Approval"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The value that crossed the criterion. Present on escalatable refusals; may be None on absolute where the bar itself is the point.",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "kind",
+        "reason_code",
+        "criterion"
+      ],
+      "title": "RefusalDetail",
+      "type": "object"
+    },
+    "RefusalKind": {
+      "description": "Canon \u00a71.3 \u2014 two refusal shapes distinguished in the envelope.\n\n* escalatable \u2014 refusal names the criterion + value + route. UI may\n                offer 'Escalate for review' as an affordance.\n* absolute    \u2014 refusal names the bar + source. UI renders NO\n                approval affordance of any kind.",
+      "enum": [
+        "escalatable",
+        "absolute"
+      ],
+      "title": "RefusalKind",
+      "type": "string"
+    },
+    "VerdictOutcome": {
+      "description": "Canon \u00a76.4 \u2014 three receipted outcomes.\n\n* runs_now      \u2014 every check passed; run auto-starts and the receipt\n                  names the trust-receipt id.\n* refused       \u2014 a check failed with a refusal envelope (see\n                  `refusal`); may be escalatable or absolute.\n* held_for_check \u2014 a check requires DPO countersign; the item enters\n                  the Pending policy check queue. Reason plain.",
+      "enum": [
+        "runs_now",
+        "refused",
+        "held_for_check"
+      ],
+      "title": "VerdictOutcome",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Canon \u00a76.4 \u2014 the verdict envelope stamped on Commission card commit.\n\nEvery commission verdict is receipted; a trust receipt is issued and\nlinked from the wizard session's Commission card (`verdict_ref`).\n\nDesign law:\n  * Fail-closed \u2014 a check whose status cannot be resolved MUST NOT\n    default to `passed`.\n  * Refusal grammar (\u00a71.3): escalatable vs absolute distinguished in\n    `refusal.kind`; frontend renders no approval affordance when\n    kind==absolute.\n  * Auto-run ceiling ($1,000 initial) is enforced server-side;\n    direct-write refused per Change-a-Rule discipline.\n\nFreeze: `model_json_schema()` matches\n`tests/invariants/commission_verdict.contract_snapshot.json`\nbyte-for-byte.",
+  "properties": {
+    "auto_run_ceiling": {
+      "$ref": "#/$defs/AutoRunCeilingCheck",
+      "description": "Canon \u00a74.2 auto-run ceiling check embedded."
+    },
+    "checks": {
+      "description": "Every one of the five checks with its status (fail-closed).",
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "issued_at_iso": {
+      "description": "ISO-8601 UTC of verdict issuance.",
+      "title": "Issued At Iso",
+      "type": "string"
+    },
+    "outcome": {
+      "$ref": "#/$defs/VerdictOutcome"
+    },
+    "refusal": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RefusalDetail"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Present iff outcome==refused. On held_for_check, present with kind==escalatable."
+    },
+    "session_id": {
+      "description": "Wizard session that produced this verdict.",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "trust_receipt_ref": {
+      "description": "Trust-receipt ID for this verdict (public, read-only).",
+      "title": "Trust Receipt Ref",
+      "type": "string"
+    },
+    "verbatim_carrier": {
+      "const": "Every commission verdict lands in the record the DPO reads.",
+      "default": "Every commission verdict lands in the record the DPO reads.",
+      "enum": [
+        "Every commission verdict lands in the record the DPO reads."
+      ],
+      "title": "Verbatim Carrier",
+      "type": "string"
+    },
+    "verdict_id": {
+      "description": "Stable UUID for this verdict.",
+      "title": "Verdict Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "verdict_id",
+    "session_id",
+    "issued_at_iso",
+    "outcome",
+    "checks",
+    "auto_run_ceiling",
+    "trust_receipt_ref"
+  ],
+  "title": "CommissionVerdict",
+  "type": "object"
+}

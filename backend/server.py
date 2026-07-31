@@ -125,6 +125,11 @@ app.include_router(master_admin_router.router, prefix="/api")
 from routers import compliance as compliance_router  # noqa: E402
 app.include_router(compliance_router.router, prefix="/api")
 
+# UI-1-A · Canon §6 conversational wizard + Commission verdict engine.
+# Seals UseDataWizardSession@v0 (34→35) + CommissionVerdict@v0 (35→36).
+from routers import use_data as use_data_router  # noqa: E402
+app.include_router(use_data_router.router, prefix="/api")
+
 # Phase 8 Seam 3 Sub-stage 3 — §8 consequence-class checker router.
 from routers import checker as checker_router  # noqa: E402
 app.include_router(checker_router.router, prefix="/api")

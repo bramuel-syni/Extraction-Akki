@@ -27,7 +27,7 @@ from pathlib import Path
 # can never disagree about what parity is.
 _INVARIANTS_DIR = Path(__file__).resolve().parents[2] / "tests" / "invariants"
 
-EXPECTED_PARITY: int = 34
+EXPECTED_PARITY: int = 36
 """Bumped 32 -> 34 at Memory Service Stage B (2026-07-31) — Owner ruling
 condition (c2) 2026-07-30 cycle 3: two seal events landed as new frozen
 seats via D4b prior FREEZE — memory_plane_v0 (plane envelope) and
@@ -54,5 +54,5 @@ def count_frozen_contract_snapshots() -> int:
 
 
 def parity_ok() -> bool:
-    """Return True iff on-disk parity equals `EXPECTED_PARITY` (=32)."""
+    """Return True iff on-disk parity equals `EXPECTED_PARITY` (=36)."""
     return count_frozen_contract_snapshots() == EXPECTED_PARITY

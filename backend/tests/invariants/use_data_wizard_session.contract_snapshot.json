@@ -1,0 +1,439 @@
+{
+  "$defs": {
+    "CommissionCard": {
+      "additionalProperties": false,
+      "description": "Canon \u00a76.3 Commission card + Canon \u00a76.4 verdict entry point.\n\nEvery governed value confirmed explicitly here before commit. On\ncommit, the card produces a CommissionVerdict (sibling contract).",
+      "properties": {
+        "committed_at_iso": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO-8601 UTC of the commit action. None until commit.",
+          "title": "Committed At Iso"
+        },
+        "door": {
+          "$ref": "#/$defs/Door",
+          "description": "Which door was entered."
+        },
+        "values_confirmed": {
+          "description": "Reflection field names that have been explicitly confirmed on this card.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Values Confirmed",
+          "type": "array"
+        },
+        "verdict_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust-receipt ref for the CommissionVerdict issued on commit.",
+          "title": "Verdict Ref"
+        }
+      },
+      "required": [
+        "door"
+      ],
+      "title": "CommissionCard",
+      "type": "object"
+    },
+    "DialogueTurn": {
+      "additionalProperties": false,
+      "description": "One turn in the wizard conversation.\n\nCanon \u00a76.3: dialogue is the shaping channel; the card commits. Turns\nare read-only after write; the card holds the committed state.",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/DialogueTurnRole"
+        },
+        "text": {
+          "description": "Turn body, plain-language.",
+          "title": "Text",
+          "type": "string"
+        },
+        "ts_iso": {
+          "description": "ISO-8601 UTC timestamp of the turn.",
+          "title": "Ts Iso",
+          "type": "string"
+        },
+        "turn_id": {
+          "description": "Stable UUID for the turn.",
+          "title": "Turn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_id",
+        "role",
+        "text",
+        "ts_iso"
+      ],
+      "title": "DialogueTurn",
+      "type": "object"
+    },
+    "DialogueTurnRole": {
+      "description": "A conversational turn's speaker.\n\n`user`   \u2014 the operator.\n`agent`  \u2014 the wizard agent (through the SyniSense Shield chokepoint).",
+      "enum": [
+        "user",
+        "agent"
+      ],
+      "title": "DialogueTurnRole",
+      "type": "string"
+    },
+    "Door": {
+      "description": "Canon \u00a76.1 \u2014 three doors on the Use Data landing.\n\nSame conversational wizard behind each; door is intent seed only.",
+      "enum": [
+        "integrate_an_app",
+        "export_or_license",
+        "train_a_model"
+      ],
+      "title": "Door",
+      "type": "string"
+    },
+    "FieldState": {
+      "description": "Canon \u00a76.3 Reflection card \u2014 three field states per governed value.\n\n`set`     \u2014 a user-said value confirmed on the Commission card.\n`open`    \u2014 never named yet; render \"\u2014 open\" (never a placeholder).\n`assumed` \u2014 agent-supplied; carries the amber \"agent assumed\" chip.",
+      "enum": [
+        "set",
+        "open",
+        "assumed"
+      ],
+      "title": "FieldState",
+      "type": "string"
+    },
+    "IntelCard": {
+      "additionalProperties": false,
+      "description": "Canon \u00a76.3 Intel card \u2014 what the shield's grounded turn returned.\n\nNames the source of every claim rendered in the conversation; unset\nwhen no grounded claim has landed yet.",
+      "properties": {
+        "grounded_claims": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Grounded Claims",
+          "type": "array"
+        },
+        "unset": {
+          "default": true,
+          "description": "True when no grounded claim has been served yet.",
+          "title": "Unset",
+          "type": "boolean"
+        }
+      },
+      "title": "IntelCard",
+      "type": "object"
+    },
+    "PlanPreviewCard": {
+      "additionalProperties": false,
+      "description": "Canon \u00a76.3 Plan preview \u2014 ranges + editable ceiling with halt note.\n\nRenders capacity, coverage, and cost ranges. Ceiling is editable inline.",
+      "properties": {
+        "ceiling_usd": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Operator-set ceiling for this objective's spend.",
+          "title": "Ceiling Usd"
+        },
+        "cost_high_usd": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost High Usd"
+        },
+        "cost_low_usd": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Low Usd"
+        },
+        "coverage_range_high_pct": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Upper bound of coverage estimate.",
+          "title": "Coverage Range High Pct"
+        },
+        "coverage_range_low_pct": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Lower bound of coverage estimate (percent).",
+          "title": "Coverage Range Low Pct"
+        },
+        "halt_note_verbatim": {
+          "const": "Halts at ceiling. A halted run resumes only after you raise it or narrow the objective.",
+          "default": "Halts at ceiling. A halted run resumes only after you raise it or narrow the objective.",
+          "enum": [
+            "Halts at ceiling. A halted run resumes only after you raise it or narrow the objective."
+          ],
+          "title": "Halt Note Verbatim",
+          "type": "string"
+        }
+      },
+      "title": "PlanPreviewCard",
+      "type": "object"
+    },
+    "ReflectionCard": {
+      "additionalProperties": false,
+      "description": "Canon \u00a76.3 Reflection card \u2014 always visible.\n\nRenders the objective as it stands. Fields declare state; no field\nsilently commits from dialogue (gate_card_commits_no_silent_dialogue_values).",
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/ReflectionField"
+          },
+          "title": "Fields",
+          "type": "array"
+        }
+      },
+      "title": "ReflectionCard",
+      "type": "object"
+    },
+    "ReflectionField": {
+      "additionalProperties": false,
+      "description": "One governed value on the Reflection card.\n\nCanon \u00a76.3 Reflection: \"the objective as it stands now, fields marked\nset / open / assumed default\". Every field carries its state.",
+      "properties": {
+        "committed_by_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "turn_id of the DialogueTurn that committed this value on the Commission card. None while state==open. For assumed values, the turn that surfaced the assumption.",
+          "title": "Committed By Ref"
+        },
+        "label": {
+          "description": "Plain-language label rendered on the card.",
+          "title": "Label",
+          "type": "string"
+        },
+        "name": {
+          "description": "Field identifier (e.g. 'reach', 'floor', 'budget').",
+          "title": "Name",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/FieldState"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Concrete value when state==set or state==assumed. None when state==open.",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "state"
+      ],
+      "title": "ReflectionField",
+      "type": "object"
+    },
+    "SampleResultsCard": {
+      "additionalProperties": false,
+      "description": "Canon \u00a76.3 Sample results \u2014 the receipt of a completed test.\n\nRenders volume, class distribution, per-hour cost from an executed\nsample; grounded (trust-receipt ref stamped).",
+      "properties": {
+        "class_distribution": {
+          "description": "{defensibility_class: fraction_in_[0,1]}",
+          "title": "Class Distribution",
+          "type": "object"
+        },
+        "grounded_by_receipt_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust receipt ID of the sample run that grounds these numbers.",
+          "title": "Grounded By Receipt Ref"
+        },
+        "per_hour_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Per Hour Cost Usd"
+        },
+        "units_found": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units Found"
+        }
+      },
+      "title": "SampleResultsCard",
+      "type": "object"
+    },
+    "TestCard": {
+      "additionalProperties": false,
+      "description": "Canon \u00a76.3 Test card \u2014 offer, not push.\n\nSample-run governed by the objective's budget; result promotable to\nReflection in one action (Canon \u00a76.3 winning-config promote).",
+      "properties": {
+        "last_run_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust-receipt ref for the most recent sample run. None until first run.",
+          "title": "Last Run Ref"
+        },
+        "offered": {
+          "default": false,
+          "description": "Test invitation shown.",
+          "title": "Offered",
+          "type": "boolean"
+        },
+        "winning_config_promoted": {
+          "default": false,
+          "description": "True after operator promotes the winning config to Reflection.",
+          "title": "Winning Config Promoted",
+          "type": "boolean"
+        }
+      },
+      "title": "TestCard",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Canon \u00a76.2 \u00b7 \u00a76.3 \u00b7 \u00a711.1 \u2014 the conversational wizard session envelope.\n\nEnvelope carrying:\n  * the door (entry intent),\n  * the dialogue as an append-only turn list,\n  * the six cards' state,\n  * the session identity (session_id + operator_id).\n\nDesign law:\n  * Dialogue shapes; the card commits.\n  * Every governed value on the Commission card was explicitly\n    confirmed (not silently inferred from a turn).\n  * Agent-said values carry `state=\"assumed\"` (amber chip) on\n    Reflection until the operator confirms.\n\nFreeze: `model_json_schema()` matches\n`tests/invariants/use_data_wizard_session.contract_snapshot.json`\nbyte-for-byte.",
+  "properties": {
+    "commission": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CommissionCard"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "None until the operator opens the Commission card."
+    },
+    "dialogue": {
+      "items": {
+        "$ref": "#/$defs/DialogueTurn"
+      },
+      "title": "Dialogue",
+      "type": "array"
+    },
+    "door": {
+      "$ref": "#/$defs/Door",
+      "description": "Which of the three landing doors seeded this session."
+    },
+    "intel": {
+      "$ref": "#/$defs/IntelCard"
+    },
+    "opened_at_iso": {
+      "description": "ISO-8601 UTC of session open.",
+      "title": "Opened At Iso",
+      "type": "string"
+    },
+    "operator_id": {
+      "description": "User id of the operator running the wizard.",
+      "title": "Operator Id",
+      "type": "string"
+    },
+    "plan_preview": {
+      "$ref": "#/$defs/PlanPreviewCard"
+    },
+    "reflection": {
+      "$ref": "#/$defs/ReflectionCard"
+    },
+    "sample_results": {
+      "$ref": "#/$defs/SampleResultsCard"
+    },
+    "session_id": {
+      "description": "Stable UUID for this wizard session.",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "test": {
+      "$ref": "#/$defs/TestCard"
+    }
+  },
+  "required": [
+    "session_id",
+    "operator_id",
+    "opened_at_iso",
+    "door"
+  ],
+  "title": "UseDataWizardSession",
+  "type": "object"
+}

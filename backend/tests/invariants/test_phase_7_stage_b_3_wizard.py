@@ -204,7 +204,7 @@ def test_prior_contracts_count_now_28_post_9_1():
     # Parity count 34 post-Memory Service Stage B (Owner (c2) 2026-07-31 additive
     # memory_plane_v0 + memory_write_back_v0). Prior: 32 post-P1 (trust_receipt_v1).
     from tests.invariants.test_frozen_contract_snapshot_parity import CONTRACT_TO_SNAPSHOT
-    assert len(CONTRACT_TO_SNAPSHOT) == 34
+    assert len(CONTRACT_TO_SNAPSHOT) == 36
 
 
 @pytest.mark.parametrize("contract_file", sorted([

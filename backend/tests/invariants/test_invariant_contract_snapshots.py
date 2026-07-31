@@ -31,6 +31,9 @@ from contracts.qualification_matrix.loader import (
     QualificationMatrix,
     load_qualification_matrix,
 )
+# UI-1-A seal events (2026-07-31) — parity 34→35→36.
+from contracts.use_data_wizard_session import UseDataWizardSession
+from contracts.commission_verdict import CommissionVerdict
 
 SNAPSHOT_DIR = Path(__file__).parent
 
@@ -86,4 +89,28 @@ def test_qualification_matrix_v0_content_frozen():
     actual = load_qualification_matrix("v0").model_dump()
     assert _canonical(actual) == _canonical(expected), _diff_message(
         "qualification_matrix v0 content", actual, expected
+    )
+
+
+# =============================================================================
+# UI-1-A seal events (2026-07-31) — parity 34→35→36.
+# Canon §6.2/§6.3 (UseDataWizardSession) + §6.4 (CommissionVerdict).
+# D4b freeze arguments filed at
+#   docs/stage_a_proposals/ui_1_stage_a_experience_canon_v1_2026-07-31.md §3.
+# =============================================================================
+
+
+def test_use_data_wizard_session_schema_frozen():
+    expected = _read(SNAPSHOT_DIR / "use_data_wizard_session.contract_snapshot.json")
+    actual = UseDataWizardSession.model_json_schema()
+    assert _canonical(actual) == _canonical(expected), _diff_message(
+        "use_data_wizard_session (UseDataWizardSession)", actual, expected
+    )
+
+
+def test_commission_verdict_schema_frozen():
+    expected = _read(SNAPSHOT_DIR / "commission_verdict.contract_snapshot.json")
+    actual = CommissionVerdict.model_json_schema()
+    assert _canonical(actual) == _canonical(expected), _diff_message(
+        "commission_verdict (CommissionVerdict)", actual, expected
     )

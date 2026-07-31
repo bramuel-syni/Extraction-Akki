@@ -118,11 +118,11 @@ def test_q4_run_holds_parity_31():
     """R4 #6: Q4 execution is doc-only + query-engine additive; Parity 31 held."""
     contracts_dir = REPO_ROOT / "backend" / "contracts"
     contract_count = len(list(contracts_dir.glob("*.py")))
-    assert contract_count == 34, f"Parity 34 violation: {contract_count} contracts"
+    assert contract_count == 36, f"Parity 36 violation: {contract_count} contracts"
 
     snapshots_dir = REPO_ROOT / "backend" / "tests" / "invariants"
     snapshot_count = len(list(snapshots_dir.glob("*.contract_snapshot.json")))
-    assert snapshot_count == 34, f"Parity 34 snapshot violation: {snapshot_count}"
+    assert snapshot_count == 36, f"Parity 36 snapshot violation: {snapshot_count}"
 
 
 # ---------------------------------------------------------------------------

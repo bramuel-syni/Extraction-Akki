@@ -307,7 +307,7 @@ def test_v1_g7_attestation_parity_31_byte_identical_at_transform_forms_close() -
     """V1-G7 at Transform Forms close: 29 pre-TF + KA v0 + CallableSkillProvisioning v0 = 31."""
     invariants_dir = Path(__file__).parent
     snapshots = list(invariants_dir.glob("*.contract_snapshot.json"))
-    assert len(snapshots) == 34, (
+    assert len(snapshots) == 36, (
         f"V1-G7 Transform Forms → Memory Service Stage B: expected 34 snapshots. "
         f"Actual: {len(snapshots)}."
     )
@@ -334,6 +334,10 @@ def test_v0_paths_byte_identical_at_transform_forms_close() -> None:
         # Two new frozen seats; also outside "pre-TF" set.
         "memory_plane_v0.contract_snapshot.json",
         "memory_write_back_v0.contract_snapshot.json",
+        # UI-1-A seal events 2026-07-31 — Canon §6.2/§6.3/§6.4 · parity 34→36.
+        # Two new frozen seats; also outside "pre-TF" set.
+        "use_data_wizard_session.contract_snapshot.json",
+        "commission_verdict.contract_snapshot.json",
     }
     pre_tf = [
         s for s in invariants_dir.glob("*.contract_snapshot.json")
