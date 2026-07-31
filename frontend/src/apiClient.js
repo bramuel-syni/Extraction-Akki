@@ -277,6 +277,44 @@ export const api = {
         validateStatus: (s) => s >= 200 && s < 600,
       })
       .then((r) => ({ status: r.status, body: r.data })),
+  // Phase 3 sub-cycle 3 — Govern module client helpers (existing endpoints
+  // only; NO new frozen contracts). Owner ruling 2026-08-02.
+  checkerPending: (role) =>
+    client
+      .get(`/checker/pending${role ? `?role=${encodeURIComponent(role)}` : ''}`, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  checkerInitiate: (payload) =>
+    client
+      .post('/checker/initiate', payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  checkerCountersign: (requestId, payload = {}) =>
+    client
+      .post(`/checker/countersign/${encodeURIComponent(requestId)}`, payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  checkerObject: (requestId, payload = {}) =>
+    client
+      .post(`/checker/object/${encodeURIComponent(requestId)}`, payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  complianceRetentionWrite: (payload) =>
+    client
+      .post('/compliance/retention_config', payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  complianceAuthorizedDeletion: (payload) =>
+    client
+      .post('/compliance/authorized_deletion', payload, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
   northenaTraceRead: (traceId) =>
     client
       .get(`/northena/trace/${encodeURIComponent(traceId)}`, {

@@ -175,6 +175,8 @@ const CONSOLE_NAV_ITEMS = [
   // reachable from visible navigation, not deep-linked only).
   { path: '/memory', label: 'Memory Service', gate: 'auth' },
   { path: '/registry', label: 'Registry · Estate Map', gate: 'auth' },
+  // Phase 3 sub-cycle 3 — Govern module (Surfaces v2 shell rule respected).
+  { path: '/govern', label: 'Govern · DPO Estate', gate: 'auth' },
   { path: '/auth/login', label: 'Sign in', gate: 'public' },
 ];
 

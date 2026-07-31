@@ -27,8 +27,10 @@ supplements:
     sha256: ccd3b063769242ff289ff068798d7f9048e18c76c5f78ec63b3db993b6498076
   - path: docs/registry/function_promise_registry_v0.8_supplement_phase3_subcycle2.md
     sha256: d8b13903dc24fc4d87de8493b3d7c292ad804b847b437ecc1e13f641f0e458e8
+  - path: docs/registry/function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    sha256: ac4f601aae26f2b51e211a51c27efc9cb84773c067f023cca72c80808239d4c8
 
-# Row totals: promises=47 · functions=205 · findings=12
+# Row totals: promises=47 · functions=215 · findings=12
 
 promises:
   - promise_id: PROM-S1-provable-envelope-inheritance
@@ -3509,6 +3511,156 @@ functions:
     ladder_rung: 1 · Deterministic
     owner: Owner
     source: function_promise_registry_v0.8_supplement_phase3_subcycle2.md
+    rulings: []
+  - function_id: akki.frontend.govern_home_lists_rule_inventory_with_class_chips
+    governor: Named surfaces (Govern · frontend)
+    mandate: "`/govern` renders a rule inventory table where every row carries a value-class chip (`rails` / `rules` / `engine-settings` / `registries`) AND an enforcement-class chip (`Enforced` / `Attested` / `Monitored`) AND a change-authority label (Compliance countersignature vs Admin sign-off · §A4-2 symmetry). Values render verbatim from `GET /api/compliance/retention_config` and `GET /api/checker/pending`; unset values render as `<MarkedOpenSlot slotName=\"rule_value_{slug}\"/>`."
+    promise:
+      - PROM-S1-external-scoped-access
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernHomePage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_govern_home_renders_rule_inventory_with_class_chip)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_retention_unset_banner_verbatim
+    governor: Named surfaces (Govern · retention)
+    mandate: "`/govern/retention` (and `/govern` header) renders the ratified `UNSET_RETENTION_BANNER` string BYTE-IDENTICAL whenever `global_default.retention_window_days === null` OR any held-class posture is `unset`. Never invents copy; never renders a substitute banner."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernRetentionPage.jsx + GovernHomePage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_retention_unset_banner_verbatim)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_retention_posture_read_only_v2_1_shape
+    governor: Named surfaces (Govern · retention)
+    mandate: "`/govern/retention` renders the three-held-class table (raw_source · derived · output) with per-class window_days (or MarkedOpenSlot when unset) and posture chip (inheriting/explicit/unset). Consumes `GET /api/compliance/retention_config` verbatim; NO client-side computation over held-class posture."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernRetentionPage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_retention_read_only_shape)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_change_rule_ceremony_symmetric_direction
+    governor: Named surfaces (Govern · change-rule)
+    mandate: "`/govern/change-rule` computes direction from numeric deltas: `from>to → loosening (oxblood chip)`; `from<to → tightening (sage chip)`; `==` → neutral (navy). §A4-2 symmetry: loosening requires Compliance countersign; tightening requires Admin countersign. Wrong-capacity attempt at countersign returns HTTP 403 → renders `<AccessControlDeniedPanel>` (navy), NEVER governed refusal."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernChangeRulePage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_change_rule_ceremony_direction_symmetry)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_change_rule_ceremony_countdown_visible
+    governor: Named surfaces (Govern · change-rule)
+    mandate: "`/govern/change-rule` renders FB-16 countdown timer (client-side interval; server-side `applies_after_iso` as truth). `Cancel-before-applies` action visible while state ∈ `{proposed, countersigned, waiting}`. Applied rows acquire the ratified `FROZEN_IS_IMMUTABLE` chip."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernChangeRulePage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_change_rule_countdown_visible)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_refusal_health_coverage_marker_rendered
+    governor: Named surfaces (Govern · refusal-health)
+    mandate: "`/govern/refusal-health` renders `GET /api/compliance/refusals_coverage` per-family since-dates plus earliest-across-families summary line. Middle-dot separator `·` preserved verbatim per E7. Honest empty-state note when no families surfaced yet — never a \"no data\" error."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernRefusalHealthPage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_refusal_coverage_rendered)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_refusal_health_gap_files_via_wizard_door
+    governor: Named surfaces (Govern · refusal-health)
+    mandate: "Every refusal-family card carries a `File as extraction candidate →` action link routing to `/operator/commission` (the wizard door). FB-10 demand-discovery flywheel: refusal → candidate. Action NEVER absent from a family card."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernRefusalHealthPage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_refusal_gap_files_via_wizard_door)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_pending_queue_role_aware_filter
+    governor: Named surfaces (Govern · pending)
+    mandate: "`/govern/pending` calls `GET /api/checker/pending?role={capacity}` where `capacity` is derived from the caller's JWT roles (dpo → compliance; master_admin/admin → admin). §A4-2 seam symmetry: compliance capacity sees admin-initiated tightening; admin capacity sees compliance-initiated loosening. Countersign + Object actions available inline per row."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernPendingPage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_pending_queue_role_aware)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.frontend.govern_wrong_capacity_countersign_renders_access_control_denial
+    governor: Named surfaces (Govern · pending)
+    mandate: "POST `/api/checker/countersign/{id}` from wrong capacity (compliance attempting an admin-required tightening or vice versa) returns HTTP 403 `auth_scope_insufficient` and MUST render via `<AccessControlDeniedPanel>` (navy) NEVER governed refusal (oxblood). Four response classes discipline."
+    promise:
+      - PROM-S1-refusal-taxonomy-closed
+    service_trace:
+      - S1.call
+    surface: frontend/src/pages/govern/GovernPendingPage.jsx + GovernChangeRulePage.jsx
+    enforcement: Jest (test_govern_ui_gates.test.js · gate_change_rule_ceremony_direction_symmetry)
+    cost: 1 cell · µs class
+    dependencies: React
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
+    rulings: []
+  - function_id: akki.backend.govern_surfaces_read_only_no_new_frozen_contract
+    governor: Named surfaces (Govern · verification)
+    mandate: "The Govern module surfaces this cycle consume EXISTING committed endpoints only: `/api/compliance/retention_config` (GET/POST) · `/api/compliance/refusals_coverage` (GET) · `/api/compliance/refusals` (GET) · `/api/compliance/authorized_deletion` (POST) · `/api/checker/initiate` (POST) · `/api/checker/countersign/{id}` (POST) · `/api/checker/object/{id}` (POST) · `/api/checker/pending` (GET). Zero new endpoints; zero new frozen contracts; parity remains 34/34."
+    promise:
+      - PROM-S1-frozen-wire-contract
+    service_trace:
+      - S1.call
+    surface: backend/routers/compliance.py + backend/routers/checker.py (UNCHANGED)
+    enforcement: pytest (test_govern_g_g1_to_g_g8.py · g_g1..g_g8)
+    cost: 1 cell · ms class
+    dependencies: FastAPI
+    ladder_rung: 1 · Deterministic
+    owner: Owner
+    source: function_promise_registry_v0.9_supplement_phase3_subcycle3.md
     rulings: []
 
 findings:

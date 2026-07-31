@@ -17,6 +17,7 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 - `docs/registry/function_promise_registry_v0.6_supplement.md`: `4b23407558e42ee6c19c57ec8038ee3ae68d80e1984d80da9247d2d34d29b8b8`
 - `docs/registry/function_promise_registry_v0.7_supplement.md`: `ccd3b063769242ff289ff068798d7f9048e18c76c5f78ec63b3db993b6498076`
 - `docs/registry/function_promise_registry_v0.8_supplement.md`: `d8b13903dc24fc4d87de8493b3d7c292ad804b847b437ecc1e13f641f0e458e8`
+- `docs/registry/function_promise_registry_v0.9_supplement.md`: `ac4f601aae26f2b51e211a51c27efc9cb84773c067f023cca72c80808239d4c8`
 
 **UNVERIFIED count:** 29  ·  **[CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE]:** 28  ·  **remedy-candidate: P4 advisory annotations:** 5  ·  **Overlaps with archaeological:** 15
 
@@ -27,7 +28,7 @@ THIS ARTIFACT IS REPORT-LEVEL · NEVER BUILD-FAILING · RETIREMENT/MERGE REMAINS
 | `northena.artifact.signature_bound` | `PROM-S4-artifact-signature-bound` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Runtime signature check' lacks testable telemetry/gate reference |
 | `mtafiti.perception.pinned_model_provenance` | `PROM-S1-honesty-grammar-source-labels`, `PROM-9-2a-real-worker-provenance` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Contract field required (model_id + weights_sha)' lacks testable telemetry/gate reference |
 | `mtafiti.perception.mode_selection_evident_at_read` | `PROM-9-2a-mode-selection-evident` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Contract field required (execution_mode)' lacks testable telemetry/gate reference |
-| `mtafiti.census.dimension_registry_vocabulary` | `PROM-S2-census-dimension-integrity`, `PROM-S1-honesty-grammar-source-labels` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Vocabulary-set membership check' lacks testable telemetry/gate reference |
+| `mtafiti.census.dimension_registry_vocabulary` | `PROM-S1-honesty-grammar-source-labels`, `PROM-S2-census-dimension-integrity` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Vocabulary-set membership check' lacks testable telemetry/gate reference |
 | `targeta.commission_wizard.shape_as_objective_prefill` | `PROM-S2-shape-as-objective-reach-only` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Runtime pre-fill contract' lacks testable telemetry/gate reference |
 | `targeta.transform_form.per_call_provisioning` | `PROM-tf-transform-form-per-call-provisioning` | no | — | — | enforcement field 'Load-bearing internal contract (no snapshot)' lacks testable telemetry/gate reference |
 | `targeta.transform_form.class_registry_additive` | `PROM-tf-class-with-claim-invariant` | yes | [CLIENT-PROMISE · UNVERIFIED · ESCALATE-AT-CLOSE] | — | enforcement field 'Versioned-registry load + additive-only gate' lacks testable telemetry/gate reference |

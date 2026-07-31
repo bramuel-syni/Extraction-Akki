@@ -39,6 +39,13 @@ import MemoryHomePage from './pages/memory/MemoryHomePage';
 import MemoryPlaneDetailPage from './pages/memory/MemoryPlaneDetailPage';
 import MemoryPlaneObservabilityPage from './pages/memory/MemoryPlaneObservabilityPage';
 import RegistryEstateMapPage from './pages/registry/RegistryEstateMapPage';
+// Phase 3 sub-cycle 3 — Govern module surfaces (Owner ruling 2026-08-02
+// sub-cycle 3 dispatch; consume EXISTING checker + compliance endpoints only).
+import GovernHomePage from './pages/govern/GovernHomePage';
+import GovernRetentionPage from './pages/govern/GovernRetentionPage';
+import GovernChangeRulePage from './pages/govern/GovernChangeRulePage';
+import GovernRefusalHealthPage from './pages/govern/GovernRefusalHealthPage';
+import GovernPendingPage from './pages/govern/GovernPendingPage';
 import { AuthProvider } from './hooks/useAuth';
 
 // Phase 8 Stage B-1 — Auth landing (Owner E1 ratified: custom JWT + bcrypt).
@@ -98,6 +105,12 @@ export default function App() {
           <Route path="memory/planes/:planeId" element={<MemoryPlaneDetailPage />} />
           <Route path="memory/planes/:planeId/observability" element={<MemoryPlaneObservabilityPage />} />
           <Route path="registry" element={<RegistryEstateMapPage />} />
+          {/* Phase 3 sub-cycle 3 · Govern module surfaces (existing endpoints only). */}
+          <Route path="govern" element={<GovernHomePage />} />
+          <Route path="govern/retention" element={<GovernRetentionPage />} />
+          <Route path="govern/change-rule" element={<GovernChangeRulePage />} />
+          <Route path="govern/refusal-health" element={<GovernRefusalHealthPage />} />
+          <Route path="govern/pending" element={<GovernPendingPage />} />
           {/* Anything else falls back to the Ask Console (single ingress per UI Spec §3.1). */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
