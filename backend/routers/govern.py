@@ -161,8 +161,16 @@ async def get_trust_center_record(request: Request):
     # fixture-capable bucket MUST enumerate top rows with is_sample flag
     # so seeded SAMPLE fixtures render as visible badges on admin's screen
     # (not just aggregate counts).
+    #
+    # UI-1-C follow-up (Owner ruling 2026-08-02 · UI-1-B minor): sort
+    # is_sample DESC first so seeded fixtures always pin above real rows,
+    # even as the collection grows past 10 real entries (previously the
+    # two seeded rule-change samples were pushed off the top-10 sort by
+    # initiated_at DESC when ceremony verifications piled up).
     refusal_rows: List[Dict[str, Any]] = []
-    async for doc in refusals_coll.find({}).sort("issued_at_iso", -1).limit(10):
+    async for doc in refusals_coll.find({}).sort(
+        [("is_sample", -1), ("issued_at_iso", -1)]
+    ).limit(10):
         refusal_rows.append({
             "refusal_id": doc.get("refusal_id"),
             "class_hint": doc.get("class_hint"),
@@ -178,8 +186,11 @@ async def get_trust_center_record(request: Request):
     released_count = await checker_coll.count_documents({"state": "effective"})
     suspended_count = await checker_coll.count_documents({"state": "suspended"})
     # Enumerate top rule-change rows (§7.1 record right · §7.5 ceremony history).
+    # Sample rows pinned above real rows per Owner UI-1-C follow-up.
     rule_change_rows: List[Dict[str, Any]] = []
-    async for doc in checker_coll.find({}).sort("initiated_at", -1).limit(10):
+    async for doc in checker_coll.find({}).sort(
+        [("is_sample", -1), ("initiated_at", -1)]
+    ).limit(10):
         rule_change_rows.append({
             "request_id": doc.get("request_id"),
             "state": doc.get("state"),
@@ -200,7 +211,9 @@ async def get_trust_center_record(request: Request):
     ud_coll = db.get_collection("use_data_wizard_sessions")
     holds_open = await ud_coll.count_documents({"verdict_outcome": "held_for_check"})
     hold_rows: List[Dict[str, Any]] = []
-    async for doc in ud_coll.find({"verdict_outcome": "held_for_check"}).sort("held_since_iso", -1).limit(10):
+    async for doc in ud_coll.find({"verdict_outcome": "held_for_check"}).sort(
+        [("is_sample", -1), ("held_since_iso", -1)]
+    ).limit(10):
         hold_rows.append({
             "session_id": doc.get("session_id"),
             "operator_id": doc.get("operator_id"),
