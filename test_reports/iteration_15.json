@@ -1,0 +1,50 @@
+{
+  "summary": "UI-1-B iter15 verification on live preview https://governance-scan-3.preview.emergentagent.com — Govern module rebuild per Canon §7 mostly GREEN with 2 issues flagged. BACKEND: (a) new iter15 pytest module /app/backend/tests/test_govern_ui1b_iter15.py — 10/10 PASS (parity=36, trust_center 7 buckets + doctrine verbatim, enforcement_class_split machinery/attestation/monitored, estate_rules S_/O_/E_/D_, registries upload→diff→commit additions path with version+receipt_ref, removals path returns approval_required=true and commit refused, checker.initiate ok for DPO, cancel forbidden for DPO but permitted for admin with persisted cancel state, analyst denied on /trust_center_record and /holds with no 'outcome' key leak). (b) Existing invariants suite /app/backend/tests/invariants/test_govern_ui1b_gates.py 15/15 PASS. FRONTEND (Playwright live): (1) /govern renders BOTH halves testids govern-half-rule-inventory + govern-half-record; enforcement headline shows 3/1/1 (machinery·enforced / attestation·attested / monitored) and contains 'Neither is superior; both are recorded.'; doctrine line 'Violations post as plainly as successes; every violation carries its disposition.' renders verbatim under data-testid govern-record-doctrine-verbatim. (2) /govern/rules renders all four estate-rules-class-{S,O,E,D} sections. (3) Registries additions flow: DPO uploads {id:partner-gamma,name:Gamma} → diff shows Added=1/Removed=0/Changed=0 with Commit button → commit produces registries-step-commit + registries-commit-receipt containing version=1 + receipt=trcv-reg-e5a34d948879 + effective_from ISO. (4) Registries removal flow: submitting [] against a committed registry surfaces registries-diff-approval-required + registries-diff-change-a-rule-affordance anchor with href='/govern/change-rule' AND the Commit button is ABSENT (asymmetry enforced client+server). (5) /govern/change-rule as DPO: initiate 'retention_windows' 30→90 renders govern-change-rule-request-state='PENDING_COUNTER_SIGN' + govern-change-rule-cancel-block; DPO cancel attempt in UI surfaces server-side 'auth_scope_insufficient' (not a UI-only block — the request actually round-trips through /api/checker/cancel). (6) Admin cancel flow: admin initiates then fills reason 'iter15 admin cancel window' + clicks cancel → govern-change-rule-suspended-record renders with govern-change-rule-suspend-reason echoing the entered reason (persists via /api/checker/cancel). (7) /govern/holds as DPO: 5 sample held rows render with govern-hold-sample-badge-*, govern-hold-verdict-ref-*, govern-hold-reverse-route-* anchors pointing to /use-data/wizard/<session_id>. (8) Analyst on /govern and /govern/holds: 'NOT AUTHORISED · auth_scope_insufficient' panel renders, no 'outcome' key leaked (governed-refusal grammar preserved for auth boundary). (9) Mobile 390x844 as DPO: govern-half-rule-inventory and govern-half-record stack vertically (right half y=2071 > left y+h=2051). Parity /api/readyz still 36/36.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "GovernHomePage · rule-inventory table",
+        "issue": "Mobile 390px viewport has 127px horizontal overflow (documentElement.scrollWidth=517 vs clientWidth=390). Culprit is the un-scoped <table> under govern-half-rule-inventory holding rows govern-rule-row-* — the table is 470px wide and does not shrink or wrap or gain overflow-x:auto on its own wrapper. Spec test #9 requires 'no horizontal overflow at 390px'. Fix suggestion: wrap the table in a container with overflow-x:auto and max-width:100%, OR collapse the table to a card-per-row layout at <=480px.",
+        "selector": "table under [data-testid='govern-half-rule-inventory']",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "GovernHoldsPage → Use Data wizard reverse-route",
+        "issue": "Spec test #7 says 'Click the reverse-route link and confirm it opens the Use Data wizard for that session.' As demo.dpo@demo.rms.example.com the reverse-route href='/use-data/wizard/s-sample-held-a2df857a2765' is correct, but navigating there renders 'Not authorised · auth_scope_insufficient' instead of the wizard with the SAMPLE badge carry-through + verdict envelope reference. DPO capacity carries roles [dpo, operator] which is the exact identity that seeded the held session, so the DPO's own held Use Data session should be viewable on the wizard route. Either (a) /use-data/wizard/{session_id} scope check needs to admit dpo capacity when the DPO is the session owner, OR (b) the reverse-route should target a DPO-scoped wizard variant / read-only envelope viewer. As-is, the §7.6 reverse-route ceremony chains cleanly at the link level but the destination refuses — the DPO cannot actually 'reverse-route to Use Data session with verdict envelope reference + SAMPLE badge carry-through'.",
+        "selector": "[data-testid^='govern-hold-reverse-route-']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_govern_ui1b_iter15.py",
+    "/app/backend/tests/invariants/test_govern_ui1b_gates.py",
+    "/app/test_reports/pytest/iter15_govern.xml"
+  ],
+  "action_items": [
+    "Fix mobile 390px overflow on /govern rule-inventory table (wrap in overflow-x:auto container or collapse to cards).",
+    "Fix DPO scope on /use-data/wizard/{session_id} for the reverse-route target (§7.6): DPO opens their own seeded held sample session and sees SAMPLE badge + verdict envelope reference. Currently refuses with auth_scope_insufficient — breaks the ceremony's stated purpose.",
+    "Non-blocking: verify countdown ticking under pending_delay stage — during initiate the state jumps to PENDING_COUNTER_SIGN so govern-change-rule-countdown does not render yet; spec's 'if pending_delay' clause is honoured, but a smoke that transitions countersign → pending_delay → countdown-render would tighten coverage."
+  ],
+  "critical_code_review_comments": [
+    "Registries three-body-schema (upload/diff/commit each with extra='forbid') is correct + Canon-consistent — clients get the three-step flow reflected in the API. Nice contract.",
+    "Sample held session seeding is per demo identity and idempotent (5 rows visible for DPO across identities) — matches iter14 pattern.",
+    "Auth denial on /govern and /govern/holds does NOT carry an 'outcome' key — refusal grammar cleanly separated from governed-refusal grammar. Doctrine 5 asymmetry preserved.",
+    "govern-change-rule-suspended-record correctly surfaces after admin cancel — canceled proposal renders as record, not deletion (§7.5 record-not-deletion invariant intact).",
+    "Rule inventory table on /govern lacks any responsive/wrap treatment; only mobile overflow bug in the whole surface — everything else stacks cleanly."
+  ],
+  "updated_files": ["/app/backend/tests/test_govern_ui1b_iter15.py"],
+  "success_rate": {
+    "backend": "100% (10/10 iter15 + 15/15 invariants gates)",
+    "frontend": "90% (9/10 spec items green; mobile overflow + DPO wizard scope on reverse-route are the 2 misses)"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw ; demo.dpo@demo.rms.example.com / demo-dpo-pw ; demo.analyst@demo.rms.example.com / demo-analyst-pw. Token stored at localStorage['rms.b1.auth.access_token']. All credentials sourced from /app/memory/test_credentials.md.",
+  "seed_data_creation": "None — used existing startup-seeded s-sample-held-* per demo identity; created a few /api/govern/registries/upload+commit rows under registry_name='partners_iter15_add_*' / 'partners_iter15_rem_*' as ephemeral state to exercise the removals-approval-required path. Also initiated + admin-canceled a checker request for retention_windows 30→90-iter15-* (persisted as a canceled record).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "UI-1-B floor: parity 36/36. Regression tests to re-run on any change to /app/backend/routers/govern.py, /app/backend/routers/checker.py, /app/backend/services/use_data/sample_fixture_seeder.py, or /app/frontend/src/pages/govern/*.jsx : (a) pytest backend/tests/test_govern_ui1b_iter15.py -v (b) pytest backend/tests/invariants/test_govern_ui1b_gates.py -v (c) Playwright script from iter15 to re-verify Registries three-step flow + admin cancel + DPO holds reverse-route + mobile stacking. Two open bugs (mobile overflow of rule-inventory table + DPO cannot open own held Use Data session via reverse-route) need re-verification after fix.",
+  "rca of the issue": "Mobile overflow RCA: The govern-half-rule-inventory renders a native <table> without any responsive wrapper — the table's intrinsic column widths (Rule / Class / Enforcement) sum to ~470px which exceeds the 390px viewport. All content is inside a 24px-padded parent so effective inner width is 342px, but the table does not shrink. Fix: add wrapper <div style='overflow-x:auto'> around the table OR give <td> min-width:0 + break-words + collapse the table via CSS to a card layout at max-width:480px. Reverse-route auth RCA: /use-data/wizard/{session_id} route uses ask_console_user + operator scope check (per iter14 evidence). DPO capacity has roles [dpo, operator] on demo.dpo identity — so 'operator' should satisfy — but the wizard's scope guard may be checking ask_console_user explicitly OR the session ownership check may require session.user_id == identity.user_id and the session's owner may be stored under a different identity/user_id than the DPO's caller identity. Need main agent to inspect /app/backend/routers/use_data.py wizard endpoint auth path + confirm that s-sample-held-{uid[-12:]} is keyed to the demo.dpo user_id."
+}

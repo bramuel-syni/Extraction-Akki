@@ -72,8 +72,12 @@ const SET_CONFIG = {
 
 /* =============================================================================
    CELL 1 · govern home renders rule inventory with class chips.
+   RETIRED at UI-1-B (2026-08-01) — GovernHomePage rebuilt per Canon §7.1 as
+   Trust Center two-halves. The rule inventory now renders as a Canon §7.3
+   Estate Rules Record with S/O/E/D class chips. The equivalent UI-1-B gates
+   land in __tests__/ui_1_b/govern_ui1b_gates.test.js.
    ============================================================================= */
-describe('Phase-3-SubC3 · gate_govern_home_renders_rule_inventory_with_class_chip', () => {
+describe.skip('Phase-3-SubC3 · gate_govern_home_renders_rule_inventory_with_class_chip [RETIRED · UI-1-B]', () => {
   it('every rule row carries BOTH a value-class chip AND an enforcement chip', async () => {
     api.complianceRetentionConfig.mockResolvedValueOnce({ status: 200, body: SET_CONFIG });
     api.checkerPending.mockResolvedValueOnce({ status: 200, body: { pending: [], count: 0 } });
@@ -81,7 +85,6 @@ describe('Phase-3-SubC3 · gate_govern_home_renders_rule_inventory_with_class_ch
     await waitFor(() =>
       expect(screen.getByTestId('govern-home-rule-inventory')).toBeInTheDocument()
     );
-    // Iterate over each rendered rule row and assert both chips exist.
     const rows = document.querySelectorAll('[data-testid^="govern-rule-row-"]');
     expect(rows.length).toBeGreaterThanOrEqual(3);
     rows.forEach((row) => {
@@ -89,24 +92,17 @@ describe('Phase-3-SubC3 · gate_govern_home_renders_rule_inventory_with_class_ch
       expect(within(row).getByTestId(`govern-rule-value-class-${slug}`)).toBeInTheDocument();
       expect(within(row).getByTestId(`govern-rule-enforcement-${slug}`)).toBeInTheDocument();
     });
-    // Pending link is reachable from the home surface (Surfaces v2 shell rule).
     expect(screen.getByTestId('govern-home-pending-link')).toHaveAttribute('href', '/govern/pending');
   });
 });
 
 /* =============================================================================
    CELL 2 · UNSET_RETENTION_BANNER renders byte-identical.
+   Home-page half RETIRED at UI-1-B (rebuild); retention-page half retained.
    ============================================================================= */
 describe('Phase-3-SubC3 · gate_retention_unset_banner_verbatim', () => {
-  it('home renders the ratified unset-retention banner byte-identical when global default is null', async () => {
-    api.complianceRetentionConfig.mockResolvedValueOnce({ status: 200, body: UNSET_CONFIG });
-    api.checkerPending.mockResolvedValueOnce({ status: 200, body: { pending: [], count: 0 } });
-    render(<MemoryRouter><GovernHomePage /></MemoryRouter>);
-    await waitFor(() =>
-      expect(screen.getByTestId('govern-home-unset-retention-copy')).toBeInTheDocument()
-    );
-    // Byte-identical string check.
-    expect(screen.getByTestId('govern-home-unset-retention-copy').textContent).toBe(UNSET_RETENTION_BANNER);
+  it.skip('[RETIRED · UI-1-B] home renders the ratified unset-retention banner byte-identical', async () => {
+    // The Trust Center rebuild moved retention posture rendering to /govern/retention only.
   });
 
   it('retention page also renders the same ratified banner byte-identical', async () => {
@@ -123,14 +119,8 @@ describe('Phase-3-SubC3 · gate_retention_unset_banner_verbatim', () => {
     }
   });
 
-  it('home does NOT render the unset banner when all classes are set (posture-set banner instead)', async () => {
-    api.complianceRetentionConfig.mockResolvedValueOnce({ status: 200, body: SET_CONFIG });
-    api.checkerPending.mockResolvedValueOnce({ status: 200, body: { pending: [], count: 0 } });
-    render(<MemoryRouter><GovernHomePage /></MemoryRouter>);
-    await waitFor(() =>
-      expect(screen.getByTestId('govern-home-posture-set-banner')).toBeInTheDocument()
-    );
-    expect(screen.queryByTestId('govern-home-unset-retention-banner')).toBeNull();
+  it.skip('[RETIRED · UI-1-B] home does NOT render the unset banner when all classes are set', async () => {
+    // Trust Center rebuild: retention posture no longer surfaces on /govern.
   });
 });
 

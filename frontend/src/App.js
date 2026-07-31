@@ -30,6 +30,11 @@ import GovernRetentionPage from './pages/govern/GovernRetentionPage';
 import GovernChangeRulePage from './pages/govern/GovernChangeRulePage';
 import GovernRefusalHealthPage from './pages/govern/GovernRefusalHealthPage';
 import GovernPendingPage from './pages/govern/GovernPendingPage';
+// UI-1-B · Govern module rebuild per Canon §7 (Trust Center two halves,
+// Estate Rules S/O/E/D, Class-D registries, Holds reverse-route).
+import GovernEstateRulesPage from './pages/govern/GovernEstateRulesPage';
+import GovernRegistriesPage from './pages/govern/GovernRegistriesPage';
+import GovernHoldsPage from './pages/govern/GovernHoldsPage';
 // UI-1-A (2026-07-31) · Use Data module per Canon §6.
 import UseDataLandingPage from './pages/use_data/UseDataLandingPage';
 import UseDataWizardPage from './pages/use_data/UseDataWizardPage';
@@ -78,6 +83,10 @@ export default function App() {
           <Route path="govern/change-rule" element={<GovernChangeRulePage />} />
           <Route path="govern/refusal-health" element={<GovernRefusalHealthPage />} />
           <Route path="govern/pending" element={<GovernPendingPage />} />
+          {/* UI-1-B · Canon §7.3 Estate Rules · §7.4 Registries · §7.6 Holds. */}
+          <Route path="govern/rules" element={<GovernEstateRulesPage />} />
+          <Route path="govern/registries" element={<GovernRegistriesPage />} />
+          <Route path="govern/holds" element={<GovernHoldsPage />} />
           {/* Canon §9 · Prove — DORMANT (UI-1-D fold). */}
           <Route path="prove" element={<ProveDormantPage />} />
           {/* Canon §5 · Team — DORMANT (UI-1-E fold). */}

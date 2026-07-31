@@ -115,8 +115,16 @@ async def get_with_sample_flag(session_id: str) -> Optional[Dict[str, Any]]:
 
 
 async def list_by_operator(operator_id: str) -> List[Dict[str, Any]]:
-    """List sessions belonging to an operator with sample flag preserved."""
-    cursor = db[COLLECTION].find({"operator_id": operator_id}).sort("opened_at_iso", -1)
+    """List sessions belonging to an operator with sample flag preserved.
+
+    Held-for-check sessions (`verdict_outcome=held_for_check` sidecar) are
+    excluded from this listing — they belong on the Holds surface
+    (Canon §7.6), not the Use Data pipeline strip.
+    """
+    cursor = db[COLLECTION].find({
+        "operator_id": operator_id,
+        "verdict_outcome": {"$ne": "held_for_check"},
+    }).sort("opened_at_iso", -1)
     out: List[Dict[str, Any]] = []
     async for doc in cursor:
         out.append({

@@ -411,6 +411,10 @@ export const api = {
         validateStatus: (s) => s >= 200 && s < 600,
       })
       .then((r) => ({ status: r.status, body: r.data })),
+  governHolds: () =>
+    client
+      .get('/govern/holds', { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
   // UI-1-B · Change-a-Rule ceremony visible countdown + cancel (Canon §7.5).
   checkerRequestRead: (requestId) =>
     client

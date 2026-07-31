@@ -133,12 +133,30 @@ export default function GovernChangeRulePage() {
   const [deny, setDeny] = useState(null);
   const [refusal, setRefusal] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelDeny, setCancelDeny] = useState(null);
+
+  // Poll the checker request every 2s while a countdown window is live
+  // so the ceremony countdown ticks against the authoritative backend
+  // state (never a UI-only clock).
+  React.useEffect(() => {
+    if (!request || !request.request_id) return undefined;
+    const inFlight = request.state === 'pending_delay' || request.state === 'pending_counter_sign';
+    if (!inFlight) return undefined;
+    const t = setInterval(async () => {
+      const r = await api.checkerRequestRead(request.request_id);
+      if (r.status === 200) setRequest(r.body);
+    }, 2000);
+    return () => clearInterval(t);
+  }, [request?.request_id, request?.state]);
 
   const initiate = async (e) => {
     e.preventDefault();
     setBusy(true);
     setDeny(null);
     setRefusal(null);
+    setCancelDeny(null);
     const r = await api.checkerInitiate({
       rule_class: ruleClass,
       from_value_ref: fromRef,
@@ -153,6 +171,26 @@ export default function GovernChangeRulePage() {
     setRefusal(r.body);
   };
 
+  const cancelWindow = async () => {
+    if (!request || !request.request_id) return;
+    if (!cancelReason.trim()) return;
+    setCancelBusy(true);
+    setCancelDeny(null);
+    const r = await api.checkerCancel(request.request_id, cancelReason.trim());
+    setCancelBusy(false);
+    if (r.status === 401 || r.status === 403) {
+      setCancelDeny(r.body);
+      return;
+    }
+    if (r.status >= 200 && r.status < 300) {
+      // Read the updated request so state + suspend_reason land in the
+      // history (canceled proposal is a RECORD, not a deletion).
+      const r2 = await api.checkerRequestRead(request.request_id);
+      if (r2.status === 200) setRequest(r2.body);
+      setCancelReason('');
+    }
+  };
+
   const currentStage = !request
     ? 'proposed'
     : request.state === 'pending_counter_sign'
@@ -162,8 +200,10 @@ export default function GovernChangeRulePage() {
         : request.state === 'effective'
           ? 'applied'
           : request.state === 'suspended'
-            ? 'proposed'
+            ? 'suspended'
             : 'proposed';
+
+  const canCancel = request && (request.state === 'pending_counter_sign' || request.state === 'pending_delay');
 
   return (
     <AkkiShell
@@ -298,6 +338,73 @@ export default function GovernChangeRulePage() {
               >
                 Continue in the pending queue →
               </Link>
+            </div>
+          )}
+          {canCancel && (
+            <div
+              data-testid="govern-change-rule-cancel-block"
+              style={{
+                marginTop: '18px', padding: '14px 16px',
+                border: `1px dashed ${AKKI_V4_PALETTE.oxblood}`,
+                background: AKKI_V4_PALETTE.cream,
+              }}
+            >
+              <div style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.ink, marginBottom: '8px' }}>
+                <strong>Cancel this window</strong> — a canceled proposal is a record, not a deletion.
+                Cancel routes through the checker state machine (Canon §7.5 · master_admin only).
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  data-testid="govern-change-rule-cancel-reason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Cancel reason (required)"
+                  style={{
+                    flex: 1, minWidth: '220px', padding: '6px 10px',
+                    border: `1px solid ${AKKI_V4_PALETTE.mist}`, fontSize: '0.85rem',
+                  }}
+                />
+                <button
+                  type="button"
+                  data-testid="govern-change-rule-cancel-btn"
+                  onClick={cancelWindow}
+                  disabled={cancelBusy || !cancelReason.trim()}
+                  style={{
+                    padding: '6px 14px', background: AKKI_V4_PALETTE.oxblood,
+                    color: AKKI_V4_PALETTE.cream, border: 'none',
+                    fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.75rem',
+                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                    cursor: (cancelBusy || !cancelReason.trim()) ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {cancelBusy ? 'canceling…' : 'Cancel window'}
+                </button>
+              </div>
+              {cancelDeny && (
+                <div style={{ marginTop: '10px' }}>
+                  <AccessControlDeniedPanel reason={cancelDeny.reason} detail={cancelDeny.detail} />
+                </div>
+              )}
+            </div>
+          )}
+          {request.state === 'suspended' && (
+            <div
+              data-testid="govern-change-rule-suspended-record"
+              style={{
+                marginTop: '14px', padding: '12px 16px',
+                border: `1px solid ${AKKI_V4_PALETTE.oxblood}`,
+                background: AKKI_V4_PALETTE.mist,
+              }}
+            >
+              <div style={{ fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.7rem', color: AKKI_V4_PALETTE.oxblood, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                Canceled · record, not deletion
+              </div>
+              <div data-testid="govern-change-rule-suspend-reason" style={{ fontSize: '0.85rem', color: AKKI_V4_PALETTE.ink }}>
+                {request.suspend_reason || '(no reason recorded)'}
+              </div>
+              <div style={{ marginTop: '6px', fontFamily: AKKI_V4_TYPOGRAPHY.monoLine, fontSize: '0.75rem', color: AKKI_V4_PALETTE.sage }}>
+                prior_state · {request.prior_state} · suspended_at · {request.suspended_at}
+              </div>
             </div>
           )}
         </section>

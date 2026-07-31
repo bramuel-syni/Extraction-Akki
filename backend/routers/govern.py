@@ -159,9 +159,14 @@ async def get_trust_center_record(request: Request):
     held = await refusals_coll.count_documents({"class_hint": "held_for_check"})
     # Holds: open = pending in checker state machine; totals include historical resolutions.
     checker_pending = await state_machine.list_pending()
-    checker_coll = db.get_collection("rule_change_requests")
+    checker_coll = db.get_collection("checker_requests")
     released_count = await checker_coll.count_documents({"state": "effective"})
     suspended_count = await checker_coll.count_documents({"state": "suspended"})
+    # Holds: number of Use Data sessions with verdict_outcome=held_for_check
+    # (Canon §7.6 · reverse-route surface). Sidecar-flagged; no frozen
+    # contract touched.
+    ud_coll = db.get_collection("use_data_wizard_sessions")
+    holds_open = await ud_coll.count_documents({"verdict_outcome": "held_for_check"})
     # Memory activity summarised from planes collection.
     planes_coll = db.get_collection("memory_planes")
     planes_active = await planes_coll.count_documents({"state": "active"})
@@ -172,7 +177,7 @@ async def get_trust_center_record(request: Request):
             "held_for_check": held,
         },
         "holds": {
-            "open": len(checker_pending),
+            "open": holds_open,
             "released": released_count,
             "confirmed_rejected": suspended_count,
         },
@@ -550,3 +555,40 @@ async def get_registry_current(registry_name: str, request: Request):
         return JSONResponse(status_code=404, content={"reason": "registry_empty"})
     doc.pop("_id", None)
     return doc
+
+
+# ============================ §7.6 holds surface (reverse-route) =============
+
+
+@router.get("/holds")
+async def get_holds(request: Request):
+    """Holds surface (Canon §7.6) · reverse-route to originating Use Data.
+
+    Lists Use Data wizard sessions where the commission verdict resolved
+    to `held_for_check`. Every row carries the originating session_id,
+    the verdict envelope reference, proposed spend + ceiling, and the
+    hold reason verbatim so the DPO can walk the trace back to the
+    session that produced the hold.
+
+    Sample-marked rows (`is_sample=True`) carry the badge through.
+    """
+    _, _, deny = await _resolve_dpo_or_admin(request)
+    if deny is not None:
+        return deny
+    coll = db.get_collection("use_data_wizard_sessions")
+    cursor = coll.find({"verdict_outcome": "held_for_check"}).sort("held_since_iso", -1)
+    holds: List[Dict[str, Any]] = []
+    async for doc in cursor:
+        holds.append({
+            "session_id": doc.get("session_id"),
+            "operator_id": doc.get("operator_id"),
+            "door": doc.get("door"),
+            "verdict_ref": doc.get("verdict_ref"),
+            "proposed_spend_usd": doc.get("proposed_spend_usd"),
+            "auto_run_ceiling_usd": doc.get("auto_run_ceiling_usd"),
+            "held_since_iso": doc.get("held_since_iso"),
+            "hold_reason_verbatim": doc.get("hold_reason_verbatim"),
+            "is_sample": bool(doc.get("is_sample", False)),
+            "reverse_route": f"/use-data/wizard/{doc.get('session_id')}",
+        })
+    return {"holds": holds, "count": len(holds), "canon_ref": "Canon §7.6"}

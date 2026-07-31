@@ -366,3 +366,70 @@ async def test_g_b12_no_new_frozen_contracts_parity_36():
     body = r.json()
     assert body["parity_count"] == 36
     assert body["expected_parity"] == 36
+
+
+# ---------------------- HOLDS SURFACE (§7.6 reverse-route) --------------------
+
+
+@pytest.mark.asyncio
+async def test_g_b13_holds_surface_lists_held_use_data_sessions():
+    """Canon §7.6 · Holds surface lists Use Data sessions in held_for_check
+    state with reverse-route back to the originating session.
+    """
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        token = await _login_dpo(ac)
+        r = await ac.get(
+            "/api/govern/holds",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["canon_ref"] == "Canon §7.6"
+    assert "holds" in body
+    assert "count" in body
+    assert body["count"] >= 1, "expected at least one seeded sample hold"
+    # Every hold carries a reverse_route back to Use Data.
+    for hold in body["holds"]:
+        assert hold["reverse_route"] == f"/use-data/wizard/{hold['session_id']}"
+        assert hold["verdict_ref"] is not None
+    # At least one hold is a sample fixture (Owner viewable-build addendum).
+    assert any(h["is_sample"] for h in body["holds"]), (
+        "expected at least one sample-marked hold for the walk-through."
+    )
+
+
+@pytest.mark.asyncio
+async def test_g_b14_holds_surface_refuses_analyst():
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        token = await _login_analyst(ac)
+        r = await ac.get(
+            "/api/govern/holds",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert r.status_code == 403
+    assert r.json().get("reason") == "auth_scope_insufficient"
+
+
+# ---------------------- SAMPLE FIXTURES · TRUST CENTER RECORD -----------------
+
+
+@pytest.mark.asyncio
+async def test_g_b15_trust_center_record_buckets_carry_sample_rows():
+    """Trust Center record buckets render non-zero after startup seed."""
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        token = await _login_dpo(ac)
+        r = await ac.get(
+            "/api/govern/trust_center_record",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert r.status_code == 200
+    body = r.json()
+    # Refusals seeded: at least one absolute + escalatable + held_for_check.
+    assert body["refusals"]["absolute"] >= 1
+    assert body["refusals"]["escalatable"] >= 1
+    assert body["refusals"]["held_for_check"] >= 1
+    # Rule changes seeded: at least one effective + one suspended.
+    assert body["rule_changes"]["effective_30d"] >= 1
+    assert body["rule_changes"]["suspended_30d"] >= 1
+    # Holds bucket now counts held Use Data sessions (§7.6), not checker pending.
+    assert body["holds"]["open"] >= 1

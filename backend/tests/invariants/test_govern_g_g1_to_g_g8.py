@@ -301,11 +301,15 @@ def test_g_g8_govern_surfaces_import_only_apiclient_and_design():
     """Every Govern surface JSX imports ONLY from apiClient and design/*.
     NO new backend paths are introduced by hand-rolled fetches or by
     calling any router outside the whitelist.
+
+    UI-1-B (2026-08-01) extended the Govern surface set from 5 (sub-cycle 3)
+    to 8: added GovernEstateRulesPage (§7.3), GovernRegistriesPage (§7.4),
+    GovernHoldsPage (§7.6). All still route through apiClient exclusively.
     """
     root = Path(__file__).resolve().parents[3] / "frontend" / "src" / "pages" / "govern"
     assert root.exists(), f"expected {root} to exist after sub-cycle 3 landing"
     files = list(root.glob("*.jsx"))
-    assert len(files) == 5, f"expected 5 Govern pages; found {len(files)}"
+    assert len(files) == 8, f"expected 8 Govern pages (5 sub-cycle 3 + 3 UI-1-B); found {len(files)}"
     # Allowed import module-suffixes (relative from pages/govern/ into src/):
     allowed_prefixes = (
         "../../apiClient",

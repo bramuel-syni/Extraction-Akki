@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 from typing import List
 
 from contracts.use_data_wizard_session import (
+    CommissionCard,
     DialogueTurn,
     IntelCard,
     PlanPreviewCard,
@@ -37,6 +38,8 @@ from services.use_data import session_store
 
 
 COLLECTION = "use_data_wizard_sessions"
+REFUSALS_COLLECTION = "compliance_refusals"
+CHECKER_COLLECTION = "checker_requests"
 
 
 def _now_iso() -> str:
@@ -94,7 +97,6 @@ def _fixture_in_progress(session_id: str, operator_id: str) -> UseDataWizardSess
 
 
 def _fixture_ready(session_id: str, operator_id: str) -> UseDataWizardSession:
-    from contracts.use_data_wizard_session import CommissionCard
     return UseDataWizardSession(
         session_id=session_id,
         operator_id=operator_id,
@@ -129,6 +131,46 @@ def _fixture_ready(session_id: str, operator_id: str) -> UseDataWizardSession:
     )
 
 
+def _fixture_held(session_id: str, operator_id: str) -> UseDataWizardSession:
+    """UI-1-B · seeded HELD-for-check Use Data session.
+
+    Canon §7.6 Holds Surface reverse-route: this session appears in the
+    holds surface and links back to /use-data/wizard/{session_id}.
+    """
+    return UseDataWizardSession(
+        session_id=session_id,
+        operator_id=operator_id,
+        opened_at_iso=_now_iso(),
+        door="train_a_model",
+        dialogue=[
+            DialogueTurn(
+                turn_id=f"{session_id}-t1",
+                role="user",
+                text="Train a recall-oriented classifier over the licensed corpus.",
+                ts_iso=_now_iso(),
+            ),
+        ],
+        reflection=ReflectionCard(fields=[
+            ReflectionField(name="need", label="Need", state="set",
+                            value="Recall-oriented classifier · licensed corpus."),
+            ReflectionField(name="scope", label="Scope", state="set",
+                            value="12-month training window across three source families."),
+            ReflectionField(name="evidence_floor", label="Evidence floor", state="set",
+                            value="established_fact."),
+            ReflectionField(name="rights", label="Rights posture", state="set",
+                            value="internal_plus_partner."),
+            ReflectionField(name="output_form", label="Output form", state="set",
+                            value="model_artifact · versioned."),
+        ]),
+        commission=CommissionCard(
+            door="train_a_model",
+            values_confirmed=["rights", "privacy_floor", "pii_posture", "budget", "scope"],
+            committed_at_iso=_now_iso(),
+            verdict_ref="trcv-sample-held-train-a-model-fixture",
+        ),
+    )
+
+
 async def seed_sample_fixtures_if_absent(operator_email_and_id: List[dict]) -> None:
     """Idempotent — skips per-session-id if already present.
 
@@ -140,6 +182,10 @@ async def seed_sample_fixtures_if_absent(operator_email_and_id: List[dict]) -> N
     Owner iter14 addendum verbatim (2026-07-31):
         "the startup seeder must idempotently guarantee the two marked
          sample rows per EVERY demo identity INCLUDING admin"
+
+    UI-1-B addendum (2026-07-31): also seed one HELD-for-check session
+    per identity so the Trust Center → Holds → reverse-route walk-through
+    is exercisable for every demo identity, ESPECIALLY the dpo.
 
     `operator_email_and_id`: list of {email, user_id} — every operator
     who should carry the two sample rows. Caller resolves.
@@ -154,9 +200,140 @@ async def seed_sample_fixtures_if_absent(operator_email_and_id: List[dict]) -> N
         uid_suffix = uid[-12:]
         in_prog_id = f"s-sample-in-progress-{uid_suffix}"
         ready_id = f"s-sample-ready-{uid_suffix}"
-        for sess_id, builder in ((in_prog_id, _fixture_in_progress), (ready_id, _fixture_ready)):
+        held_id = f"s-sample-held-{uid_suffix}"
+        for sess_id, builder in (
+            (in_prog_id, _fixture_in_progress),
+            (ready_id, _fixture_ready),
+        ):
             already = await coll.find_one({"session_id": sess_id})
             if already is not None:
                 continue
             sess = builder(session_id=sess_id, operator_id=uid)
             await session_store.insert(sess, is_sample=True)
+        # HELD-for-check sample: same envelope shape, but a sidecar
+        # `verdict_outcome=held_for_check` + proposed_spend + held_since
+        # so the /api/govern/holds surface can list it and Trust Center
+        # counts it in the `holds.open` bucket.
+        already_held = await coll.find_one({"session_id": held_id})
+        if already_held is None:
+            sess_held = _fixture_held(session_id=held_id, operator_id=uid)
+            payload = sess_held.model_dump()
+            payload["is_sample"] = True
+            payload["instance_id"] = session_store._current_instance_id()
+            payload["verdict_outcome"] = "held_for_check"
+            payload["verdict_ref"] = "trcv-sample-held-train-a-model-fixture"
+            payload["proposed_spend_usd"] = 1450.00
+            payload["auto_run_ceiling_usd"] = 1000.00
+            payload["held_since_iso"] = _now_iso()
+            payload["hold_reason_verbatim"] = (
+                "Proposed spend $1,450.00 exceeds auto-run ceiling $1,000.00. "
+                "Pending policy check — single DPO countersign."
+            )
+            await coll.insert_one(payload)
+    # UI-1-B sample fixtures for Trust Center record buckets (per Owner
+    # directive: SAMPLE-marked rows so `refusals` / `rule_changes`
+    # buckets render non-zero and are exercisable in the walk-through).
+    await _seed_sample_refusals_if_absent()
+    await _seed_sample_rule_changes_if_absent()
+
+
+async def _seed_sample_refusals_if_absent() -> None:
+    """Idempotent seed of sample refusal ledger rows for Trust Center §7.1.
+
+    Two rows: one ABSOLUTE (rights_incompatibility), one ESCALATABLE
+    (privacy_floor_below_threshold), one HELD_FOR_CHECK (auto_run_ceiling).
+    """
+    coll = db[REFUSALS_COLLECTION]
+    now = _now_iso()
+    fixtures = [
+        {
+            "refusal_id": "sample-refusal-absolute-rights",
+            "class_hint": "absolute",
+            "reason_code": "rights_compatibility_bar",
+            "criterion_verbatim": (
+                "Requested use exceeds the rights posture declared on the "
+                "source registry (internal-only vs internal_plus_partner)."
+            ),
+            "route_to_approval": None,
+            "issued_at_iso": now,
+            "is_sample": True,
+        },
+        {
+            "refusal_id": "sample-refusal-escalatable-privacy",
+            "class_hint": "escalatable",
+            "reason_code": "privacy_floor_below_threshold",
+            "criterion_verbatim": (
+                "Declared privacy floor k<10 on a partner-licensed corpus. "
+                "Escalate for DPO review."
+            ),
+            "route_to_approval": "Escalate for DPO review",
+            "issued_at_iso": now,
+            "is_sample": True,
+        },
+        {
+            "refusal_id": "sample-refusal-held-ceiling",
+            "class_hint": "held_for_check",
+            "reason_code": "auto_run_ceiling_exceeded",
+            "criterion_verbatim": (
+                "Proposed spend $1,450.00 exceeds auto-run ceiling $1,000.00. "
+                "Pending policy check — single DPO countersign."
+            ),
+            "route_to_approval": "Pending policy check — single DPO countersign",
+            "issued_at_iso": now,
+            "is_sample": True,
+        },
+    ]
+    for f in fixtures:
+        already = await coll.find_one({"refusal_id": f["refusal_id"]})
+        if already is None:
+            await coll.insert_one(f)
+
+
+async def _seed_sample_rule_changes_if_absent() -> None:
+    """Idempotent seed of sample rule-change history rows.
+
+    One `effective` (loosening-symmetric commissioned then applied),
+    one `suspended` (canceled before effect — record kept, not deleted).
+    """
+    coll = db[CHECKER_COLLECTION]
+    now = _now_iso()
+    fixtures = [
+        {
+            "request_id": "sample-rc-effective-retention",
+            "rule_class": "retention_windows",
+            "from_value_ref": "180d",
+            "to_value_ref": "365d",
+            "consequence_class": "loosening_symmetric",
+            "state": "effective",
+            "initiator_id": "demo.dpo@demo.rms.example.com",
+            "initiator_role": "compliance",
+            "initiated_at": now,
+            "countersigned_at": now,
+            "effective_at": now,
+            "is_sample": True,
+        },
+        {
+            "request_id": "sample-rc-suspended-source-standing",
+            "rule_class": "source_standing_table",
+            "from_value_ref": "v3",
+            "to_value_ref": "v4",
+            "consequence_class": "tightening_unilateral",
+            "state": "suspended",
+            "prior_state": "pending_delay",
+            "initiator_id": "demo.dpo@demo.rms.example.com",
+            "initiator_role": "compliance",
+            "initiated_at": now,
+            "suspended_at": now,
+            "suspended_by_id": "admin@rms.example.com",
+            "suspended_by_role": "admin",
+            "suspend_reason": (
+                "Sample record — cancellation preserved (not deleted); "
+                "cancel is a record, per Canon §7.5."
+            ),
+            "is_sample": True,
+        },
+    ]
+    for f in fixtures:
+        already = await coll.find_one({"request_id": f["request_id"]})
+        if already is None:
+            await coll.insert_one(f)

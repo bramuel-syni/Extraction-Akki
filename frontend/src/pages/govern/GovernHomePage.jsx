@@ -179,13 +179,27 @@ function RuleInventoryHalf({ rules }) {
           ))}
         </tbody>
       </table>
-      <div style={{ marginTop: '12px' }}>
+      <div style={{ marginTop: '12px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
         <Link
           to="/govern/rules"
           data-testid="govern-see-estate-rules-record"
           style={{ color: AKKI_V4_PALETTE.navy, textDecoration: 'none', fontSize: '0.85rem' }}
         >
           Open Estate Rules Record · Canon §7.3 →
+        </Link>
+        <Link
+          to="/govern/registries"
+          data-testid="govern-see-registries"
+          style={{ color: AKKI_V4_PALETTE.navy, textDecoration: 'none', fontSize: '0.85rem' }}
+        >
+          Open Registries · Canon §7.4 →
+        </Link>
+        <Link
+          to="/govern/pending"
+          data-testid="govern-see-pending"
+          style={{ color: AKKI_V4_PALETTE.navy, textDecoration: 'none', fontSize: '0.85rem' }}
+        >
+          Open Counter-sign queue →
         </Link>
       </div>
     </section>
@@ -279,8 +293,9 @@ function RecordHalf({ record }) {
         testId="govern-record-bucket-holds"
         label="Holds"
         valueLine={`open ${record.holds?.open ?? 0} · released ${record.holds?.released ?? 0} · confirmed rejected ${record.holds?.confirmed_rejected ?? 0}`}
-        routeLabel="Open holds"
-        routeTo="/govern/pending"
+        secondLine="Every hold reverse-routes to the Use Data session that produced it (Canon §7.6)."
+        routeLabel="Open holds surface"
+        routeTo="/govern/holds"
       />
       <RecordBucket
         testId="govern-record-bucket-masking"
