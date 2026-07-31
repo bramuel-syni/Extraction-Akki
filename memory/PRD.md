@@ -3,7 +3,24 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-07-11 · **MANDATE-COMPLETE held · Registry Doctrine §8.1.a Standing Queries as CI SELF-RATIFIED via §12 · Governance §14 extended to N supplements**)
+## Current gate status (2026-07-31 · **Memory Service Stage B CLOSED · Parity 34/34 live · Cycle 3 backend-only delivered**)
+
+- **Latest gate:** Memory Service Stage B (Owner ruling 2026-07-30 cycle 3 option (b) + follow-ups 1a/2a/3a). BACKEND ONLY per cycle scope. Full backend suite **1382 passed / 1 skipped / 0 failed / 0 regressions**. HTTP smoke suite 14/14 green. Testing-agent report: 100% success rate; retest_needed=false.
+- **Parity restored 32 → 34** via two seal events per D4b FREEZE:
+  - `contracts/memory_plane_v0.py` + `tests/invariants/memory_plane_v0.contract_snapshot.json` (plane envelope)
+  - `contracts/memory_write_back_v0.py` + `tests/invariants/memory_write_back_v0.contract_snapshot.json` (contribution shape)
+  - `EXPECTED_PARITY = 34` in `services/health/parity_counter.py`
+  - `/api/readyz` + `/api/system/build_info` report `parity_count = 34 = expected_parity` live
+- **Memory Service business logic** in `backend/services/memory/`: plane_registry, scoped_accessor (isolation by construction), write_back (five-ring + class-cap + rights-at-birth), publication (governed 3-step ceremony; fail-loud on unset [SLOT] per SR-5), revocation (immediate freeze; idempotent), working_set (usage-proportional; `[SLOT: 10_000]` cap), ledger_reconstructor, ledger (thin wrapper over shared NorthenaLedgerRow_v1), refusal (8-code closed reason set), constants (4 `[SLOT: default]` markers).
+- **Router (`routers/memory.py`)** — 8 endpoints under `/api/memory/*`. Engineer-key scoped; server-side `_authorize_plane_access` on every call. Cross-key → 403 `auth_scope_insufficient` (no `outcome` key). Governed refusals carry `{outcome: "refused", reason, detail}`.
+- **Governed registry bump v3 → v4** (`services/compliance/data_class_registry.v4.json`): additive; v3 preserved byte-identical; `authority` block; 7 memory_* data_class values.
+- **M-G1..M-G9 break-in gate roster** (24 cells, all green) + **P2 buildable-now guards** (25 cells, all green). Total 49 new enforcement cells this cycle.
+- **FPR registration (AC-3):** 23 memory rows in `docs/registry/function_promise_registry_v0.6_supplement_memory_stage_a.md`, regenerated into `docs/registry/machine/registry.yaml`. Parser extended to re-parse post-v1 supplements per governance §14. MRR-G-Parity at 34/34.
+- **Housekeeping doc trail:** rulings 1a/2a/3a + §6 dispatch erratum (34 ≠ 33) + CC-6 branch determination (Path α · DELEGATED-REVERSIBLE) + Frontend Brief v2 intake summary (deferred to Phase 3) + Audio Intelligence pack re-upload byte-identical to committed source.
+- **Close report:** `docs/close_reports/memory_service_stage_b_2026-07-31.md`. **Journal entry** appended to `/app/BUILD_JOURNAL.md`.
+- **Demo login verified live:** `admin@rms.example.com` / `admin-b1-test-pw`.
+
+## Prior gate status (2026-07-11 · **MANDATE-COMPLETE held · Registry Doctrine §8.1.a Standing Queries as CI SELF-RATIFIED via §12 · Governance §14 extended to N supplements**)
 - **Latest gate:** **Registry Doctrine §8.1.a Standing Queries as CI CLOSED + SELF-RATIFIED (§12) 2026-07-11** — atomic doc + code commit per Owner ruling SQ-E1 γ + cross-reference condition (PERMANENT). Third Registry Doctrine additive-surface landing.
 - **Landed artifacts:**
   - `/app/docs/rulings/standing_queries_sq_e1.md` (Owner rulings verbatim carrier · 74 LoC · SHA `705dc3df…`) — pins the doctrinal framing **"provenance-paired facts applied reflexively"** as canonical.
