@@ -203,6 +203,10 @@ app.include_router(memory_router.router, prefix="/api")
 from routers import connect as connect_router  # noqa: E402
 app.include_router(connect_router.router, prefix="/api")
 
+# UI-1-B (2026-07-31) · Govern module Canon §7 aggregates + Class-D registries seam.
+from routers import govern as govern_router  # noqa: E402
+app.include_router(govern_router.router, prefix="/api")
+
 
 @app.on_event("startup")
 async def _startup() -> None:
@@ -258,6 +262,9 @@ async def _startup() -> None:
             seed_sample_fixtures_if_absent,
         )
         await use_data_session_store.ensure_indexes()
+        # UI-1-B · Govern registries seam (Class-D generic).
+        from routers import govern as govern_router_startup  # noqa: E402
+        await govern_router_startup.ensure_indexes()
         await seed_demo_identities_if_absent()
         # Resolve every identity that should carry the two sample rows:
         # (1) the four demo identities per Owner viewable-build addendum,

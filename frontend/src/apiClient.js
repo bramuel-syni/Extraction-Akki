@@ -368,6 +368,62 @@ export const api = {
         validateStatus: (s) => s >= 200 && s < 600,
       })
       .then((r) => ({ status: r.status, body: r.data })),
+  // UI-1-B (2026-07-31) · Govern Canon §7 aggregates + Class-D registries seam.
+  governEnforcementClassSplit: () =>
+    client
+      .get('/govern/enforcement_class_split', { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governTrustCenterRecord: () =>
+    client
+      .get('/govern/trust_center_record', { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governEstateRulesRecord: () =>
+    client
+      .get('/govern/estate_rules_record', { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governRegistryUpload: (registryName, rows) =>
+    client
+      .post('/govern/registries/upload', { registry_name: registryName, rows }, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governRegistryDiff: (uploadId) =>
+    client
+      .post('/govern/registries/diff', { upload_id: uploadId }, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governRegistryCommit: (uploadId) =>
+    client
+      .post('/govern/registries/commit', { upload_id: uploadId }, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governRegistryVersions: (name) =>
+    client
+      .get(`/govern/registries/${encodeURIComponent(name)}/versions`, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  governRegistryCurrent: (name) =>
+    client
+      .get(`/govern/registries/${encodeURIComponent(name)}/current`, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  // UI-1-B · Change-a-Rule ceremony visible countdown + cancel (Canon §7.5).
+  checkerRequestRead: (requestId) =>
+    client
+      .get(`/checker/request/${encodeURIComponent(requestId)}`, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
+  checkerCancel: (requestId, reason) =>
+    client
+      .post(`/checker/cancel/${encodeURIComponent(requestId)}`, { reason }, {
+        validateStatus: (s) => s >= 200 && s < 600,
+      })
+      .then((r) => ({ status: r.status, body: r.data })),
 };
 
 export default api;
