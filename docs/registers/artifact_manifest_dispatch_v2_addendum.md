@@ -30,3 +30,26 @@
 ═══════════════════════════════════════════════════════════════════
 
 *Manifest addendum. To be folded into the primary `artifact_manifest.md` on Owner delivery of that file.*
+
+## Canon intake · Part 2 (4 of 8 files landed 2026-07-31)
+
+| Path | Recorded-Canon SHA | Supplied SHA | Derived-md SHA | Bytes |
+|---|---|---|---|---|
+| `docs/mandates/akki_operating_model_product_spec_v2.0.md` | `20b4d305…` | `4c930164…` (docx) | `5087be0f02ce50adfaa1dd793c18540de39e7b7a7887f8f1596079e6a7326f62` | 41 935 |
+| `docs/mandates/akki_role_register.md` | `471e1f4e…` | `837f04ff…` (docx) | `45bad42df495120891b0f1e39d54abe9914e5124d79cd8e2837f13b535ed2c60` | 29 083 |
+| `docs/mandates/akki_analyze_codebase_acquisition_v1.0.md` | `76b2998e…` | `9e33f832…` (docx) | `a8b81475b5f6d3a6fccfa5732c2b277326f24e7f5b08398821aa75ccf1df50dc` | 8 647 |
+| `docs/rulings/owner_change_order_2026-07-25.md` | `[MEMORY]` unverified | `33b16441…` (md direct) | (same as supplied) | 17 141 |
+
+**SHA discipline (Owner directive verbatim):** items 1-3 supplied as `.docx`; derived-md SHAs do NOT byte-match the Canon-recorded `.md` SHAs (different conversion path). Recorded-canon SHAs are noted **superseded-by-Owner-delivery**. Content is treated as canon per Owner delivery. Item 4 supplied direct as `.md`; its on-disk SHA `33b16441…` is now the §1.5 resolved SHA (replaces the prior `[MEMORY]` annotation).
+
+Originals: `docs/handoff/canon_originals/*.docx` (3 files).
+Delta log: `docs/canon_intake_delta_log_part2_2026-07-31.md`.
+
+## Canon intake · Part 3 (2 more files landed 2026-07-31)
+
+| Path | Recorded-Canon SHA | Supplied/on-disk SHA | Match | Bytes |
+|---|---|---|---|---|
+| `docs/rulings/owner_brief_blinded_assessment_2026-07-25.md` | `c5026ff4c6662877e198440278fd576ab63f846aa84d0cd40f2b87a0eea7dc17` | `c5026ff4c6662877e198440278fd576ab63f846aa84d0cd40f2b87a0eea7dc17` | ✓ MATCH byte-identical | 10 671 |
+| `docs/rulings/owner_brief_enforcement_class_on_estate.md` | (new · not in original 8) | `7c6d0192220927ab160988ff1effd48144f738bdfc0a7fe7b4f73d643205c088` | ✓ new source | 7 202 |
+
+Also written duplicate: `docs/rulings/owner_brief_blinded_assessment_and_coverage_layer.md` (artifact-trail companion to item 5, byte-identical to canonical path).
