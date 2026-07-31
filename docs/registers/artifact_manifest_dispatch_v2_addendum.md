@@ -64,3 +64,15 @@ Also written duplicate: `docs/rulings/owner_brief_blinded_assessment_and_coverag
 | `docs/handoff/canon_originals/final_batch_2026-07-31.pdf` | `76a38499…` | `76a38499a388d13a94cff1e1daecb06cb42e450a1d689d65c53faa84a28af18b` | Source PDF preserved (39 pages) | 552 490 |
 
 Delta log part 4: `docs/canon_intake_delta_log_part2_2026-07-31.md` §§11-15.
+
+## Experience Canon v1.0 receipt (2026-07-31)
+
+| Path | On-disk SHA | Bytes |
+|---|---|---|
+| `docs/mandates/AKKI_OS_EXPERIENCE_CANON_v1.md` | `6d9ed7d8bce5ce3fed180407a20d4550a3a95744ccb21735ac66351ffe3b3757` | 34 003 |
+| `docs/rulings/experience_canon_v1_supersession_and_hazard_close_2026-07-31.md` | (filed today) | supersession + HAZARD-STOP-CLOSE ruling |
+| `docs/rulings/resolved_owner_items_2026-07-31.md` | (filed today) | §6.5 auto-run ceiling $1000 · DB-1/DB-2 binding · §6.1 flag carried |
+| `docs/canon_slot4_delta_log_2026-07-31.md` | (filed today) | 11 pending-fold candidates from RMS_UI_Spec_v2_2 + UX_Arch_v2 + surface_journey_map_v1 |
+| `docs/stage_a_proposals/ui_1_stage_a_experience_canon_v1_2026-07-31.md` | (filed today) | UI-1 Stage A · conformance audit · 18-gate roster · 5 execution sub-cycles |
+
+**Supersession disposition:** the Experience Canon supersedes AS EXPERIENCE AUTHORITY: `frontend_uiux_brief_v1_2026-07-27.md/.docx` (provenance only, retained on disk), `owner_change_order_2026-07-25.md` (A1-A8 absorbed · provenance only), `AKKI_OS_CONSOLIDATED_DISPATCH_v2.md §3` (superseded · §§1/2/4/5/6/7 in force). Retired artifacts already in `/salvage/dispatch_v2_retirement_2026-07-31/` per §1.2 previous execution.
