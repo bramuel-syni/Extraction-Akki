@@ -2088,3 +2088,44 @@ The previously HUMAN_REQUIRED cross-key HTTP break-in case is now automatable en
 **Remaining for sub-cycle 2:** Memory + Registry frontend surfaces + plane-observability panel + FB-9..FB-16 journey completions (Owner sequence).
 
 — End of Phase 3 sub-cycle 1 entry. —
+
+═══════════════════════════════════════════════════════════════════
+
+## 2026-08-02 · Phase 3 sub-cycle 2 CLOSED · Memory + Registry surfaces
+
+**Cycle scope:** Memory Service surface (list · detail · publication ceremony) + Plane Observability panel (read-only aggregate over the reconstructor) + Registry Estate Map (day-zero declaration-baseline · measured-vs-unmeasured first-class · inference overlay dormant).
+
+**Owner rulings recorded verbatim:** `docs/rulings/phase3_subcycle2_memory_and_registry_2026-08-02.md` — 6 rulings.
+
+**What landed:**
+- Four new frontend routes: `/memory`, `/memory/planes/:planeId`, `/memory/planes/:planeId/observability`, `/registry` — all wired in `App.js` and reachable from `AskConsolePage` nav menu (Surfaces v2 shell rule).
+- Backend endpoint: `GET /api/memory/planes/{plane_id}/observability` — thin aggregator over Northena ledger rows via `services/memory/ledger_reconstructor.rebuild_observability`. Scope enforced identically to plane detail. Zero new frozen contract.
+- FPR supplement v0.8: 12 R4 reflexive rows (5 memory-surface + 1 observability panel + 2 backend seams + 4 registry). Machine YAML regenerated. Parser extended.
+- Enforcement cells: **+23** (8 backend O-G + 15 Jest UI). Suite totals: backend `1421 passed / 1 skipped / 0 failed`; Jest `26 suites / 182 passed / 0 failed`.
+- Testing agent verdict `iteration_8.json`: 100% backend / 100% frontend, retest_needed=false, zero critical or minor issues, zero action items.
+- Live-preview smoke: `/api/readyz` reports `parity_count=34/34`; admin login returns access_token; `/registry` renders posture banner + three method chips (declaration_baseline · measured_census · inference_overlay dormant) at cream #F3F2E9 background.
+
+**Parity:** unchanged at 34/34 (zero new frozen contracts this cycle · Ruling 2 respected).
+
+**Four response classes still NEVER conflated:** publication-refusal renders `response-governed-refusal` (oxblood accent · `outcome=refused`); cross-key 403 renders `response-access-control-denial` (navy accent · `{reason,detail}` · no `outcome` key). Testing agent explicitly verified byte-clean discipline end-to-end.
+
+**Ratified copy preserved verbatim in DOM:**
+- Publication refusal action triplet: "Accept as recorded statement" / "Narrow the objective" / "Lower the standard".
+- Frozen chip: "Frozen is immutable.".
+
+**Design-law compliance evidence:**
+- Akki v4 palette exclusively (cream / navy / oxblood / sage / amber).
+- Georgia serif wordmark "Akki OS" · Helvetica labels.
+- MarkedOpenSlot on: publication rate (attempted==0), class buckets (landed==0), unmeasured figures on every Estate Map row this cycle (declaration-baseline day-zero).
+- Dormant-capability chip on inference-overlay column (no digits).
+- Every coverage gap paired with `Propose census →` action → `/operator/commission`.
+
+**Held items still held (unchanged):**
+- Grants-revision JWT claim PARKED (SR-5).
+- B1 GPU spend ceiling AWAITING OWNER FIGURE.
+- Data Engineer role default OPEN ITEM (Master Admin alias).
+- Wizard draft persistence improvement (not ruled in).
+
+**Remaining for sub-cycle 3:** Govern module (compliance seams · registry-doctrine coverage-gap actioning · verifier surfaces).
+
+— End of Phase 3 sub-cycle 2 entry. —

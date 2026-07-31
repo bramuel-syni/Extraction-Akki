@@ -3,7 +3,21 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-01 · **Phase 3 sub-cycle 1 CLOSED · real-material readiness slice · Parity 34/34 unchanged**)
+## Current gate status (2026-08-02 · **Phase 3 sub-cycle 2 CLOSED · Memory + Registry surfaces · Parity 34/34 unchanged**)
+
+- **Sub-cycle:** Phase 3 · sub-cycle 2 (Owner ruling 2026-08-02). Six Owner rulings recorded verbatim in `docs/rulings/phase3_subcycle2_memory_and_registry_2026-08-02.md`.
+- **Screens landed (4 new):** `/memory` (plane list · server-side scope · access-control-denial on 403) · `/memory/planes/:planeId` (envelope + class-with-claim + publication ceremony with SLOT-unset fail-loud governed refusal + revocation section removed on frozen) · `/memory/planes/:planeId/observability` (four aggregate sections · MarkedOpenSlot when attempted==0 or landed==0) · `/registry` (Estate Map · declaration-baseline day-zero · three method chips · every unmeasured row + Propose census action).
+- **Surfaces v2 shell rule respected:** all four new routes reachable from `AskConsolePage` visible nav (`CONSOLE_NAV_ITEMS` extended with `/memory` + `/registry`).
+- **Backend seam (thin):** `GET /api/memory/planes/{plane_id}/observability` — read-only aggregate via `services/memory/ledger_reconstructor.rebuild_observability`. Reads Northena ledger rows exclusively (AST purity gate O-G-Aggregate-Reads-Ledger-Only asserts). Scope enforced identically to plane detail. **Parity UNCHANGED at 34/34** — no new frozen contract; response shape is an untyped aggregate JSON body per Ruling 2.
+- **FPR (AC-3):** 12 new R4 reflexive rows in `docs/registry/function_promise_registry_v0.8_supplement_phase3_subcycle2.md`; regenerated into machine YAML.
+- **Testing agent verdict** (`iteration_8.json`): full-stack CONFIRMED GREEN. Backend `1421 pass / 1 skip / 0 fail`; Jest `26 suites / 182 pass / 0 fail`; browser-verified via REACT_APP_BACKEND_URL preview URL. `retest_needed=false`; success_rate backend 100% / frontend 100%; zero critical or minor issues; zero action items.
+- **Four response classes NEVER conflated (audit-verified):** publication-refusal → `response-governed-refusal` (oxblood, `outcome=refused`); cross-key 403 → `response-access-control-denial` (navy, `{reason,detail}`, no `outcome` key). Byte-clean discipline end-to-end.
+- **Ratified copy preserved verbatim:** publication refusal action triplet (Accept as recorded statement / Narrow the objective / Lower the standard); frozen chip "Frozen is immutable.".
+- **Enforcement cells re-measured:** +23 new (8 backend O-G + 15 Jest UI). Cumulative recent cycles (Cycle 3 + Phase-3-Sub-1 + Phase-3-Sub-2): 102 new cells.
+- **Owner holds preserved:** grants-revision JWT claim PARKED (SR-5); Data Engineer role mandate OPEN ITEM (Master Admin alias); B1 GPU spend ceiling AWAITING OWNER FIGURE; Wizard draft persistence NOT RULED IN.
+- **Close report:** `docs/close_reports/phase3_subcycle2_memory_and_registry_2026-08-02.md`. **Journal entry:** appended.
+
+## Prior gate status (2026-08-01 · **Phase 3 sub-cycle 1 CLOSED · real-material readiness slice · Parity 34/34 unchanged**)
 
 - **Sub-cycle:** Phase 3 · sub-cycle 1 (Owner ruling 2026-08-01 · re-sequenced from module order to VERTICAL slice). Six Owner rulings recorded verbatim in `docs/rulings/phase3_subcycle1_owner_rulings_2026-08-01.md`.
 - **Screens landed (6 new):** `/connect` + `/connect/new` (Connect module — dormant + governed stub) · `/operator/commission` (extended with FB-4 milestone panel + FB-6 lawful-basis gate) · `/commission-view` + `/commission-view/:sessionId` (FB-5 · milestone-front-page + drill-down evidence).
