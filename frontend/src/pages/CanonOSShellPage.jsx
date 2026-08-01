@@ -20,6 +20,136 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { AkkiShell, DormantCapabilityChip } from '../design/AkkiShell';
 import { AKKI_V4_PALETTE, AKKI_V4_TYPOGRAPHY } from '../design/akkiv4_design_system';
+import { useAuth } from '../hooks/useAuth';
+
+/* Owner P0 fix (2026-08-02) — "can't sign up".
+ * Root cause: UI-1-A retirement rebuilt the root as the six-tile shell but
+ * dropped the login/register entry points. Fresh visitors had zero path to
+ * self-signup. Fix: render an auth strip in the AkkiShell header `right`
+ * slot with three states (anon · signed-in · checking).
+ *
+ * Role display map — Canon-safe plain labels. Retired-vocab gate is
+ * case-insensitive; `ask_console_user` renders as "Viewer" to avoid
+ * reintroducing retired vocabulary and to speak Canon.
+ */
+const ROLE_DISPLAY = Object.freeze({
+  master_admin: 'Master admin',
+  admin: 'Admin',
+  dpo: 'DPO',
+  operator: 'Operator',
+  engineer: 'Engineer',
+  buyer: 'Buyer',
+  ask_console_user: 'Viewer',
+});
+
+// Highest-priority role first (for identities with multiple roles).
+const ROLE_PRIORITY = Object.freeze([
+  'master_admin', 'admin', 'dpo', 'engineer', 'buyer', 'operator', 'ask_console_user',
+]);
+
+function pickDisplayRole(roles) {
+  if (!Array.isArray(roles) || roles.length === 0) return 'Viewer';
+  for (const r of ROLE_PRIORITY) {
+    if (roles.includes(r)) return ROLE_DISPLAY[r] || 'Viewer';
+  }
+  // Fallback: first role, mapped or plain.
+  const first = roles[0];
+  return ROLE_DISPLAY[first] || 'Viewer';
+}
+
+function CanonAuthStrip() {
+  const { identity, logout } = useAuth();
+  // identity === null → checking; render placeholder to avoid layout flash.
+  if (identity === null) {
+    return <div data-testid="canon-os-auth-strip" data-testid-state="checking" style={{ minHeight: '32px' }} />;
+  }
+  if (identity === false) {
+    // Anonymous — the P0 fix: both entry points are visible on the root.
+    return (
+      <div
+        data-testid="canon-os-auth-strip"
+        data-testid-state="anon"
+        style={{
+          display: 'flex', alignItems: 'center', gap: '14px',
+          fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.85rem',
+        }}
+      >
+        <Link
+          to="/auth/login"
+          data-testid="canon-os-auth-signin-link"
+          style={{
+            color: AKKI_V4_PALETTE.navy,
+            textDecoration: 'none',
+            padding: '6px 10px',
+            border: `1px solid transparent`,
+          }}
+        >
+          Sign in
+        </Link>
+        <Link
+          to="/auth/register"
+          data-testid="canon-os-auth-signup-link"
+          style={{
+            background: AKKI_V4_PALETTE.navy,
+            color: AKKI_V4_PALETTE.cream,
+            textDecoration: 'none',
+            padding: '6px 12px',
+            fontWeight: 500,
+            letterSpacing: '0.01em',
+          }}
+        >
+          Create account
+        </Link>
+      </div>
+    );
+  }
+  // Signed-in — render email + Canon-safe role label + Sign out.
+  const roleLabel = pickDisplayRole(identity?.roles);
+  return (
+    <div
+      data-testid="canon-os-auth-strip"
+      data-testid-state="signed-in"
+      style={{
+        display: 'flex', alignItems: 'center', gap: '14px',
+        fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.85rem',
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.25 }}>
+        <span
+          data-testid="canon-os-auth-signed-in-email"
+          style={{ color: AKKI_V4_PALETTE.ink, fontWeight: 500 }}
+        >
+          {identity?.email}
+        </span>
+        <span
+          data-testid="canon-os-auth-signed-in-role"
+          style={{
+            color: AKKI_V4_PALETTE.sage, fontSize: '0.72rem',
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+          }}
+        >
+          {roleLabel}
+        </span>
+      </div>
+      <button
+        type="button"
+        data-testid="canon-os-auth-signout-button"
+        onClick={logout}
+        style={{
+          background: 'transparent',
+          color: AKKI_V4_PALETTE.navy,
+          border: `1px solid ${AKKI_V4_PALETTE.mist}`,
+          padding: '6px 12px',
+          cursor: 'pointer',
+          fontFamily: AKKI_V4_TYPOGRAPHY.labels,
+          fontSize: '0.8rem',
+        }}
+      >
+        Sign out
+      </button>
+    </div>
+  );
+}
 
 /* Canon §3.1 fixed nav (verbatim order · verbatim labels).
  * `state`:
@@ -233,6 +363,7 @@ export default function CanonOSShellPage() {
     <AkkiShell
       title="Canon OS"
       subtitle="Read the estate. Answer the question. Every claim receipted at every touch."
+      right={<CanonAuthStrip />}
     >
       <p
         data-testid="canon-os-preview-what-this-serves"

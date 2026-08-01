@@ -1,0 +1,54 @@
+{
+  "summary": "P0 Owner-reported 'can't sign up' bug end-to-end verification. Walked the exact Owner flow via Playwright against the preview URL: anon shell shows Sign in + Create account (data-testids present) → click Create account → /auth/register → submit valid email+pw → land back at / signed-in with email + 'Viewer' role label + Sign out button. All 10 P0 items PASS. Backend curl confirmed 201/409/422 shapes with roles=['ask_console_user'] + empty key_grants. One REGRESSION finding: /auth/login and /auth/register pages leak the retired term 'RMS Intelligence' in the page header (h1).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "/auth/login and /auth/register headers",
+        "issues": [
+          "Retired vocabulary 'RMS Intelligence' leaked in h1 title of AuthLoginPage.js (line 45-47) and AuthRegisterPage.js (line 41-43). The systemic vocab gate explicitly prohibits this term. Recommend replacing with Canon-safe wordmark such as 'Akki OS' (used by AkkiShell on all other Canon surfaces) or 'Canon OS'."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Replace 'RMS Intelligence' h1 in /app/frontend/src/pages/AuthLoginPage.js and /app/frontend/src/pages/AuthRegisterPage.js with a Canon-safe wordmark (e.g. 'Akki OS') to satisfy the retired-vocabulary gate mandated in the regression check."
+  ],
+  "critical_code_review_comments": [
+    "AuthLoginPage.js line 45 and AuthRegisterPage.js line 41 both render 'RMS Intelligence' as h1 — this is retired vocab per Canon §11.1 and the review's explicit regression clause. Every other Canon surface uses AkkiShell (title='Akki OS' or 'Canon OS'); the two auth pages diverge and are the only place this retired term still lives.",
+    "P0 auth-strip implementation on CanonOSShellPage.jsx is clean and correct: three states (checking/anon/signed-in) with distinct data-testids, role-priority map for ask_console_user → 'Viewer', ask_console_user literal does not leak to DOM (verified)."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "91% (10/11 — one regression on auth-page header wordmark)"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (used for duplicate-email test + admin verification of /team/access-register); fresh signup p0-verify-<ts>@example.com / verifypass123",
+  "seed_data_creation": "Created 1 new registered user (p0-verify-<timestamp>@example.com) via UI happy path signup; roles=['ask_console_user'] and empty key_grants verified via backend JWT payload.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "P0 Owner sign-up flow fully working. Backend /api/auth/register verified 201/409/422 with correct shapes. Frontend CanonAuthStrip renders anon/signed-in states with all required data-testids. UI-1-E gaps verified with admin: Registry tile state='lit', /team/access-register shows '321 rows · 220 active · 96 revoked · 5 pending' with SAMPLE badges present. Only outstanding item is retired-vocab regression on the two auth pages ('RMS Intelligence' h1) — trivial one-line fix in each file.",
+  "verified_p0_checklist": {
+    "anon_shell_shows_both_auth_links": "PASS",
+    "signup_link_navigates_to_register": "PASS",
+    "duplicate_email_409_honest_error": "PASS ('An account with this email already exists.')",
+    "short_password_422_honest_error": "PASS ('String should have at least 8 characters' — no [object Object])",
+    "happy_path_registration_lands_signed_in": "PASS",
+    "role_assignment_ask_console_user_no_key_grants": "PASS (backend JWT verified)",
+    "signed_in_strip_shows_email_role_signout": "PASS (role label='Viewer')",
+    "role_literal_ask_console_user_not_in_dom": "PASS",
+    "allowed_module_prove_reachable_as_viewer": "PASS",
+    "denied_module_team_access_register_not_white": "PASS (renders honest role-gating panel)",
+    "signout_returns_to_anon": "PASS",
+    "regression_ui_1_e_registry_tile_lit": "PASS",
+    "regression_ui_1_e_revoked_sample_row_visible": "PASS (96 revoked SAMPLE rows visible to admin)",
+    "regression_no_retired_vocab_on_root": "PASS",
+    "regression_no_retired_vocab_on_auth_pages": "FAIL — 'RMS Intelligence' present in h1 on /auth/login and /auth/register"
+  }
+}
