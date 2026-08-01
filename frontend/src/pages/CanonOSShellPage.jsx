@@ -63,10 +63,10 @@ export const CANON_NAV = Object.freeze([
   {
     id: 'prove',
     label: 'Prove',
-    tagline: 'Prove-one-run. Rulebook. The auditor\u2019s edge.',
-    path: null,
-    state: 'dormant',
-    section: 'Canon §9 · UI-1-D fold',
+    tagline: 'Answer with evidence. Honest when it cannot.',
+    path: '/prove',
+    state: 'lit',
+    section: 'Canon §9',
   },
   {
     id: 'team',
@@ -246,7 +246,7 @@ export default function CanonOSShellPage() {
         the Canon OS shell (Owner ruling 2026-07-31 preview-hygiene · standing).
         The root serves the new build only. Four modules are Canon-conformant
         and reachable (Connect · Registry · Use Data · Govern);
-        Prove and Team render dormant until UI-1-D and UI-1-E land.
+        Team renders dormant until UI-1-E lands.
         No legacy landing renders here.
       </p>
 

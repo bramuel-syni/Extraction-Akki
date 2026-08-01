@@ -30,6 +30,7 @@ import GovernHomePage from '../../pages/govern/GovernHomePage';
 import GovernHoldsPage from '../../pages/govern/GovernHoldsPage';
 import ConnectHomePage from '../../pages/connect/ConnectHomePage';
 import ConnectSetupPage from '../../pages/connect/ConnectSetupPage';
+import RegistryWhatYouHoldPage from '../../pages/registry/RegistryWhatYouHoldPage';
 
 // ---- Registry of fixture-capable surfaces ------------------------------------
 // Every UI-1-* sub-cycle that lands a new surface MUST register here.
@@ -224,7 +225,54 @@ const SAMPLE_MARKING_REGISTRY = [
     ],
     row_testid_pattern: /^connect-setup-registry-row-/,
   },
-  // ---- UI-1-D · Registry/Prove surfaces · REGISTER HERE ----
+  // ---- UI-1-D · Registry ("What You Hold") + Prove surfaces ----
+  {
+    surface_id: 'registry_what_you_hold',
+    canon_ref: 'Canon §5 (UI-1-D)',
+    Component: RegistryWhatYouHoldPage,
+    endpoints: [
+      { api_method: 'registryWhatYouHold', mock: {
+        status: 200,
+        body: {
+          canon_ref: 'Canon §5',
+          generated_at_iso: 't',
+          connected: { connected: 1, in_progress: 0, awaiting_credentials: 0, failed: 0, pending: 0, total: 1, last_sync_iso: 't' },
+          holdings: {
+            rows: [
+              { source_id: 'src-sample-conn-x', source_name: 'Sample Connected', ring: 'ring_1_established_fact',
+                domain: 'records', measured: true, corpus_row_count: 500, unmeasured_reason_plain: null,
+                method: 'extract', is_sample: true },
+            ],
+            rings_axis: ['ring_1_established_fact'],
+            domains_axis: ['records'],
+            measured_count: 1, unmeasured_count: 0,
+          },
+          intelligence: { declaration_baseline_count: 3, inference_overlay_count: 0, inference_state: 'dormant', declaration_only: true },
+          backend: { planes_active: 0, registries_effective: 0, auto_run_ceiling_usd: 1000, ceiling_source_seam: 'checker_requests · auto_run_ceiling_usd' },
+        },
+      }},
+      { api_method: 'registryOpportunityBriefs', mock: {
+        status: 200,
+        body: { canon_ref: 'Canon §5', count: 1, briefs: [
+          { brief_id: 'brief-sample-y', title: 'Sample brief',
+            summary_plain: 'seeded fixture', is_sample: true,
+            cta_label: 'Put this to work', cta_route: '/use-data?prefill_from_brief=brief-sample-y' },
+        ]},
+      }},
+      { api_method: 'registryGapRegister', mock: {
+        status: 200,
+        body: { canon_ref: 'Canon §5.5', count: 1, gaps: [
+          { gap_id: 'gap-sample-z', question_plain: 'seeded gap',
+            rank_score: 0.5, state: 'open', is_sample: true,
+            cta_label: 'Queue this gap', cta_route: '/use-data?prefill_from_gap=gap-sample-z' },
+        ]},
+      }},
+    ],
+    sample_badge_testid_patterns: [
+      /^registry-sample-badge-/,
+    ],
+    row_testid_pattern: /^(registry-holdings-row-|registry-brief-|registry-gap-)/,
+  },
   // ---- UI-1-E · Team surfaces · REGISTER HERE ----
 ];
 
@@ -243,7 +291,7 @@ function primeEndpoints(entry) {
 
 describe('SYSTEMIC · sample_marking_systemic_gate · AS-U2 invariant across all fixture-capable surfaces', () => {
   it('registry is non-empty (regression: every new sub-cycle MUST register)', () => {
-    expect(SAMPLE_MARKING_REGISTRY.length).toBeGreaterThanOrEqual(5);
+    expect(SAMPLE_MARKING_REGISTRY.length).toBeGreaterThanOrEqual(6);
   });
 
   SAMPLE_MARKING_REGISTRY.forEach((entry) => {

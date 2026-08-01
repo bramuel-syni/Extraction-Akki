@@ -27,6 +27,10 @@ import MemoryHomePage from './pages/memory/MemoryHomePage';
 import MemoryPlaneDetailPage from './pages/memory/MemoryPlaneDetailPage';
 import MemoryPlaneObservabilityPage from './pages/memory/MemoryPlaneObservabilityPage';
 import RegistryEstateMapPage from './pages/registry/RegistryEstateMapPage';
+// UI-1-D · Registry ("What You Hold") + Prove per Canon §5 + §9 (2026-08-02).
+import RegistryWhatYouHoldPage from './pages/registry/RegistryWhatYouHoldPage';
+import ProvePage from './pages/prove/ProvePage';
+import ProveWalkPage from './pages/prove/ProveWalkPage';
 // Phase 3 sub-cycle 3 — Govern module surfaces (Canon §7).
 import GovernHomePage from './pages/govern/GovernHomePage';
 import GovernRetentionPage from './pages/govern/GovernRetentionPage';
@@ -45,6 +49,9 @@ import UseDataDeveloperSurfacePage from './pages/use_data/UseDataDeveloperSurfac
 import UseDataVerdictDemoPage from './pages/use_data/UseDataVerdictDemoPage';
 // UI-1-A addendum · dormant modules per R2 (Canon §3.1 nav order preserved
 // even for scheduled-but-not-yet-built modules; honest dormant tiles).
+// UI-1-D (2026-08-02): Prove tile goes LIVE (see /prove); ProveDormantPage
+// retained as retired-to-salvage.
+// eslint-disable-next-line no-unused-vars
 import ProveDormantPage from './pages/ProveDormantPage';
 import TeamDormantPage from './pages/TeamDormantPage';
 import { AuthProvider } from './hooks/useAuth';
@@ -72,9 +79,12 @@ export default function App() {
           <Route path="connect/rules" element={<ConnectRulesPage />} />
           <Route path="connect/source/:sourceId" element={<ConnectSourceProfilePage />} />
           <Route path="connect/setup" element={<ConnectSetupPage />} />
-          {/* Canon §8 · Registry Estate Map (sub-cycle 2 shell · full prototype
-              shape lands in UI-1-D). Memory-under-govern lives here too. */}
-          <Route path="registry" element={<RegistryEstateMapPage />} />
+          {/* Canon §8 · Registry Estate Map — retained as read surface.
+              UI-1-D (2026-08-02): '/registry' now lands on the full
+              "What You Hold" prototype (Canon §5). Sub-cycle-2 shell moved
+              to /registry/estate-map for salvage. */}
+          <Route path="registry" element={<RegistryWhatYouHoldPage />} />
+          <Route path="registry/estate-map" element={<RegistryEstateMapPage />} />
           <Route path="memory" element={<MemoryHomePage />} />
           <Route path="memory/planes/:planeId" element={<MemoryPlaneDetailPage />} />
           <Route path="memory/planes/:planeId/observability" element={<MemoryPlaneObservabilityPage />} />
@@ -94,8 +104,9 @@ export default function App() {
           <Route path="govern/rules" element={<GovernEstateRulesPage />} />
           <Route path="govern/registries" element={<GovernRegistriesPage />} />
           <Route path="govern/holds" element={<GovernHoldsPage />} />
-          {/* Canon §9 · Prove — DORMANT (UI-1-D fold). */}
-          <Route path="prove" element={<ProveDormantPage />} />
+          {/* Canon §9 · Prove — LIVE (UI-1-D 2026-08-02). */}
+          <Route path="prove" element={<ProvePage />} />
+          <Route path="prove/trace/:traceId" element={<ProveWalkPage />} />
           {/* Canon §5 · Team — DORMANT (UI-1-E fold). */}
           <Route path="team" element={<TeamDormantPage />} />
           {/* Master Admin ceremony surfaces (kept live; reached from Govern for now). */}

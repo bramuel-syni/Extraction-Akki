@@ -202,6 +202,31 @@ export const api = {
     client
       .post('/connect/declared_registries', payload, { validateStatus: (s) => s >= 200 && s < 500 })
       .then((r) => ({ status: r.status, body: r.data })),
+  // UI-1-D · Registry "What You Hold" + Prove (Canon §5 + §9).
+  registryWhatYouHold: () =>
+    client
+      .get('/registry/what_you_hold', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  registryOpportunityBriefs: () =>
+    client
+      .get('/registry/opportunity_briefs', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  registryGapRegister: () =>
+    client
+      .get('/registry/gap_register', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  registryQueueGap: (gapId) =>
+    client
+      .post('/registry/gap_register/queue', { gap_id: gapId }, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  proveAsk: (question) =>
+    client
+      .post('/prove/ask', { question }, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  proveTrace: (traceId) =>
+    client
+      .get(`/prove/trace/${encodeURIComponent(traceId)}`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
   // Phase 3 sub-cycle 2 — Memory Service + Registry (Owner ruling 2026-08-02).
   memoryListPlanes: () =>
     client

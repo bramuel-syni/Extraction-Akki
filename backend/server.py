@@ -207,6 +207,11 @@ app.include_router(connect_router.router, prefix="/api")
 from routers import govern as govern_router  # noqa: E402
 app.include_router(govern_router.router, prefix="/api")
 
+# UI-1-D · Registry ("What You Hold") + Prove (Canon §5 + §9).
+from routers import registry as registry_router  # noqa: E402
+app.include_router(registry_router.router, prefix="/api")
+app.include_router(registry_router.prove_router, prefix="/api")
+
 
 @app.on_event("startup")
 async def _startup() -> None:
@@ -293,6 +298,11 @@ async def _startup() -> None:
             seed_connect_sample_fixtures_if_absent,
         )
         await seed_connect_sample_fixtures_if_absent(_sample_ops)
+        # UI-1-D · Registry + Prove sample fixtures. Idempotent.
+        from services.registry.sample_fixture_seeder import (
+            seed_registry_prove_sample_fixtures_if_absent,
+        )
+        await seed_registry_prove_sample_fixtures_if_absent(_sample_ops)
     except Exception:
         log.exception("rms.startup: async delivery substrate boot failed")
         raise
