@@ -434,6 +434,13 @@ async def access_register(request: Request):
             "is_sample": bool(doc.get("is_sample", False)),
         })
 
+    # Owner Message 611 · iter25 code-review symmetry:
+    # add revoked + pending counts to the API response so the frontend
+    # counts strip doesn't derive them from a windowed slice (which could
+    # understate on very large collections). Total/active continue to
+    # reflect the entire filtered set.
+    revoked_count = sum(1 for r in rows if r["state"] == "revoked")
+    pending_count = sum(1 for r in rows if r["state"] == "pending_approval")
     # The Master Admin (and engineer/admin) may grant/revoke; DPO reads.
     can_grant = _has(identity, "master_admin", "admin", "engineer")
     can_read_all = _has(identity, "master_admin", "admin", "engineer", "dpo")
@@ -441,7 +448,12 @@ async def access_register(request: Request):
         "canon_ref": "Canon §3.2 · UI-1-E · B · Access Register",
         "identity": identity.email,
         "rows": rows,
-        "counts": {"total": len(rows), "active": sum(1 for r in rows if r["state"] == "active")},
+        "counts": {
+            "total": len(rows),
+            "active": sum(1 for r in rows if r["state"] == "active"),
+            "revoked": revoked_count,
+            "pending_approval": pending_count,
+        },
         "capabilities": {
             "can_read_all": can_read_all,
             "can_grant": can_grant,

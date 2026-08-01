@@ -136,7 +136,7 @@ const ACCESS_REGISTER_ENVELOPE_MASTER_ADMIN = {
       is_sample: true,
     },
   ],
-  counts: { total: 3, active: 2 },
+  counts: { total: 3, active: 2, revoked: 1, pending_approval: 0 },
   capabilities: { can_read_all: true, can_grant: true, can_revoke: true },
   role_gate_doctrine_plain: 'Master Admin: read + grant + revoke. DPO: read (record) only. Operator / Analyst / other roles: read own grants.',
 };

@@ -3,7 +3,21 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **UI-1 COMPLETE · UI-1-E CLOSED · SHELL FULLY LIT · Parity 36/36 · awaiting Owner independent verification of Team + carriage of UI-1 roll-up**)
+## Current gate status (2026-08-02 · **UI-1 COMPLETE · UI-1-E CLOSED (iter25 · Owner Message 611 spot-check gaps CLOSED) · SHELL FULLY LIT WITH ALL SIX TILES · Parity 36/36 · awaiting Owner independent verification + carriage of UI-1 roll-up**)
+
+### UI-1-E iter25 addendum (2026-08-02) — Owner Message 611 narrow re-verification
+
+Owner spot-check found two narrow gaps blocking close. Both CLOSED in iter25:
+
+- **GAP 1 · Registry tile stale (PARTIAL → LIT):** `CanonOSShellPage.jsx` `TILES` array Registry `state` flipped `'partial' → 'lit'`. Staleness-guard Jest cell (`canon_os_root_vocab_gate.test.js`) upgraded to require ALL six tiles LIT · no dormant · no partial · from UI-1-E onward. Any future regression to `partial`/`dormant` reds this cell.
+- **GAP 2 · Revoked SAMPLE row not visible on `/team/access-register`:** RCA — collection grew to 313 rows during iter23/24 tests; endpoint sort `.sort("created_at_iso", -1)` pushed 5 sample revoked (older timestamps) past position 30 (frontend visible slice). Fix (3-part defense-in-depth):
+  1. **Backend sort discipline:** compound sort `[(is_sample, -1), (state, 1), (created_at_iso, -1)]` pins sample-marked rows to the top of every response regardless of collection growth. First revoked-sample now at index 15/60 in live data.
+  2. **Frontend slice widened 30→60.**
+  3. **Symmetric API counts (iter25 code-review nit):** `/api/team/access_register` response `counts` now returns `{total, active, revoked, pending_approval}` — frontend counts strip reads directly from the API, no windowed-slice derivation.
+- **New Jest cell** (`at least one SAMPLE revoked grant renders with visible revoked state + timestamp`) asserts: `data-state="revoked"`, REVOKED state badge, 'revoked · 2026-08-02' timestamp, 'next login/refresh' propagation phrase, SAMPLE badge with `data-sample-badge='true'`.
+- **New backend invariant cell** (`test_e_b1a_access_register_sample_revoked_row_visible_in_first_slice`) asserts at least 1 sample revoked row in first 60 with `when_revoked_iso` and propagation phrase.
+- **Testing agent iter25:** `retest_needed: false`. GAP 1: 6 LIT tiles + 0 partial + 0 dormant · GAP 2: 5 sample revoked rows visible in first 60. Regression: DPO break-in unchanged; grant→login→propagation single-source path unchanged; constitutional seats dormant-honest unchanged. Parity 36/36 held.
+- **Documents updated:** `/app/docs/rulings/ui1e_close_report_2026-08-02.md` (iter25 addendum · 3 sections), `/app/docs/rulings/ui1_rollup_2026-08-02.md` (final testing floor + iter25 verdict).
 
 ### UI-1-E close (2026-08-02) — Team module per Canon §3.2 + operating model A.5 (SLOT-3 fold-in)
 

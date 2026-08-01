@@ -161,3 +161,94 @@ Sign in as **`admin@rms.example.com / admin-b1-test-pw`** at https://governance-
 - [x] Iter23 CRITICAL regression identified + fixed + re-verified in iter24 · `retest_needed: false`.
 
 **UI-1-E ready for Owner independent verification before UI-1 roll-up goes to Owner.**
+
+---
+
+## Addendum · Owner Message 611 narrow re-verification (iter25 · 2026-08-02)
+
+Owner independently verified UI-1-E substance PASSED (approval surface · access register grammar · constitutional seats). Two narrow gaps flagged:
+
+### GAP 1 · Registry tile stale (PARTIAL → LIT)
+
+**Owner ruling:** "Registry tile still renders PARTIAL on the root shell. That disclosure was correct while What-You-Hold was pending; UI-1-D delivered it, so the tile is stale. Flip Registry to LIVE (and check the tile-state source is derived, not hand-set, so it can't go stale again — if it's a hardcoded label, derive it from the route registry or at minimum add a Jest cell asserting all six tiles LIVE from UI-1-E onward)."
+
+**Fix:** `CanonOSShellPage.jsx` `TILES` array: Registry `state` flipped `'partial' → 'lit'`. Section string updated from "Canon §8 · sub-cycle 2 landing · full prototype shape in UI-1-D" → "Canon §5 · UI-1-D".
+
+**Staleness guard:** the existing shell vocab Jest test was upgraded to require **all six modules render LIT · no dormant · no partial · from UI-1-E onward**:
+
+```js
+test('All six modules render LIT after UI-1-E (no dormant, no partial · shell fully lit)', () => {
+  ['connect', 'registry', 'use-data', 'govern', 'prove', 'team'].forEach((id) => {
+    const tile = screen.getByTestId(`canon-nav-tile-${id}`);
+    expect(tile.querySelector('[data-testid="canon-nav-state-dormant"]')).toBeNull();
+    expect(tile.querySelector('[data-testid="canon-nav-state-partial"]')).toBeNull();
+    expect(tile.querySelector('[data-testid="canon-nav-state-lit"]')).toBeTruthy();
+  });
+});
+```
+
+Any future regression that flips a tile back to `partial`/`dormant` will red this cell.
+
+Testing agent iter25 verified: `document.querySelectorAll('[data-testid=canon-nav-state-partial]')` → 0 across the entire shell page.
+
+### GAP 2 · Revoked SAMPLE row missing from Access Register
+
+**Owner ruling:** "No revoked row renders on the Access Register. Your seeder claimed 1 revocation fixture; the rendered register shows none. Diagnose (seeder not creating it, aggregator filtering revoked rows out, or renderer skipping them) and fix so at least one SAMPLE revoked grant renders with visible revoked state + revocation reason for admin. Add the page-level gate cell."
+
+**RCA:** the seeder DID create 5 sample revoked rows (verified in DB · `state=revoked · is_sample=true · sample-team-grant-revoked-{uid}` per identity). The endpoint returned all 313 rows in the register. The frontend sliced to the first 30 (`data.rows.slice(0, 30)`). The endpoint's sort was `.sort("created_at_iso", -1)` — newest first. Because iter23/24 test rounds created many recent (non-sample) grants during the grant→revoke roundtrip tests, the collection grew to 313 rows; the 5 sample revoked fixtures — inserted at startup with older `created_at_iso` — got pushed past position 30 and became invisible.
+
+**Fix (3-part · defense-in-depth):**
+
+1. **Backend sort discipline (single-source guard):** endpoint sort changed to a compound tuple:
+   ```python
+   cursor = grants_coll.find(base_query).sort([
+       ("is_sample", -1),      # samples first — pinned regardless of collection growth
+       ("state", 1),           # active < pending_approval < revoked (groups non-active together for visibility)
+       ("created_at_iso", -1), # newest first within same group
+   ])
+   ```
+   Sample-marked rows now appear at the top of every response. Confirmed live: first revoked-sample at index 15/60 out of 315 total rows.
+
+2. **Frontend slice widened 30→60:** cheap defense-in-depth. Given the sort now pins samples first, the redundancy is safe.
+
+3. **Symmetric API counts (iter25 code-review nit):** `/api/team/access_register` response `counts` block now returns `{total, active, revoked, pending_approval}` (was `{total, active}` only). Frontend counts strip reads these from the API instead of deriving from a windowed slice — prevents understatement for very large collections.
+
+**New page-level gate cells:**
+
+Frontend Jest cell:
+```js
+it('/team/access-register: at least one SAMPLE revoked grant renders with visible revoked state + timestamp', async () => {
+  ...
+  const revokedRow = screen.getByTestId('team-grant-row-sample-team-grant-revoked-abc');
+  expect(revokedRow.getAttribute('data-state')).toBe('revoked');
+  expect(revokedRow.querySelector('[data-testid="team-grant-state-revoked"]')).toBeTruthy();
+  expect(revokedRow.textContent).toMatch(/revoked.*2026-08-02/i);
+  expect(screen.getByTestId('team-grant-propagation-sample-team-grant-revoked-abc').textContent)
+    .toMatch(/next login\/refresh/i);
+  expect(screen.getByTestId('team-grant-sample-badge-sample-team-grant-revoked-abc')
+    .getAttribute('data-sample-badge')).toBe('true');
+});
+```
+
+Backend invariant cell:
+```python
+async def test_e_b1a_access_register_sample_revoked_row_visible_in_first_slice():
+    ...
+    visible = body["rows"][:60]
+    revoked_samples = [r for r in visible
+                       if r["state"] == "revoked" and r.get("is_sample")]
+    assert len(revoked_samples) >= 1
+    assert "next login/refresh" in revoked_samples[0]["propagation_state_plain"].lower()
+    assert revoked_samples[0]["when_revoked_iso"]
+```
+
+Testing agent iter25 verified: 5 sample revoked rows visible in first 60. Counts strip renders "315 rows · 217 active · 93 revoked · 5 pending" · REVOKED state badge visible · 'revoked · 2026-08-…' timestamp visible · 'next login/refresh' propagation phrase visible · SAMPLE badge with `data-sample-badge='true'`.
+
+### Post-fix testing floor (iter25 · `retest_needed: false`)
+
+- Backend UI-1-E invariants: **13/13 pass** (+1 new: `test_e_b1a_access_register_sample_revoked_row_visible_in_first_slice`).
+- Frontend Jest: **19 suites · 184 pass · 3 skipped · 0 fail** (+1 new UI-1-E cell for revoked-visibility · +1 shell vocab cell now requires all six LIT).
+- Live-preview iter25: **both GAPs CLOSED**. GAP 1: 6 LIT tiles + 0 partial + 0 dormant. GAP 2: 5 sample revoked in first 60 · state badge + timestamp + propagation + SAMPLE badge all rendered.
+- Regression: DPO break-in unchanged (`test_e_b3`). Grant→login→propagation single-source path unchanged. Constitutional seats dormant-honest unchanged. Parity 36/36 held constant.
+
+**Iter25 verdict:** both Owner Message 611 GAPs CLOSED. Staleness-guard test cell prevents future regression to `partial`/`dormant` on any of the six module tiles. Sort discipline on the access register endpoint prevents sample-revoked rows from being pushed off the visible window even as the register grows.

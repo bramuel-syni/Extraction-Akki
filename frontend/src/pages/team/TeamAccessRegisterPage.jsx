@@ -333,8 +333,8 @@ export default function TeamAccessRegisterPage() {
               color: AKKI_V4_PALETTE.sage, marginBottom: '8px',
             }}>
               {data.counts.total} rows · {data.counts.active} active ·{' '}
-              {(data.rows || []).filter((r) => r.state === 'revoked').length} revoked ·{' '}
-              {(data.rows || []).filter((r) => r.state === 'pending_approval').length} pending
+              {data.counts.revoked ?? 0} revoked ·{' '}
+              {data.counts.pending_approval ?? 0} pending
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead>
