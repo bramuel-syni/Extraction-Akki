@@ -3,7 +3,54 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **UI-1 COMPLETE · UI-1-E CLOSED (iter25 · Owner Message 611 spot-check gaps CLOSED) · SHELL FULLY LIT WITH ALL SIX TILES · Parity 36/36 · awaiting Owner independent verification + carriage of UI-1 roll-up**)
+## Current gate status (2026-08-01 · **P0-A + P0-B AUTH FIXED (iter27 · 15/15 PASS) · CD-1 + CP-1 + LC v1.0 + Adoption Spec v1.0 INTAKE FILED · Canon SHA byte-identical · UI-1 COMPLETE · Parity 36/36**)
+
+### 2026-08-01 · P0 auth reachability + sign-in restoration + Owner intake
+
+**P0-A · "can't sign up" — CLOSED (iter26 + iter27).**
+- Root cause: UI-1-A retirement (2026-07-31) rebuilt the root as the Canon OS six-tile shell but dropped the login/register entry points; fresh visitors had ZERO path to auth.
+- Fix: `CanonAuthStrip` component added to `CanonOSShellPage.jsx` via `AkkiShell` `right` prop. Three states: `checking` (empty placeholder), `anon` (Sign in + Create account links top-right), `signed-in` (email + Canon-safe role label + Sign out button).
+- Canon-safe role mapping (via `ROLE_DISPLAY` + `ROLE_PRIORITY`): `master_admin`→"Master admin", `admin`→"Admin", `dpo`→"DPO", `operator`→"Operator", `engineer`→"Engineer", `buyer`→"Buyer", `ask_console_user`→"Viewer". Role literal `ask_console_user` never leaks to DOM.
+- Backend already correct (verified live): 201 fresh signup with `roles=['ask_console_user']` + empty `key_grants` (Canon §3.2 lowest-privilege default), 409 `email_already_registered` on duplicate, 422 array-shape validation error (renders honestly via `formatApiErrorDetail`).
+- Retired-vocab regression collateral: h1 on `/auth/login` + `/auth/register` flipped from `RMS Intelligence` → `Akki OS`. Retired-vocab gate extended to walk both auth pages (`RETIRED_TERMS × 2 pages = +24 assertions`).
+
+**P0-B · "preview signin not working" — CLOSED (iter27).**
+- Root cause: credit-exhaustion service outage during Owner's attempt. Services restored (`supervisor` restart cycle) · `/api/readyz` returns parity 36/36 · admin login curl + Playwright verified end-to-end.
+
+**Testing agent verdict (iter27 · full flow · 15/15 PASS · retest_needed=false · zero bugs · 100% success):**
+- Anon shell shows both auth links · Sign in works with admin creds · wrong-password renders `auth-login-error-denied` with 401 `{reason: auth_missing}` (distinct from RefusalCard grammar) · sign-out returns to anon · Create account link reaches /auth/register · fresh registration lands signed-in with "Viewer" role · duplicate-email + short-password render honest errors · role assignment correct · role literal absent from DOM · allowed module /prove reachable · denied module /team/access-register renders honest role-gating panel (never white screen, never governed-refusal styling) · retired vocab absent from auth pages · UI-1-E gap 1 (Registry tile LIT) + gap 2 (revoked SAMPLE row visible) still holding · backend health parity 36/36.
+
+**Regression:** Backend pytest `1202 pass · 1 skip · 0 fail` (invariants). Frontend Jest `20 suites · 197 pass · 3 skipped · 0 fail` (from 183 → +13 P0 gate cells; retired-vocab gate expanded to auth pages). Parity **36/36 held constant**.
+
+**Test artifacts:** `/app/test_reports/iteration_26.json` (P0-A end-to-end · 10/10 PASS) · `/app/test_reports/iteration_27.json` (P0-A + P0-B + full regression · 15/15 PASS). New gate: `/app/frontend/src/__tests__/ui_1_e/canon_os_auth_strip_p0_gate.test.js` (13 cells).
+
+### 2026-08-01 · Owner document intake — CD-1 + CP-1 + LC v1.0 + Adoption Spec v1.0 + Canon re-upload
+
+**Canon re-upload:** BYTE-IDENTICAL — SHA256 `6d9ed7d8bce5ce3fed180407a20d4550a3a95744ccb21735ac66351ffe3b3757` matches committed `/app/docs/mandates/AKKI_OS_EXPERIENCE_CANON_v1.md` (594 lines). Record-only, no supersession, no deltas.
+
+**Four new documents committed to `/app/docs/mandates/`:**
+| # | File | SHA256 | Lines |
+|---|---|---|---|
+| 1 | `AKKI_OS_CORRECTIVE_DIRECTIVE_CD1.md` | `086aef119490bdb64d5b4930ed26855630de1bb7409fad7a9959f61ad6afa7fd` | 241 |
+| 2 | `AKKI_OS_COMMISSIONING_PACKAGE_CP1.md` | `1cdcced0a5b52b843286610a862ef5e263eb5ec2dd8f49dd2f8350c16678cc74` | 158 |
+| 3 | `AKKI_OS_LLM_CONSUMPTION_LEVERS_v1.md` | `925c06901ff693e1530bfdefc2d17c33ef55bff9e395dee00808d9112997ae8d` | 167 |
+| 4 | `akkios_external_pattern_adoption_spec_v1.0.md` | `91d71c852e98c5e79fb0a2a599e65eb097bb81d134281d1d58afe042d52709c4` | 218 |
+
+**Intake report (per-doc summary + HAZARD-STOP scan + combined build queue):** `/app/docs/rulings/owner_intake_2026-08-01_cd1_cp1_lc1_adoption_canon-reup.md`.
+
+**HAZARD-STOP scan:** CLEAN across all four docs. CD-1 §4 preservation register is intact — the P0 CanonAuthStrip is a UX addition on the delivered shell (no contract, no seam, no gate, no frozen-contract impact) → no §4 conflict. The stale anchors in Adoption Spec v1.0 (Commission View / Objective Wizard / TargetOutcome / test_set_ref / FIX-2 / FIX-4 / insurance telemetry / internal reduction-skill mandate) are ALL re-mapped or STRUCK by CP-1 Part 2 — MUST NOT act on stale anchors.
+
+**Combined build queue emerging (14 items across Tracks A/B/C/D — see intake report):**
+- **Track A (corrections)** — CD §2 record corrections (definition_of_done_v1.md · Akki-for-Exec + Portal removal from this-build registers · provenance annotations on $1,000 ceiling + UR-2 mappings · journal errata) · CD §3 conformance completions (In-progress/Ready on /use-data · retire /memory + /master-admin/* from top-level nav · /api/ask wire name) · CD-1.5 tier-lock erratum + bound · CD-1.6 stub-figure marking · CD-5.2 DOM sweep for "scheduled for UI-2" copy.
+- **Track B (priority · consumption reduction)** — CD-1.3 baseline capture BEFORE any LC enables · LC-1 cache → LC-2 routing → LC-3 narrowing (each enabled separately for attribution) · A-1 compression at terminal-test approach.
+- **Track C (evidence machinery)** — A-2 protocol + evidence register (HARD ORDERING: must complete before terminal test) · A-3 adopted portions · A-4 harness dormant-ready.
+- **Track D (GPU proving)** — CD-1.2 worker onboarding pack; independent of A/B/C.
+
+**Awaiting Owner review of intake report before dispatching any Track A-D item.**
+
+---
+
+## Prior gate status (2026-08-02 · **UI-1 COMPLETE · UI-1-E CLOSED (iter25 · Owner Message 611 spot-check gaps CLOSED) · SHELL FULLY LIT WITH ALL SIX TILES · Parity 36/36 · awaiting Owner independent verification + carriage of UI-1 roll-up**)
 
 ### UI-1-E iter25 addendum (2026-08-02) — Owner Message 611 narrow re-verification
 
