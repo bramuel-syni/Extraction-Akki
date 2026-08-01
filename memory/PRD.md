@@ -3,7 +3,55 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-01 · **P0-A + P0-B AUTH FIXED (iter27 · 15/15 PASS) · CD-1 + CP-1 + LC v1.0 + Adoption Spec v1.0 INTAKE FILED · Canon SHA byte-identical · UI-1 COMPLETE · Parity 36/36**)
+## Current gate status (2026-08-01 · **FIDELITY B1+B2 CLOSED (iter28 · 12/12 PASS) · Owner hold before B3-B10 · CD-5.2 sprint-decontamination fix landed · CD-1+CP-1+LC1+Adoption+CIF+RWP-1 all filed · Parity 36/36**)
+
+### 2026-08-01 · Fidelity defect cycle — Batches B1 (shell) + B2 (Registry) CLOSED
+
+**Owner directive (2026-08-01 verbatim):** "The front end is built exactly as Akki_v4_Standalone__1_.html (sha256 2ab55d9f…). Every page: identical typography, layout, spacing, composition, section order, and flow. A page that differs from the file is a defect. The only permitted difference: live data where the file shows fake data. Ship B1 (shell foundation) + B2 (Registry, the prototype's default landing) first, then HOLD for Owner review at the preview before B3-B10 proceed."
+
+**File of record:** `/app/docs/mandates/Akki_v4_Standalone.html` · SHA256 `2ab55d9f0f317e1e8721fe1a598dc51522e45b6f9b42c2513c843e7a238f1fba` · 919,853 bytes. Fresh URL (hli5ed9s) byte-identical to prior (vbpqdvws).
+
+**Batch B1 (shell foundation) landed:**
+- `AkkiV4Shell.jsx` (new) · persistent 216 px sidebar + 66 px rich header per prototype tokens · Canon nav in prototype order Connect · Registry · Use Data · Govern · Prove · Team.
+- `AkkiV4ShellLayout.jsx` (new) · React Router layout wrapper.
+- `akkiv4_design_system.js` extended with `AKKI_V4_PROTO` + `AKKI_V4_PROTO_TYPE` tokens (Instrument Sans + Newsreader + Spline Sans Mono).
+- `AkkiShell.jsx` updated with `NestedInAkkiV4ShellContext` to suppress double-chrome when legacy inner shell renders inside AkkiV4Shell.
+- `App.js` rewritten · every in-app route wraps in AkkiV4ShellLayout · root `/` redirects to `/registry`.
+- `public/index.html` fonts swapped to Instrument Sans + Newsreader + Spline Sans Mono.
+- Six-tile CanonOSShellPage retired from live tree (file kept as salvage).
+
+**Batch B2 (Registry V4 landing) landed:**
+- `RegistryV4Page.jsx` (new) · full prototype fidelity: hero + Newsreader 34 px composed sentence + underlined facts + maroon opportunities link + Run census button + Measure/Record tabs + 6-tile stat strip + 1.5fr:1fr composition grid with view select + hatched-territory legend + What-it-can-do CTAs + item-by-item 8-column table with hatched chip.
+- Live-data policy: fetch `/api/registry/what_you_hold` + `/opportunity_briefs` only when a token is present; anon visitors see SAMPLE fixture per Canon AS-U2.
+
+**Testing agent (iter28) verdict:** `retest_needed:false` · **12/12 PASS · 90 assertions** · 100% success rate · zero bugs · four initial "fails" all verified as test-script artifacts (HTML entity encoding + too-strict length threshold on honestly role-gated anon module visits).
+
+**Regression envelope:**
+- Frontend Jest: 21 suites · 204 passed · 3 skipped · 0 failed.
+- Backend invariants: 1208 passed · 1 skipped · 0 failed.
+- Parity **36/36 held constant** (no new frozen contracts).
+- CD-5.2 sprint-decontamination fix (backend team.py + shipped-copy gate) still green.
+- P0 iter27 auth-strip + retired-vocab + UI-1-E gaps all still hold.
+
+**Test artifacts:**
+- `/app/test_reports/iteration_28.json` (12/12 PASS)
+- `/app/docs/rulings/fidelity_batch_b1_b2_close_2026-08-01.md` (close report)
+- `/app/docs/rulings/frontend_fidelity_defect_cycle_audit_2026-08-01.md` (parent audit + batch plan)
+- `/app/frontend/src/__tests__/fidelity/per_page_parity_checklist_gate.test.js` (standing gate · 51 rows · B1+B2 rows flipped to PASS/DEVIATION_LIVE_DATA_ONLY)
+
+**Owner hold:** B3–B10 NOT proceeding until Owner verifies B1+B2 at the preview. Awaiting steer.
+
+**Backlog by Owner-approved order (10 batches, B1+B2 CLOSED):**
+- B2.b · Registry `/registry/artifact/:id` prototype fidelity (small)
+- B3 · Connect batch
+- B4 · Use Data batch (absorbs CD-3.1 In-progress/Ready + commissions view retirement + Track B baseline capture)
+- B5-B6 · Govern batches
+- B7 · Prove batch (Ask Akki drawer + Memos + Public Receipts + How-answers + Walk polish)
+- B8 · Team batch
+- B9 · CD-3.2 /memory + /master-admin retirement + CD-3.3 /api/ask wire
+- B10 · Final side-by-side + roll-up
+
+### Prior gate status (2026-08-01 · **P0-A + P0-B AUTH FIXED (iter27 · 15/15 PASS) · CD-1 + CP-1 + LC v1.0 + Adoption Spec v1.0 INTAKE FILED · Canon SHA byte-identical · UI-1 COMPLETE · Parity 36/36**)
 
 ### 2026-08-01 · P0 auth reachability + sign-in restoration + Owner intake
 

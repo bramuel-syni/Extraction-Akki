@@ -443,6 +443,10 @@ function useRegistryData() {
   const [payload, setPayload] = useState(null);
   const [briefs, setBriefs] = useState(null);
   useEffect(() => {
+    // Only fetch when a token is present — anon visitors see the SAMPLE
+    // fixture (Canon AS-U2). This avoids noisy 401s in the console for
+    // the /registry landing which anon visitors reach on every root hit.
+    if (!tokenStore.getAccessToken()) return () => {};
     let alive = true;
     (async () => {
       try {
