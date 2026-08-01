@@ -89,7 +89,7 @@ const APPROVAL_SURFACE_ENVELOPE = {
       requested_at_iso: null,
       linked_record_route: '/govern/record/rule-changes',
       state: 'dormant_honest',
-      state_reason_plain: 'This class of approval is registered in Canon; its dispatch pipeline is scheduled for UI-2.',
+      state_reason_plain: 'This class of approval is registered in Canon; its dispatch pipeline awaits owner dispatch.',
       is_sample: false,
     },
   ],

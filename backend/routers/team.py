@@ -189,7 +189,7 @@ async def approval_surface(request: Request):
             "state": "dormant_honest",
             "state_reason_plain": (
                 "This class of approval is registered in Canon; its "
-                "dispatch pipeline is scheduled for UI-2. Rendered here "
+                "dispatch pipeline awaits owner dispatch. Rendered here "
                 "so the Master Admin sees the full approval surface, "
                 "not a partial view."
             ),
