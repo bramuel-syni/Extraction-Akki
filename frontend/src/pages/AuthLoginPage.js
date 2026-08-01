@@ -43,7 +43,7 @@ export default function AuthLoginPage() {
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-baseline gap-2">
             <h1 className="text-base font-semibold tracking-tight text-rms-ink">
-              RMS Intelligence
+              Akki OS
             </h1>
             <span className="text-[10px] font-mono uppercase text-rms-mute tracking-wider">
               Sign in
