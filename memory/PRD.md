@@ -3,7 +3,25 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **UI-1-C FULLY CLOSED · Canon §4 Connect module rebuilt · Parity 36/36 · awaiting Owner independent verification**)
+## Current gate status (2026-08-02 · **UI-1-D FULLY CLOSED · Canon §5 Registry "What You Hold" + Canon §9 Prove built · Parity 36/36 · awaiting Owner independent verification**)
+
+### UI-1-D close (2026-08-02) — Registry ("What You Hold") + Prove per Canon §5 + §9
+
+- **§5 Registry ("What You Hold") — four axes rendered top-to-bottom:** Connected (from /connect landing) · Holdings (warehouse view by ring · source · domain · measured/unmeasured first-class) · Intelligence (opportunity briefs) · Backend (auto-run ceiling from single-source-of-truth). Every unmeasured holdings row carries a plain-language `unmeasured_reason_plain` (never null · never a code).
+- **§5 Opportunity briefs — "Put this to work" CTA:** `<Link data-testid="registry-brief-cta-{id}" to="/use-data?prefill_from_brief={id}">Put this to work</Link>`. Retired vocab "Shape this objective" purged from DOM (extended retired-vocab gate).
+- **§5 Gap register — "Queue this gap" CTA:** idempotent POST `/api/registry/gap_register/queue` returns `queued_use_data_session_id` opening `/use-data?prefill_from_gap={id}`. NOT_EXTRACTED_YET refusals on Prove auto-append new gaps here.
+- **§9 Prove — 4 response shapes, 3 distinct visual grammars:** `answered` (sage border · Walk this proof link) · `not_extracted_yet` (amber · WITH queue button) · `evidence_cannot_support_it` (amber · NO queue button · reason_code + wire_reason_verbatim) · `something_broke` (**navy bg · oxblood 6px left border · borderRadius 2px** — VISUALLY DISTINCT · fault channel · NEVER a refusal reason_code).
+- **§11 DB-1 (wire reason verbatim):** refusal cards render `envelope.wire_reason_verbatim` byte-for-byte. Backend gate `test_d_d1_wire_reason_verbatim_in_refusal_response` asserts sentence-level content.
+- **§11 DB-2 (paired break-in · fault never shares refusal styling):** enforced at THREE levels: (1) backend `_map_refusal_shape()` returns only refusal shapes for known service_1 codes; (2) `SomethingBrokeCard` is a fully separate component with zero shared testids/classnames; (3) frontend gate Cell 13 `gate_prove_db2_paired_break_in_fault_never_shares_refusal_styling` + backend `test_d_p4_prove_ask_something_broke_uses_fault_channel_never_refusal`.
+- **§9.2 Walk-a-Proof:** `/prove/trace/{trace_id}` returns 3 layers (claim · reasoning with candidates+corroboration+probability · raw_facts with source links). Close button uses React Router `location.state = {from, scrollY, from_search}` to return EXACTLY to origin (Owner ratified this in Message 521).
+- **Refusal→shape mapping ruling filed:** `/app/docs/rulings/service_1_refusal_mapping_ruling_2026-08-02.md` (Owner Message 521 requirement). All 4 service_1 codes map unambiguously to `evidence_cannot_support_it`. `form_not_offerable` documented as sole conditional-ambiguity case with recommended NO-split until Owner ruling.
+- **Sample fixtures per identity:** 2 opportunity briefs · 3 gap-register rows · 3 prove sample answers (one per refusal shape) + 1 fault fixture. All `is_sample=true` with SAMPLE badges rendered in DOM (iter21 measured 45 SAMPLE badges on admin walkthrough).
+- **SYSTEMIC gate expanded:** `sample_marking_systemic_gate.test.js` now covers **7 row-rendering surfaces** (added `registry_what_you_hold` + `registry_gap_register`). Prove is action-required (query surface) → covered by 4 dedicated cells in `ui1d_gates.test.js` (sample banners on all 4 shapes).
+- **Retired-vocab gate extended:** `RETIRED_TERMS` list now includes `"Shape this objective"` (Canon C.4 rename to "Put this to work"). Cell 11 `gate_ui1d_retired_vocabulary_absent_on_registry_and_prove` asserts absence on both surfaces + positive assertion for "Put this to work" on /registry.
+- **Canon OS shell:** Prove is now LIT (not dormant) after UI-1-D. Only Team remains dormant until UI-1-E lands. Nav strip: `Connect · Registry · Use Data · Govern · Prove` (five active modules).
+- **Regression:** Backend pytest **1544 pass · 2 skip · 0 fail** (+15 UI-1-D invariants). Frontend Jest **18 suites · 160 pass · 3 skipped-to-salvage · 0 fail** (+13 UI-1-D cells / 19 tests). Parity **36/36 held constant** throughout.
+- **Live-preview iter21 verdict:** `retest_needed: false`. 11/11 live-HTTP gates GREEN. DB-2 fault-vs-refusal visual distinction proven with computed styles. Walk-a-proof close-to-origin works. All 45 SAMPLE badges rendered.
+- **Close report:** `/app/docs/rulings/ui1d_close_report_2026-08-02.md` (11 sections + FPR rows + WHAT-TO-LOOK-AT walk-through).
 
 ### UI-1-C close (2026-08-02) — Connect module rebuild per Canon §4
 

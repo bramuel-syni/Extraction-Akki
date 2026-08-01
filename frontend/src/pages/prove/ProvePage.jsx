@@ -235,6 +235,20 @@ function SomethingBrokeCard({ envelope }) {
       }}>
         Something broke · fault channel · {envelope.fault_channel_ref}
       </div>
+      {envelope.is_sample && (
+        <div
+          data-testid="prove-something-broke-sample-banner"
+          data-sample-badge="true"
+          style={{
+            display: 'inline-block', padding: '2px 8px', marginBottom: '8px',
+            background: AKKI_V4_PALETTE.sage, color: AKKI_V4_PALETTE.ink,
+            fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.62rem',
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+          }}
+        >
+          SAMPLE FAULT
+        </div>
+      )}
       <p data-testid="prove-fault-plain-reason" style={{
         margin: 0, color: AKKI_V4_PALETTE.cream, fontSize: '0.95rem',
       }}>

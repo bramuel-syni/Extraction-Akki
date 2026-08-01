@@ -488,6 +488,26 @@ describe('UI-1-D · gate_prove_refusal_shape_sample_banner_when_is_sample_true',
       expect(screen.getByTestId('prove-evidence-cannot-support-sample-banner')).toBeInTheDocument()
     );
   });
+
+  it('SOMETHING_BROKE with is_sample=true renders the sample fault banner (symmetric with refusal shapes · sample marking systemic)', async () => {
+    api.proveAsk.mockResolvedValueOnce({ status: 200, body: {
+      shape: 'something_broke', trace_id: null, asked: 'q-sample3',
+      fault_channel_ref: 'fault-s', fault_reason_plain: 'seeded fault sample',
+      queue_offered: false, is_sample: true,
+    }});
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    fireEvent.change(screen.getByTestId('prove-question-input'), { target: { value: 'q-sample3' } });
+    fireEvent.click(screen.getByTestId('prove-ask-btn'));
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-something-broke-sample-banner')).toBeInTheDocument()
+    );
+    // Even with the sample banner, the fault card MUST remain visually distinct
+    // (DB-2 binding · fault does not become a refusal because of a sample marker).
+    expect(screen.getByTestId('prove-shape-something-broke').getAttribute('data-shape'))
+      .toBe('something_broke');
+    expect(screen.queryByTestId('prove-shape-evidence-cannot-support')).toBeNull();
+    expect(screen.queryByTestId('prove-shape-not-extracted-yet')).toBeNull();
+  });
 });
 
 
