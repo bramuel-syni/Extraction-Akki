@@ -316,7 +316,17 @@ async def commit_commission(session_id: str, body: CommitBody, request: Request)
         censused_source_ids=body.censused_source_ids,
     )
     proposed_spend = body.proposed_budget_usd or 0.0
-    ceiling = evaluate_auto_run_ceiling(proposed_spend_usd=proposed_spend)
+    # UI-1-C · EE-R4 no-parallel-mechanism (Owner ruling 2026-08-02):
+    # read the effective ceiling through the single-source-of-truth seam
+    # so Change-a-Rule ceremony updates flow to the verdict engine WITHOUT
+    # any duplicated constant. Falls back to AUTO_RUN_CEILING_USD_INITIAL
+    # when no effective ceremony row exists.
+    from services.connect.rulebook import get_effective_auto_run_ceiling_usd
+    effective_ceiling = await get_effective_auto_run_ceiling_usd()
+    ceiling = evaluate_auto_run_ceiling(
+        proposed_spend_usd=proposed_spend,
+        effective_ceiling_usd=effective_ceiling,
+    )
     verdict = compose_verdict(
         session_id=session_id,
         checks=checks,
@@ -363,12 +373,18 @@ async def refuse_direct_ceiling_write(body: CeilingWriteBody, request: Request):
 
 @router.get("/ceiling")
 async def read_ceiling(request: Request):
-    """Read the effective auto-run ceiling (Canon §4.2 initial $1,000)."""
+    """Read the effective auto-run ceiling (Canon §4.2 initial $1,000).
+
+    UI-1-C · EE-R4 no-parallel-mechanism: reads through the single
+    source of truth (`services.connect.rulebook.get_effective_auto_run_ceiling_usd`).
+    """
     identity, denial = await _resolve_identity(request)
     if denial is not None:
         return denial
+    from services.connect.rulebook import get_effective_auto_run_ceiling_usd
+    effective = await get_effective_auto_run_ceiling_usd()
     return {
-        "ceiling_usd": AUTO_RUN_CEILING_USD_INITIAL,
+        "ceiling_usd": effective,
         "currency": "USD",
         "change_path": "change_a_rule_ceremony_only",
         "canon_ref": "Canon §4.2 · §7.5",

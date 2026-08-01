@@ -287,6 +287,12 @@ async def _startup() -> None:
             if doc is not None:
                 _sample_ops.append({"email": email, "user_id": str(doc["_id"])})
         await seed_sample_fixtures_if_absent(_sample_ops)
+        # UI-1-C · Canon §4.1 seed: 4 sample sources per identity + 2
+        # declared Class-D registries. Idempotent.
+        from services.connect.sample_fixture_seeder import (
+            seed_connect_sample_fixtures_if_absent,
+        )
+        await seed_connect_sample_fixtures_if_absent(_sample_ops)
     except Exception:
         log.exception("rms.startup: async delivery substrate boot failed")
         raise

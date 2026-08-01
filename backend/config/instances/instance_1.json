@@ -5,5 +5,12 @@
   "product_title_full": "RMS Intelligence System",
   "seeded_at": "2026-07-14",
   "authority": "Owner dispatch 2026-07-14 (Multi-Instance Capability MC-E1..MC-E6 close). Owner-verbatim: 'instance #1's config carries \"RMS Intelligence\"'.",
-  "notes": "Platform-agnostic build; instance-#1 branding preserved verbatim. Class-(a) branding moved from live code to this config surface at MC-E6 β close."
+  "notes": "Platform-agnostic build; instance-#1 branding preserved verbatim. Class-(a) branding moved from live code to this config surface at MC-E6 β close.",
+  "deployment_target": "RMS Local",
+  "primary_regulator": "DPO capacity",
+  "credentials_holder": "instance vault",
+  "configuration_locked": false,
+  "configuration_signed_by": null,
+  "configuration_signed_at_iso": null,
+  "defaults": ["deployment_target", "primary_regulator", "credentials_holder"]
 }

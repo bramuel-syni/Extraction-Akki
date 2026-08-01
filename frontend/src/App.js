@@ -13,9 +13,12 @@ import AuthRegisterPage from './pages/AuthRegisterPage';
 import MasterAdminHomePage from './pages/master_admin/MasterAdminHomePage';
 import ChangeARulePage from './pages/master_admin/ChangeARulePage';
 import AuditTrailPage from './pages/master_admin/AuditTrailPage';
-// Phase 3 sub-cycle 1 — Connect module (Canon §4).
+// Phase 3 sub-cycle 1 — Connect module (Canon §4). Rebuilt UI-1-C 2026-08-02.
 import ConnectHomePage from './pages/connect/ConnectHomePage';
 import ConnectNewSourcePage from './pages/connect/ConnectNewSourcePage';
+import ConnectRulesPage from './pages/connect/ConnectRulesPage';
+import ConnectSourceProfilePage from './pages/connect/ConnectSourceProfilePage';
+import ConnectSetupPage from './pages/connect/ConnectSetupPage';
 // Phase 3 sub-cycle 1 — Commission View (FB-5).
 import CommissionViewHomePage from './pages/commission_view/CommissionViewHomePage';
 import CommissionRunDetailPage from './pages/commission_view/CommissionRunDetailPage';
@@ -65,6 +68,10 @@ export default function App() {
           {/* Canon §4 · Connect. */}
           <Route path="connect" element={<ConnectHomePage />} />
           <Route path="connect/new" element={<ConnectNewSourcePage />} />
+          {/* UI-1-C · Canon §4.2 Rules · §4.4 Source Profile · §4.2 A5 Setup. */}
+          <Route path="connect/rules" element={<ConnectRulesPage />} />
+          <Route path="connect/source/:sourceId" element={<ConnectSourceProfilePage />} />
+          <Route path="connect/setup" element={<ConnectSetupPage />} />
           {/* Canon §8 · Registry Estate Map (sub-cycle 2 shell · full prototype
               shape lands in UI-1-D). Memory-under-govern lives here too. */}
           <Route path="registry" element={<RegistryEstateMapPage />} />

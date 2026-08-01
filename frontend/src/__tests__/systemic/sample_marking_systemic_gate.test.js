@@ -28,6 +28,8 @@ import '@testing-library/jest-dom';
 import UseDataLandingPage from '../../pages/use_data/UseDataLandingPage';
 import GovernHomePage from '../../pages/govern/GovernHomePage';
 import GovernHoldsPage from '../../pages/govern/GovernHoldsPage';
+import ConnectHomePage from '../../pages/connect/ConnectHomePage';
+import ConnectSetupPage from '../../pages/connect/ConnectSetupPage';
 
 // ---- Registry of fixture-capable surfaces ------------------------------------
 // Every UI-1-* sub-cycle that lands a new surface MUST register here.
@@ -143,7 +145,85 @@ const SAMPLE_MARKING_REGISTRY = [
     ],
     row_testid_pattern: /^govern-hold-row-/,
   },
-  // ---- UI-1-C · Connect surfaces  · REGISTER HERE ----
+  // ---- UI-1-C · Connect surfaces registered here ----
+  {
+    surface_id: 'connect_landing_record_table',
+    canon_ref: 'Canon §4.1 (UI-1-C)',
+    Component: ConnectHomePage,
+    endpoints: [
+      { api_method: 'connectLanding', mock: {
+        status: 200,
+        body: {
+          canon_ref: 'Canon §4.1',
+          headline: { kind: 'pre_connection', text: '4 sources declared · 1 connected · 1 awaiting credentials' },
+          status_banner: {
+            configuration_locked: false,
+            deployment_target: 'RMS Local', primary_regulator: 'DPO capacity',
+            credentials_holder: 'instance vault',
+            config_read_only_route: '/instance/config',
+            defaults: ['deployment_target', 'primary_regulator', 'credentials_holder'],
+            field_is_default: { deployment_target: true, primary_regulator: true, credentials_holder: true },
+          },
+          cards: {
+            connections_healthy: 1, connections_total: 4,
+            last_sync_iso: '2026-08-02T00:00:00Z',
+            egress_posture: 'seam · lands when OT-1a egress facts arrive',
+            egress_is_dormant: true,
+          },
+          record_rows: [
+            { source_id: 'src-sample-conn-1', name: 'Sample connected', protocol: 'postgres',
+              protocol_familiar: 'database endpoint', cadence: 'daily_09', cadence_plain: 'each morning at 9',
+              state: 'connected', is_sample: true },
+            { source_id: 'src-sample-failed-1', name: 'Sample failed', protocol: 'http_json',
+              protocol_familiar: 'HTTP · JSON API', cadence: 'daily_00', cadence_plain: 'each night at midnight',
+              state: 'failed', failure_reason_plain: 'TLS handshake failed at 03:11 UTC — install the current warehouse certificate then retry.',
+              is_sample: true },
+            { source_id: 'src-sample-inprog-1', name: 'Sample in progress', protocol: 's3',
+              protocol_familiar: 'object-store endpoint', cadence: 'hourly', cadence_plain: 'every hour',
+              state: 'in_progress', is_sample: true },
+            { source_id: 'src-sample-await-1', name: 'Sample awaiting credentials', protocol: 'sftp',
+              protocol_familiar: 'transfer host', cadence: 'weekly_mon', cadence_plain: 'every Monday morning',
+              state: 'awaiting_credentials', is_sample: true },
+          ],
+          footer: { credentials_holder: 'instance vault', signed_off_by: 'not yet signed',
+                    govern_link_text: 'data use rules live in Govern', govern_link_route: '/govern/rules' },
+          declared_registries: [
+            { registry_name: 'sanctioned_partners', schema_class: 'pseudonymize',
+              is_empty: true, version: null, last_updated_at_iso: null, is_sample: true },
+          ],
+        },
+      }},
+    ],
+    // Connect landing badges use `connect-sample-badge-{source_id}` on
+    // record-table rows plus per-registry chips.
+    sample_badge_testid_patterns: [
+      /^connect-sample-badge-/,
+    ],
+    row_testid_pattern: /^connect-source-row-/,
+  },
+  {
+    surface_id: 'connect_setup_declared_registries',
+    canon_ref: 'Canon §4.2 A5 (UI-1-C)',
+    Component: ConnectSetupPage,
+    endpoints: [
+      { api_method: 'connectDeclaredRegistries', mock: {
+        status: 200,
+        body: {
+          canon_ref: 'Canon §4.2 · A5',
+          declared: [
+            { registry_name: 'sanctioned_partners', schema_class: 'pseudonymize',
+              is_empty: true, version: null, is_sample: true },
+            { registry_name: 'restricted_terms', schema_class: 'filter',
+              is_empty: true, version: null, is_sample: true },
+          ],
+        },
+      }},
+    ],
+    sample_badge_testid_patterns: [
+      /^connect-setup-sample-badge-/,
+    ],
+    row_testid_pattern: /^connect-setup-registry-row-/,
+  },
   // ---- UI-1-D · Registry/Prove surfaces · REGISTER HERE ----
   // ---- UI-1-E · Team surfaces · REGISTER HERE ----
 ];
@@ -163,7 +243,7 @@ function primeEndpoints(entry) {
 
 describe('SYSTEMIC · sample_marking_systemic_gate · AS-U2 invariant across all fixture-capable surfaces', () => {
   it('registry is non-empty (regression: every new sub-cycle MUST register)', () => {
-    expect(SAMPLE_MARKING_REGISTRY.length).toBeGreaterThanOrEqual(3);
+    expect(SAMPLE_MARKING_REGISTRY.length).toBeGreaterThanOrEqual(5);
   });
 
   SAMPLE_MARKING_REGISTRY.forEach((entry) => {
@@ -188,7 +268,16 @@ describe('SYSTEMIC · sample_marking_systemic_gate · AS-U2 invariant across all
             else {
               // A "row" is any object with is_sample and a stable id-ish key.
               if (v.is_sample === true) {
-                const id = v.session_id || v.refusal_id || v.request_id;
+                // Row identifier candidates across surfaces:
+                //   Use Data pipeline     → session_id
+                //   Govern refusals       → refusal_id
+                //   Govern rule-changes   → request_id
+                //   Govern holds          → session_id
+                //   Connect landing rows  → source_id
+                //   Connect declared reg. → registry_name
+                //   UI-1-D/E · new sub-cycles add their id here.
+                const id = v.session_id || v.refusal_id || v.request_id
+                  || v.source_id || v.registry_name;
                 if (id) sampleRowIds.push(id);
                 // Handle nested session envelope shape (Use Data pipeline).
                 if (v.session && v.session.session_id) sampleRowIds.push(v.session.session_id);

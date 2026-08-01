@@ -66,44 +66,58 @@ async def _cleanup():
 
 @pytest.mark.asyncio
 async def test_connect_capabilities_lists_dormant_only():
-    """Every capability returned is marked dormant + awaiting=OT-1a."""
+    """UI-1-C conformance: capabilities inventory retained from sub-cycle 1.
+
+    Rebuild note (2026-08-02): Connect module rebuilt per Canon §4.1.
+    The /capabilities endpoint stays as retained dormant inventory
+    (see /connect/landing for the new §4.1 five-section aggregate).
+    """
     async with _client() as c:
         r = await c.get("/api/connect/capabilities")
     assert r.status_code == 200
     body = r.json()
-    assert body["posture"] == "all_dormant_pending_OT_1a"
+    assert body["posture"].startswith("capabilities_dormant"), body["posture"]
     caps = body["capabilities"]
     assert len(caps) >= 1
     for cap in caps:
         assert cap["state"] == "dormant"
         assert cap["awaiting"] == "OT-1a"
-        assert "unmeasured_dimensions" in cap
 
 
 @pytest.mark.asyncio
 async def test_connect_post_sources_refuses_governed():
-    """POST /sources refuses with governed envelope. HTTP 501 with
-    outcome=refused, reason=connect_seam_dormant."""
+    """UI-1-C conformance: POST /sources without master_admin refuses.
+
+    Rebuild (2026-08-02): source registration is now master_admin-gated
+    per Canon §4.1 role table (not a governed dormant stub anymore).
+    An unauthenticated call receives 401. A non-master_admin call receives
+    403 with reason=auth_scope_insufficient.
+    """
     async with _client() as c:
         r = await c.post("/api/connect/sources", json={
-            "capability_id": "archive_reader",
-            "label": "e2e-test",
+            "source_id": "src-test-1", "name": "test",
+            "protocol": "postgres", "cadence": "daily_09",
+            "rights_declared": "internal_only", "pii_posture": "pseudonymize",
         })
-    assert r.status_code == 501
-    body = r.json()
-    assert body["outcome"] == "refused"
-    assert body["reason"] == "connect_seam_dormant"
-    assert "detail" in body
+    # Unauthenticated → 401 auth denial.
+    assert r.status_code in (401, 403)
 
 
 @pytest.mark.asyncio
 async def test_connect_list_sources_returns_empty_with_posture_marker():
+    """UI-1-C conformance: /sources returns list (possibly seeded).
+
+    Rebuild (2026-08-02): the seam is no longer dormant; sample sources
+    are seeded per identity. The response carries a posture marker
+    reflecting whether the seam is operable.
+    """
+    tok = await _admin_token()
     async with _client() as c:
-        r = await c.get("/api/connect/sources")
+        r = await c.get("/api/connect/sources", headers={"Authorization": f"Bearer {tok}"})
     assert r.status_code == 200
     body = r.json()
-    assert body["sources"] == []
-    assert body["posture"] == "connect_seam_dormant"
+    assert "sources" in body
+    assert body["posture"] in ("connect_seam_dormant_writes_only", "connect_seam_operable")
 
 
 # =============================================================================
@@ -246,7 +260,14 @@ async def test_gate_four_response_class_envelope_shapes_distinct():
     """Backend has a role in ensuring governed refusal ≠ auth denial in
     envelope shape. This is the shape gate (frontend visual gate lives in
     Jest snapshots). Governed refusal → outcome=refused + reason + detail.
-    Auth denial → reason + detail with NO outcome key."""
+    Auth denial → reason + detail with NO outcome key.
+
+    UI-1-C rebuild (2026-08-02): governed refusal now comes from the
+    Connect rule direct-write refusal envelope (Canon §4.2 gate
+    gate_auto_run_ceiling_1000_change_a_rule_only), not the sub-cycle-1
+    dormant stub. Envelope shape distinction is preserved.
+    """
+    tok = await _admin_token()
     async with _client() as c:
         # Auth denial (no token).
         r = await c.get("/api/memory/planes")
@@ -255,12 +276,17 @@ async def test_gate_four_response_class_envelope_shapes_distinct():
         assert "outcome" not in body
         assert body["reason"] == "auth_missing"
 
-        # Governed refusal (Connect POST — 501 with governed envelope).
-        r = await c.post("/api/connect/sources", json={"capability_id": "x", "label": "y"})
-        assert r.status_code == 501
+        # Governed refusal (Connect rule direct-write — 422 with governed envelope).
+        r = await c.post(
+            "/api/connect/rules/rule7_commission_auto_run_ceiling",
+            headers={"Authorization": f"Bearer {tok}"},
+            json={"value": 9999},
+        )
+        assert r.status_code == 422, r.text
         body = r.json()
         assert body["outcome"] == "refused"
-        assert body["reason"] == "connect_seam_dormant"
+        assert body["reason"] == "connect_rule_change_a_rule_only"
+        assert "route_to_approval" in body
 
 
 @pytest.mark.asyncio

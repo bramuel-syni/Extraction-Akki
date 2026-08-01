@@ -165,6 +165,43 @@ export const api = {
     client
       .post('/connect/sources', payload, { validateStatus: (s) => s >= 200 && s < 600 })
       .then((r) => ({ status: r.status, body: r.data })),
+  // UI-1-C · Connect module rebuild per Canon §4 (2026-08-02).
+  connectLanding: () =>
+    client
+      .get('/connect/landing', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectRules: () =>
+    client
+      .get('/connect/rules', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectRuleDirectWrite: (ruleId, value) =>
+    client
+      .post(`/connect/rules/${encodeURIComponent(ruleId)}`, { value }, { validateStatus: (s) => s >= 200 && s < 600 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectSourceProfile: (sid) =>
+    client
+      .get(`/connect/sources/${encodeURIComponent(sid)}`, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectSourceConnect: (sid) =>
+    client
+      .post(`/connect/sources/${encodeURIComponent(sid)}/connect`, {}, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectSourceTest: (sid) =>
+    client
+      .post(`/connect/sources/${encodeURIComponent(sid)}/test`, {}, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectSourceRetry: (sid) =>
+    client
+      .post(`/connect/sources/${encodeURIComponent(sid)}/retry`, {}, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectDeclaredRegistries: () =>
+    client
+      .get('/connect/declared_registries', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  connectDeclareRegistry: (payload) =>
+    client
+      .post('/connect/declared_registries', payload, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
   // Phase 3 sub-cycle 2 — Memory Service + Registry (Owner ruling 2026-08-02).
   memoryListPlanes: () =>
     client

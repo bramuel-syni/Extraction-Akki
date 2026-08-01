@@ -1,0 +1,34 @@
+{
+  "summary": "UI-1-C Connect module tested end-to-end against live preview. All 11 backend gate cells pass (test_connect_ui1c_gates.py). All 8 live-preview integration tests pass (ui1c_live_preview_test.py). Frontend renders /connect (5 sections in exact order, Canon §4.1, gov link → /govern/rules, both DEFAULT markers on RMS Local + DPO capacity, 22 SAMPLE badges across 20 rows, all 4 state grammar {connected, in_progress, awaiting_credentials, failed} present, plain-language TLS failure reason >20 chars, no ceremony content). /connect/source/{id} renders (Canon §4.4, answer-first mapping header 'N of M fields confirmed · K need attention', full-fields collapsed then toggle expands, failure panel with plain-language reason). /connect/rules renders 7 rule cards, rule7 shows $1,000.00 · ∞ permitted, direct-write probe → refusal panel with route href='/govern/change-rule', rule5 wears dormant badge. /connect/setup renders declare form; declaring a new registry succeeds and row shows empty-fail-closed + govern link. Single-source-of-truth ceiling gate MATCHED: /api/connect/rules[rule7].value=1000.0 == /api/use_data/ceiling.ceiling_usd=1000.0 (no parallel mechanism). Parity /api/readyz = 36/36. Analyst 403 auth_scope_insufficient on POST /api/connect/sources; analyst GET landing 200. Mobile 390x844 stacks cleanly (scrollWidth==clientWidth==390) with internal overflow-x on record table.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/connect record table", "issues": ["Owner spec says 'row click to source profile' but only the inner Link (connect-source-link-*) is clickable — clicking the row element (connect-source-row-*) outside the name link does NOT navigate. Recommend making the entire <tr> clickable (onClick + role='link' + cursor:pointer) or at minimum widen the clickable target to the whole row for the spec's intent. Current impl is a minor deviation but functionally reachable via the name link."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/invariants/test_connect_ui1c_gates.py",
+    "/app/backend/tests/ui1c_live_preview_test.py",
+    "/app/test_reports/pytest/ui1c_backend.xml",
+    "/app/test_reports/pytest/ui1c_live.xml"
+  ],
+  "action_items": [
+    "OPTIONAL / MINOR: Make the entire <tr> in ConnectHomePage record table clickable to fully honor Canon §4.1 'row click to source profile' — currently only the inner name link is clickable."
+  ],
+  "critical_code_review_comments": [
+    "Single-source-of-truth ceiling: verified in both static gate (injects effective checker_requests row and both endpoints move together to 2500) and live parity (both return 1000.0). No parallel mechanism detected (EE-R4 clean).",
+    "Sample source seeder produced 20 rows for admin (4 states × 5 identities cross-visible) — matches Owner's note. All rows carry SAMPLE badges and is_sample=true — no unmarked fixtures.",
+    "DEFAULT markers render as prominent dashed pill 'DEFAULT — NOT YET CONFIRMED' next to RMS Local and DPO capacity — visible and honest.",
+    "Failure reason text (TLS handshake plain-language, ~275 chars) is properly instructional and identifies the master_admin as the actor to remediate — plain-language grammar satisfied."
+  ],
+  "updated_files": [
+    "/app/backend/tests/ui1c_live_preview_test.py (new — 8 live-preview regression tests)"
+  ],
+  "success_rate": {"backend": "100% (11/11 invariant gates + 8/8 live-preview)", "frontend": "100% on Canon §4.1/§4.2/§4.4 acceptance items; 1 minor deviation on row-click UX"},
+  "seed_data_creation": "Declared two test registries via API (ui1c_test_1785543455, ui1c_test_1785543463) — sample marked. Idempotent; safe to leave.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "UI-1-C is green. Sample-marking systemic gate now covers 5 surfaces (Use Data pipeline, Govern record, Govern holds, Connect landing, Connect setup). Next sub-cycle should extend to whatever new surface it adds. Parity is still 36/36 — any bump is Owner HAZARD-STOP. Ceiling single-source-of-truth is the critical Owner EE-R4 gate: /api/connect/rules[rule7].value must always == /api/use_data/ceiling.ceiling_usd."
+}

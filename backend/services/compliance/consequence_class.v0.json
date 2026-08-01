@@ -9,6 +9,7 @@
     "disclosure_thresholds": "dual_control",
     "lawful_basis_registry": "dual_control",
     "source_standing_table": "tightening_unilateral",
-    "master_admin_rule_change": "tightening_unilateral"
+    "master_admin_rule_change": "tightening_unilateral",
+    "auto_run_ceiling_usd": "tightening_unilateral"
   }
 }

@@ -1,0 +1,8 @@
+{
+  "rule_id": "tier_lock",
+  "locked": false,
+  "reason_note": "second",
+  "grantor_id": "6a6ba8e9c29ca2df857a2765",
+  "idempotency_key": "ord-2-a3379dab",
+  "at": "2026-08-01T00:14:32.166298+00:00"
+}
