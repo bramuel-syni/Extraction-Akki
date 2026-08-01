@@ -44,8 +44,8 @@ export const CANON_NAV = Object.freeze([
     label: 'Registry',
     tagline: 'What you hold. What it says. What it is worth.',
     path: '/registry',
-    state: 'partial',
-    section: 'Canon §8 · sub-cycle 2 landing · full prototype shape in UI-1-D',
+    state: 'lit',
+    section: 'Canon §5 · UI-1-D',
   },
   {
     id: 'use-data',

@@ -80,26 +80,19 @@ describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
     expect(screen.getByTestId('canon-nav-label-team')).toHaveTextContent(/^Team$/);
   });
 
-  test('All six modules are REACHABLE after UI-1-E (no dormant tiles remain)', () => {
+  test('All six modules render LIT after UI-1-E (no dormant, no partial · shell fully lit)', () => {
     renderShell();
-    // All six module tiles are reachable Links (no nolink variants).
-    // Registry remains `partial` (Canon §8 sub-cycle 2) — reachable but not full.
-    // The other five are `lit`.
+    // Owner Message 611 · UI-1-E close binding: all six tiles must render LIT
+    // from UI-1-E onward · Registry was `partial` while What-You-Hold was
+    // pending, UI-1-D delivered it, so the tile flips LIT.
     ['connect', 'registry', 'use-data', 'govern', 'prove', 'team'].forEach((id) => {
       const tile = screen.getByTestId(`canon-nav-tile-${id}`);
       expect(tile).toBeInTheDocument();
       // Reachable: not a dormant nolink variant.
       expect(screen.queryByTestId(`canon-nav-tile-nolink-${id}`)).toBeNull();
+      // No dormant/partial state renders — must be LIT.
       expect(tile.querySelector('[data-testid="canon-nav-state-dormant"]')).toBeNull();
-      // Either lit or partial (both are reachable states).
-      const isLitOrPartial =
-        tile.querySelector('[data-testid="canon-nav-state-lit"]') !== null ||
-        tile.querySelector('[data-testid="canon-nav-state-partial"]') !== null;
-      expect(isLitOrPartial).toBe(true);
-    });
-    // Only registry may be partial — the other five must be lit.
-    ['connect', 'use-data', 'govern', 'prove', 'team'].forEach((id) => {
-      const tile = screen.getByTestId(`canon-nav-tile-${id}`);
+      expect(tile.querySelector('[data-testid="canon-nav-state-partial"]')).toBeNull();
       expect(tile.querySelector('[data-testid="canon-nav-state-lit"]')).toBeTruthy();
     });
   });

@@ -377,9 +377,21 @@ async def access_register(request: Request):
     grants_coll = db.get_collection("engineer_key_grants")
     # Determine visibility scope.
     if _has(identity, "master_admin", "admin", "engineer", "dpo"):
-        cursor = grants_coll.find({}).sort("created_at_iso", -1)
+        base_query: Dict[str, Any] = {}
     else:
-        cursor = grants_coll.find({"grantee_email": identity.email}).sort("created_at_iso", -1)
+        base_query = {"grantee_email": identity.email}
+    # Owner Message 611 · UI-1-E close binding: at least one SAMPLE revoked
+    # row must be visible in the frontend render. Sort seeded sample rows
+    # first (is_sample DESC) so the visible slice always includes them —
+    # including revoked ones. Within is_sample, sort by state so the
+    # non-active states (pending_approval · revoked) group together and
+    # remain visible in the first N rendered rows. Fallback tie-break is
+    # created_at_iso DESC.
+    cursor = grants_coll.find(base_query).sort([
+        ("is_sample", -1),
+        ("state", 1),
+        ("created_at_iso", -1),
+    ])
 
     rows: List[Dict[str, Any]] = []
     async for doc in cursor:

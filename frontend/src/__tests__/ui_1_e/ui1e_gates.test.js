@@ -519,6 +519,28 @@ describe('UI-1-E · gate_team_page_level_sample_marking_systemic', () => {
       expect(badge.getAttribute('data-sample-badge')).toBe('true');
     });
   });
+
+  // Owner Message 611 · UI-1-E close binding: at least one SAMPLE revoked
+  // grant MUST render on /team/access-register for admin, with visible
+  // revoked state + revocation timestamp visible in the row.
+  it('/team/access-register: at least one SAMPLE revoked grant renders with visible revoked state + timestamp', async () => {
+    render(<MemoryRouter><TeamAccessRegisterPage /></MemoryRouter>);
+    await waitFor(() =>
+      expect(screen.getByTestId('team-grant-row-sample-team-grant-revoked-abc')).toBeInTheDocument()
+    );
+    const revokedRow = screen.getByTestId('team-grant-row-sample-team-grant-revoked-abc');
+    expect(revokedRow.getAttribute('data-state')).toBe('revoked');
+    // State badge renders "REVOKED" (data-testid team-grant-state-revoked).
+    expect(revokedRow.querySelector('[data-testid="team-grant-state-revoked"]')).toBeTruthy();
+    // Revoked-timestamp visible on the row (rendered under `when`).
+    expect(revokedRow.textContent).toMatch(/revoked.*2026-08-02/i);
+    // Propagation state carries the honest "next login/refresh" note.
+    expect(screen.getByTestId('team-grant-propagation-sample-team-grant-revoked-abc').textContent)
+      .toMatch(/next login\/refresh/i);
+    // Sample badge visible (systemic sample-marking).
+    expect(screen.getByTestId('team-grant-sample-badge-sample-team-grant-revoked-abc')
+      .getAttribute('data-sample-badge')).toBe('true');
+  });
 });
 
 

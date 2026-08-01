@@ -225,6 +225,35 @@ async def test_e_b1_access_register_admin_reads_all_grants_and_can_grant():
 
 
 @pytest.mark.asyncio
+async def test_e_b1a_access_register_sample_revoked_row_visible_in_first_slice():
+    """Owner Message 611 · UI-1-E close binding: at least one SAMPLE revoked
+    grant MUST be visible in the frontend's rendered slice (first 60 rows).
+    The endpoint sorts sample-marked rows first so revoked samples always
+    make the visible window even when the register has grown to hundreds
+    of non-sample rows.
+    """
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        tok = await _admin_token(ac)
+        r = await ac.get("/api/team/access_register",
+                         headers={"Authorization": f"Bearer {tok}"})
+    body = r.json()
+    # Visible slice (mirrors the frontend's .slice(0, 60)).
+    visible = body["rows"][:60]
+    revoked_samples = [r for r in visible
+                       if r["state"] == "revoked" and r.get("is_sample")]
+    assert len(revoked_samples) >= 1, (
+        f"no sample revoked rows in first 60 · counts={body['counts']} · "
+        f"total states in visible slice="
+        f"{sorted({r['state'] for r in visible})}"
+    )
+    # The revoked sample carries the honest propagation state.
+    rr = revoked_samples[0]
+    assert "next login/refresh" in rr["propagation_state_plain"].lower()
+    # Revoked timestamp is present.
+    assert rr["when_revoked_iso"], f"revoked sample missing when_revoked_iso: {rr}"
+
+
+@pytest.mark.asyncio
 async def test_e_b2_access_register_dpo_reads_but_cannot_grant():
     """Owner Message 608 D-2 binding · break-in style role-gate cell.
 

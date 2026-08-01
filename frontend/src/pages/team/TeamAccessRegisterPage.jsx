@@ -332,7 +332,9 @@ export default function TeamAccessRegisterPage() {
               fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.7rem',
               color: AKKI_V4_PALETTE.sage, marginBottom: '8px',
             }}>
-              {data.counts.total} rows · {data.counts.active} active
+              {data.counts.total} rows · {data.counts.active} active ·{' '}
+              {(data.rows || []).filter((r) => r.state === 'revoked').length} revoked ·{' '}
+              {(data.rows || []).filter((r) => r.state === 'pending_approval').length} pending
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead>
@@ -346,7 +348,7 @@ export default function TeamAccessRegisterPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.rows.slice(0, 30).map((row) => (
+                {data.rows.slice(0, 60).map((row) => (
                   <GrantRow key={row.grant_id} row={row} canRevoke={data.capabilities.can_revoke} onRevoke={onRevoke} />
                 ))}
               </tbody>
