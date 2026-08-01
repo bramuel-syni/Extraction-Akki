@@ -419,3 +419,104 @@ describe('UI-1-D · gate_prove_ask_input_no_ask_first_landing_pattern', () => {
       expect.stringMatching(/plain language/i));
   });
 });
+
+
+/* =============================================================================
+   Cell 11 · gate_ui1d_retired_vocabulary_absent_on_registry_and_prove
+   Owner UI-1-D dispatch · Canon C.4 rename: "Shape this objective" → "Put this to work".
+   The retired vocab MUST NOT render on either new surface (rendered-DOM discipline).
+   ============================================================================= */
+describe('UI-1-D · gate_ui1d_retired_vocabulary_absent_on_registry_and_prove', () => {
+  const UI1D_RETIRED_TERMS = ['Shape this objective', 'Objectives', 'Ambitions', 'Approval Queue'];
+
+  it('/registry — retired vocab is absent from rendered DOM', async () => {
+    primeRegistry();
+    render(<MemoryRouter><RegistryWhatYouHoldPage /></MemoryRouter>);
+    await waitFor(() => expect(screen.getByTestId('registry-what-you-hold')).toBeInTheDocument());
+    const text = (document.body.textContent || '').toLowerCase();
+    UI1D_RETIRED_TERMS.forEach((term) => {
+      expect({ term, present: text.includes(term.toLowerCase()) })
+        .toEqual({ term, present: false });
+    });
+    // Positive assertion: the ratified vocab renders on this surface.
+    expect(document.body.textContent).toMatch(/Put this to work/);
+  });
+
+  it('/prove — retired vocab is absent from rendered DOM (empty + all shapes)', async () => {
+    // Idle Prove page.
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    let text = (document.body.textContent || '').toLowerCase();
+    UI1D_RETIRED_TERMS.forEach((term) => {
+      expect({ term, present: text.includes(term.toLowerCase()) })
+        .toEqual({ term, present: false });
+    });
+  });
+});
+
+
+/* =============================================================================
+   Cell 12 · gate_prove_refusal_shape_sample_banner_when_is_sample_true
+   Sample marking is systemic (Owner ruling 2026-08-01 · third-occurrence fix).
+   Applied on Prove refusal shapes: is_sample=true → visible SAMPLE badge.
+   ============================================================================= */
+describe('UI-1-D · gate_prove_refusal_shape_sample_banner_when_is_sample_true', () => {
+  it('NOT_EXTRACTED_YET with is_sample=true renders the sample refusal banner', async () => {
+    api.proveAsk.mockResolvedValueOnce({ status: 200, body: {
+      shape: 'not_extracted_yet', trace_id: 'trc-s1', asked: 'q-sample',
+      wire_reason_verbatim: 'sample refusal', queue_offered: true, gap_id: 'gap-s',
+      is_sample: true,
+    }});
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    fireEvent.change(screen.getByTestId('prove-question-input'), { target: { value: 'q-sample' } });
+    fireEvent.click(screen.getByTestId('prove-ask-btn'));
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-not-extracted-sample-banner')).toBeInTheDocument()
+    );
+    expect(screen.getByTestId('prove-not-extracted-sample-banner').getAttribute('data-sample-badge')).toBe('true');
+  });
+
+  it('EVIDENCE_CANNOT_SUPPORT with is_sample=true renders the sample refusal banner', async () => {
+    api.proveAsk.mockResolvedValueOnce({ status: 200, body: {
+      shape: 'evidence_cannot_support_it', trace_id: 'trc-s2', asked: 'q-sample2',
+      reason_code: 'no_defensibility_floor', wire_reason_verbatim: 'sample refusal',
+      queue_offered: false, is_sample: true,
+    }});
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    fireEvent.change(screen.getByTestId('prove-question-input'), { target: { value: 'q-sample2' } });
+    fireEvent.click(screen.getByTestId('prove-ask-btn'));
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-evidence-cannot-support-sample-banner')).toBeInTheDocument()
+    );
+  });
+});
+
+
+/* =============================================================================
+   Cell 13 · gate_prove_db2_paired_break_in_fault_never_shares_refusal_styling
+   DB-2 BINDING: a companion-channel failure MUST NOT convert a refusal into
+   a fault render. Fault channel uses distinct border, background, layout.
+   ============================================================================= */
+describe('UI-1-D · gate_prove_db2_paired_break_in_fault_never_shares_refusal_styling', () => {
+  it('SOMETHING_BROKE renders with distinct data-shape + no refusal testids present', async () => {
+    api.proveAsk.mockResolvedValueOnce({ status: 200, body: {
+      shape: 'something_broke', trace_id: null, asked: 'qfault',
+      fault_channel_ref: 'fault-x', fault_reason_plain: 'archive reader dormant',
+      queue_offered: false, is_sample: false,
+    }});
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    fireEvent.change(screen.getByTestId('prove-question-input'), { target: { value: 'qfault' } });
+    fireEvent.click(screen.getByTestId('prove-ask-btn'));
+    await waitFor(() => expect(screen.getByTestId('prove-shape-something-broke')).toBeInTheDocument());
+    // The fault card must NOT reuse refusal card testids.
+    expect(screen.queryByTestId('prove-shape-not-extracted-yet')).toBeNull();
+    expect(screen.queryByTestId('prove-shape-evidence-cannot-support')).toBeNull();
+    expect(screen.queryByTestId('prove-not-extracted-honesty-strip')).toBeNull();
+    expect(screen.queryByTestId('prove-evidence-cannot-support-honesty-strip')).toBeNull();
+    expect(screen.queryByTestId('prove-queue-this-gap-btn')).toBeNull();
+    // The fault card must have data-shape=something_broke (visual invariant).
+    expect(screen.getByTestId('prove-shape-something-broke').getAttribute('data-shape'))
+      .toBe('something_broke');
+    // Fault card renders its own plain reason (never a refusal reason_code).
+    expect(screen.getByTestId('prove-fault-plain-reason').textContent).toMatch(/archive reader/i);
+  });
+});

@@ -1,0 +1,47 @@
+{
+  "summary": "UI-1-D closure verification. Ran 15 UI-1-D backend invariant gates (ASGI) + 11 live-preview HTTP gates against https://governance-scan-3.preview.emergentagent.com + full rendered-UI Playwright verification covering: /registry four axes ordered top-to-bottom, 'Put this to work' briefs (10 rendered), 'Queue this gap' gap-register CTAs (9 rendered), SAMPLE badges (45 visible), DB-2 paired break-in (fault card is visually distinct from refusals — navy bg rgb(22,48,79) + oxblood left-border rgb(126,48,56) 6px vs refusal parchment+amber), walk-a-proof descent to /prove/trace/... with claim/reasoning/raw_facts layers, prove-walk-close-btn navigating back and scroll restoration hook engaged. Parity live at 36/36. All retired vocabulary ('Shape this objective') absent from /registry and /prove. Canon nav tiles lit.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "SomethingBrokeCard (ProvePage.jsx)",
+        "issue": "SomethingBrokeCard does NOT render a SAMPLE banner when envelope.is_sample=true. AnswerCard, NotExtractedYetCard, and EvidenceCannotSupportCard each render their own sample banner (prove-answer-sample-banner, prove-evidence-cannot-support-sample-banner) — SomethingBrokeCard omits this. The seeded fault question ('Show the raw archive for the March broker export.') therefore renders WITHOUT a visible SAMPLE marker even though is_sample=true. Owner directive: 'sample answers carry sample banners on all shapes' — this is the only shape missing coverage.",
+        "selector": "[data-testid='prove-shape-something-broke']",
+        "priority": "MINOR"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/invariants/test_registry_prove_ui1d_gates.py",
+    "/app/backend/tests/test_ui1d_live_preview.py",
+    "/app/test_reports/pytest/ui1d_live_preview.xml"
+  ],
+  "action_items": [
+    "OPTIONAL / MINOR: Add a `{envelope.is_sample && <div data-testid='prove-something-broke-sample-banner' data-sample-badge='true'>SAMPLE FAULT</div>}` block inside SomethingBrokeCard in /app/frontend/src/pages/prove/ProvePage.jsx (around line 231) to satisfy the systemic sample-marking rule that Owner Message 518/521 specifies for ALL 4 shapes on /prove. Existing sample_marking_systemic_gate.test.js may need a matching cell for prove_something_broke if that surface is expected to be gated too."
+  ],
+  "critical_code_review_comments": [
+    "The 4-axis Registry is well-ordered and each Holdings row carries first-class measured/unmeasured discipline with plain-language reasons on unmeasured rows (verified in rendered DOM — hatched backgrounds render, reasons show 'Source connect failed', 'Awaiting master_admin credentials', 'Ingestion in progress').",
+    "DB-2 paired break-in binding is honoured at the component level — SomethingBrokeCard is a fully separate function from the two RefusalCard components; no shared testids, no shared CSS class, and computed styles diverge on background, border-color, border-width, and border-radius. Owner directive is upheld.",
+    "The refusal→shape mapping table _REFUSAL_TO_SHAPE contains only unambiguous mappings and defaults unknown codes to 'evidence_cannot_support_it' (safe default that never fabricates a queue or a fault) — good.",
+    "Wire reason verbatim (DB-1) is honoured on the backend response (`wire_reason_verbatim` present in evidence_cannot_support_it responses; test_d_d1 asserts sentence-level length).",
+    "walk-a-proof close-returns-to-origin implementation in ProveWalkPage.jsx uses React Router `location.state` {from, scrollY, from_search} with default fallback to /prove. Correct — but requires the *entry* to /prove to be via a React Router <Link state={...}/> for the state to propagate. This is covered by ui1d_gates.test.js (jest suite); rendered end-to-end verification of scroll restoration from /registry origin would require a click-path through a shell tile that passes state (out of scope for a testing agent using page.goto)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ui1d_live_preview.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "95% (all critical + DB-2 + walk close + parity + retired-vocab + SAMPLE badges pass; SomethingBroke sample banner missing is the only gap)"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None — used existing seeded fixtures (2 briefs, 3 gaps, 3 prove sample answers per identity, per sample_fixture_seeder.py).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "UI-1-D CLOSURE VERIFIED. Backend gates 15/15 green (test_registry_prove_ui1d_gates.py). Live preview 11/11 green (test_ui1d_live_preview.py). Live rendered UI verification: 4 axes ordered, 10 'Put this to work' CTAs, 9 'Queue this gap' CTAs, 45 SAMPLE badges, DB-2 fault-vs-refusal visual distinction proven with computed styles (navy+oxblood vs parchment+amber), walk-a-proof 3-layer descent works, close button navigates back, retired vocab absent, canon nav tiles lit, parity 36/36. Only nit: SomethingBrokeCard does not render a SAMPLE banner even when envelope.is_sample=true — main agent can self-fix in 3 lines if Owner Message 518's 'sample marking systemic' extends to the fault channel too.",
+  "rca of the issue": "No RCA needed. UI-1-D closure is green. Optional micro-fix noted for SomethingBrokeCard sample banner symmetry with the other 3 shapes."
+}

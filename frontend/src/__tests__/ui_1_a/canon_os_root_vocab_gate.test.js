@@ -41,6 +41,7 @@ const RETIRED_TERMS = Object.freeze([
   'Engineer Register',
   'Extract',   // Owner R3: nav renders Use Data, not Extract.
   'My Objectives',
+  'Shape this objective',   // Owner UI-1-D: Canon C.4 rename to "Put this to work".
 ]);
 
 describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
@@ -79,18 +80,19 @@ describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
     expect(screen.getByTestId('canon-nav-label-team')).toHaveTextContent(/^Team$/);
   });
 
-  test('Prove + Team render as DORMANT tiles (state=dormant, no href)', () => {
+  test('Team renders as DORMANT tile (state=dormant, no href) · Prove is LIT after UI-1-D', () => {
     renderShell();
-    const proveTile = screen.getByTestId('canon-nav-tile-prove');
     const teamTile  = screen.getByTestId('canon-nav-tile-team');
-    // Neither dormant tile is wrapped in a `Link` — its testid variant is
-    // `canon-nav-tile-nolink-<id>`. The presence of that testid proves
-    // the tile is not reachable as a link from the shell.
-    expect(screen.getByTestId('canon-nav-tile-nolink-prove')).toBeInTheDocument();
+    // Team dormant tile is NOT wrapped in a `Link` — its testid variant is
+    // `canon-nav-tile-nolink-team`. The presence of that testid proves the
+    // tile is not reachable as a link from the shell.
     expect(screen.getByTestId('canon-nav-tile-nolink-team')).toBeInTheDocument();
     // The state pill declares dormant.
-    expect(proveTile.querySelector('[data-testid="canon-nav-state-dormant"]')).toBeTruthy();
     expect(teamTile.querySelector('[data-testid="canon-nav-state-dormant"]')).toBeTruthy();
+    // Prove was DORMANT pre-UI-1-D · it is LIT after UI-1-D · Owner directive.
+    const proveTile = screen.getByTestId('canon-nav-tile-prove');
+    expect(proveTile.querySelector('[data-testid="canon-nav-state-lit"]')).toBeTruthy();
+    expect(screen.queryByTestId('canon-nav-tile-nolink-prove')).toBeNull();
   });
 
   test('the Canon §11.1 verbatim binding line renders on the root', () => {
@@ -105,6 +107,6 @@ describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
     expect(strip).toBeInTheDocument();
     // Explicitly names Canon OS + lists the four lit modules.
     expect(strip).toHaveTextContent(/Canon OS shell/);
-    expect(strip).toHaveTextContent(/Connect · Registry · Use Data · Govern/);
+    expect(strip).toHaveTextContent(/Connect · Registry · Use Data · Govern · Prove/);
   });
 });

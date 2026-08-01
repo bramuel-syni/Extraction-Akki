@@ -96,6 +96,20 @@ function NotExtractedYetCard({ envelope, onQueue, origin }) {
       }}>
         Not extracted yet · refusal
       </div>
+      {envelope.is_sample && (
+        <div
+          data-testid="prove-not-extracted-sample-banner"
+          data-sample-badge="true"
+          style={{
+            display: 'inline-block', padding: '2px 8px', marginBottom: '8px',
+            background: AKKI_V4_PALETTE.sage, color: AKKI_V4_PALETTE.ink,
+            fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.62rem',
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+          }}
+        >
+          SAMPLE REFUSAL
+        </div>
+      )}
       <p data-testid="prove-not-extracted-honesty-strip" style={{
         margin: '0 0 12px 0', color: AKKI_V4_PALETTE.ink, fontSize: '0.95rem',
       }}>
@@ -156,6 +170,20 @@ function EvidenceCannotSupportCard({ envelope, origin }) {
       }}>
         Evidence cannot support it · refusal · {envelope.reason_code}
       </div>
+      {envelope.is_sample && (
+        <div
+          data-testid="prove-evidence-cannot-support-sample-banner"
+          data-sample-badge="true"
+          style={{
+            display: 'inline-block', padding: '2px 8px', marginBottom: '8px',
+            background: AKKI_V4_PALETTE.sage, color: AKKI_V4_PALETTE.ink,
+            fontFamily: AKKI_V4_TYPOGRAPHY.labels, fontSize: '0.62rem',
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+          }}
+        >
+          SAMPLE REFUSAL
+        </div>
+      )}
       <p data-testid="prove-evidence-cannot-support-honesty-strip" style={{
         margin: '0 0 12px 0', color: AKKI_V4_PALETTE.ink, fontSize: '0.95rem',
       }}>

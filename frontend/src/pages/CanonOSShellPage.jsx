@@ -244,8 +244,8 @@ export default function CanonOSShellPage() {
       >
         <strong style={{ color: AKKI_V4_PALETTE.navy }}>What this preview serves</strong> —
         the Canon OS shell (Owner ruling 2026-07-31 preview-hygiene · standing).
-        The root serves the new build only. Four modules are Canon-conformant
-        and reachable (Connect · Registry · Use Data · Govern);
+        The root serves the new build only. Five modules are Canon-conformant
+        and reachable (Connect · Registry · Use Data · Govern · Prove);
         Team renders dormant until UI-1-E lands.
         No legacy landing renders here.
       </p>
