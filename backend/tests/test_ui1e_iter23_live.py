@@ -54,27 +54,94 @@ def test_l1_parity_36():
 
 # --- 2. Approval surface renders items ---
 def test_l2_approval_surface_items(admin_token):
-    r = requests.get(f"{BASE_URL}/api/team/approval_surface",
-                     headers=_auth(admin_token), timeout=15)
-    assert r.status_code == 200
-    body = r.json()
-    assert "items" in body and len(body["items"]) >= 3
-    classes = {it["class"] for it in body["items"]}
-    # over_threshold + source + grant + dormant retention
-    expected = {"over_threshold_commission", "source_addition_pending",
-                "access_grant_request", "retention_window_extension"}
-    assert expected.issubset(classes), f"missing classes: {expected - classes}"
-    # Doctrine
-    doctrine = body.get("queue_doctrine_plain", "")
-    assert "consistently empty" in doctrine.lower()
-    assert "criteria are the instrument" in doctrine.lower()
-    # Sample marks
-    sample_items = [it for it in body["items"] if it.get("is_sample")]
-    assert len(sample_items) >= 1
-    # Dormant-honest present
-    dormant = [it for it in body["items"] if it["state"] == "dormant_honest"]
-    assert len(dormant) >= 1
-    assert dormant[0].get("state_reason_plain")
+    # Self-heal: pre-existing tests (test_phase_8_b_5b, test_phase_8_seam_3_sub_stage_3)
+    # `delete_many({})` on checker_requests earlier in the suite, wiping our
+    # sample rows. Re-seed a canonical over_threshold_commission row so this
+    # test asserts the approval-surface CONTRACT (four expected classes render).
+    from pymongo import MongoClient
+    from datetime import datetime, timezone
+    with MongoClient("mongodb://localhost:27017") as client:
+        db = client["rms_intelligence"]
+        # Ensure at least one over_threshold_commission is queryable.
+        db["checker_requests"].update_one(
+            {"request_id": "l2-test-canary"},
+            {"$set": {
+                "request_id": "l2-test-canary",
+                "state": "pending_master_admin",
+                "what_plain": "l2 canary · Train-a-Model over ceiling.",
+                "criterion_crossed": "auto_run_ceiling_exceeded",
+                "proposed_spend_usd": 1450.0,
+                "cost_summary": "$1,450.00 (auto-run ceiling: $1,000.00)",
+                "requested_by_email": "l2@rms.example.com",
+                "session_id": "s-l2-canary",
+                "created_at_iso": datetime.now(timezone.utc).isoformat(),
+                "is_sample": False,
+            }},
+            upsert=True,
+        )
+        # Ensure at least one pending grant is queryable.
+        db["engineer_key_grants"].update_one(
+            {"grant_id": "l2-test-canary-pending"},
+            {"$set": {
+                "grant_id": "l2-test-canary-pending",
+                "grantee_email": "l2.canary@ext.example.com",
+                "grantor_id": "system-l2-seed",
+                "key_class": "external",
+                "path": "live_query",
+                "floor": "established_fact",
+                "scope": "GET /api/l2/probe",
+                "justification": "L2 canary · sample pending grant for approval-surface test.",
+                "lawful_basis_ref": "test_canary",
+                "issued_at": datetime.now(timezone.utc),
+                "revoked_at": None,
+                "revocation_reason": None,
+                "state": "pending_approval",
+                "endpoint_scope": "GET /api/l2/probe",
+                "created_at_iso": datetime.now(timezone.utc).isoformat(),
+                "is_sample": True,
+            }},
+            upsert=True,
+        )
+        # Ensure at least one source-addition-pending row is queryable.
+        db["connect_sources_store"].update_one(
+            {"source_id": "l2-test-canary-source"},
+            {"$set": {
+                "source_id": "l2-test-canary-source",
+                "source_name": "l2_canary_source_awaiting_creds",
+                "state": "awaiting_credentials",
+                "ring": "R2",
+                "domain": "revenue",
+                "corpus_row_count": 0,
+                "declared_by_email": "l2@rms.example.com",
+                "created_at_iso": datetime.now(timezone.utc).isoformat(),
+                "is_sample": False,
+            }},
+            upsert=True,
+        )
+    try:
+        r = requests.get(f"{BASE_URL}/api/team/approval_surface",
+                         headers=_auth(admin_token), timeout=15)
+        assert r.status_code == 200
+        body = r.json()
+        assert "items" in body and len(body["items"]) >= 3
+        classes = {it["class"] for it in body["items"]}
+        expected = {"over_threshold_commission", "source_addition_pending",
+                    "access_grant_request", "retention_window_extension"}
+        assert expected.issubset(classes), f"missing classes: {expected - classes}"
+        doctrine = body.get("queue_doctrine_plain", "")
+        assert "consistently empty" in doctrine.lower()
+        assert "criteria are the instrument" in doctrine.lower()
+        sample_items = [it for it in body["items"] if it.get("is_sample")]
+        assert len(sample_items) >= 1
+        dormant = [it for it in body["items"] if it["state"] == "dormant_honest"]
+        assert len(dormant) >= 1
+        assert dormant[0].get("state_reason_plain")
+    finally:
+        with MongoClient("mongodb://localhost:27017") as client:
+            db = client["rms_intelligence"]
+            db["checker_requests"].delete_one({"request_id": "l2-test-canary"})
+            db["engineer_key_grants"].delete_one({"grant_id": "l2-test-canary-pending"})
+            db["connect_sources_store"].delete_one({"source_id": "l2-test-canary-source"})
 
 
 # --- 3. Approval surface unauth → 401 shape ---
@@ -160,12 +227,14 @@ def test_l8_grant_revoke_single_source_engineer_key_grants(admin_token):
                        headers=_auth(admin_token), timeout=15).json()
     found_team = any(row["grant_id"] == grant_id for row in reg["rows"])
     assert found_team
-    # Confirm via /api/engineer/key_grants (SAME SOURCE)
+    # Confirm via /api/engineer/key_grants (SAME SOURCE — must query the
+    # actual grantee, since engineer surface returns self grants by default
+    # per Owner ruling · self-service inspection semantics).
     eng = requests.get(f"{BASE_URL}/api/engineer/key_grants",
-                       headers=_auth(admin_token), timeout=15)
+                       headers=_auth(admin_token),
+                       params={"grantee_email": grantee}, timeout=15)
     assert eng.status_code == 200, eng.text[:200]
     eng_body = eng.json()
-    # Grants may be under 'grants' or 'rows'
     grants_list = eng_body.get("grants") or eng_body.get("rows") or []
     found_eng = any((g.get("grant_id") == grant_id) for g in grants_list)
     assert found_eng, f"grant {grant_id} not on engineer key grants surface (single-source failed)"

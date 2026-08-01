@@ -93,32 +93,62 @@ async def _seed_pending_grant(db, email: str, uid_tail: str) -> None:
     grant_id = f"sample-team-grant-pending-{uid_tail}"
     if await coll.find_one({"grant_id": grant_id}) is not None:
         return
+    # Engineer-schema-compatible sample doc so both /api/team/access_register
+    # AND /api/engineer/key_grants can list it (single-source verified · EE-R4).
     await coll.insert_one({
         "grant_id": grant_id,
         "grantee_email": "external.engineer@partner.example.com",
+        "grantor_id": email,  # engineer schema uses id (we store email as id in seeds)
+        "key_class": "external",
+        "path": "live_query",
+        "floor": "established_fact",
+        "scope": "GET /api/registry/what_you_hold (read-only)",
+        "justification": (
+            "SAMPLE fixture · read-only warehouse view of one identity's holdings; "
+            "seeded for the Team surface UI-1-E · not a real grant."
+        ),
+        "lawful_basis_ref": "team_surface_sample",
+        "issued_at": datetime.now(timezone.utc),
+        "revoked_at": None,
+        "revocation_reason": None,
+        # UI-1-E Team sidecars (additive · read by /api/team/access_register).
+        "state": "pending_approval",
         "endpoint_scope": "GET /api/registry/what_you_hold (read-only)",
         "scope_summary": "read-only warehouse view of one identity's holdings",
-        "requested_by_email": email,
         "grantor_email": None,
-        "state": "pending_approval",
-        "delegation_chain_length": 1,
+        "requested_by_email": email,
         "created_at_iso": _now_iso(),
         "is_sample": True,
     })
 
 
 async def _seed_access_register_rows(db, email: str, uid_tail: str) -> None:
-    """2 active grants + 1 revoked (for propagation-state rendering)."""
+    """2 active grants + 1 revoked (for propagation-state rendering).
+
+    Engineer-schema-compatible so the sibling /api/engineer/key_grants
+    endpoint can list every seeded row (single-source verified · EE-R4).
+    """
     coll = db.get_collection("engineer_key_grants")
     active_1 = f"sample-team-grant-active-1-{uid_tail}"
+    now = datetime.now(timezone.utc)
     if await coll.find_one({"grant_id": active_1}) is None:
         await coll.insert_one({
             "grant_id": active_1,
             "grantee_email": "auditor@dpo.example.com",
+            "grantor_id": email,
+            "key_class": "internal",
+            "path": "live_query",
+            "floor": "established_fact",
+            "scope": "GET /api/govern/record (read-only auditor scope)",
+            "justification": "SAMPLE fixture · read-only auditor access to the Govern Record.",
+            "lawful_basis_ref": "team_surface_sample",
+            "issued_at": now,
+            "revoked_at": None,
+            "revocation_reason": None,
+            "state": "active",
             "endpoint_scope": "GET /api/govern/record (read-only auditor scope)",
             "scope_summary": "read-only auditor access to the Govern Record",
             "grantor_email": email,
-            "state": "active",
             "created_at_iso": _now_iso(),
             "is_sample": True,
         })
@@ -127,10 +157,20 @@ async def _seed_access_register_rows(db, email: str, uid_tail: str) -> None:
         await coll.insert_one({
             "grant_id": active_2,
             "grantee_email": "partner@vendor.example.com",
+            "grantor_id": email,
+            "key_class": "external",
+            "path": "live_query",
+            "floor": "established_fact",
+            "scope": "GET /api/prove/samples (shape-reference read)",
+            "justification": "SAMPLE fixture · read-only Prove sample reference.",
+            "lawful_basis_ref": "team_surface_sample",
+            "issued_at": now,
+            "revoked_at": None,
+            "revocation_reason": None,
+            "state": "active",
             "endpoint_scope": "GET /api/prove/samples (shape-reference read)",
             "scope_summary": "read-only Prove sample reference",
             "grantor_email": email,
-            "state": "active",
             "created_at_iso": _now_iso(),
             "is_sample": True,
         })
@@ -139,12 +179,22 @@ async def _seed_access_register_rows(db, email: str, uid_tail: str) -> None:
         await coll.insert_one({
             "grant_id": revoked,
             "grantee_email": "former.contractor@ex.example.com",
+            "grantor_id": email,
+            "key_class": "external",
+            "path": "live_query",
+            "floor": "established_fact",
+            "scope": "GET /api/use-data/sessions",
+            "justification": "SAMPLE fixture · expired contract; access no longer required.",
+            "lawful_basis_ref": "team_surface_sample",
+            "issued_at": now,
+            "revoked_at": now,
+            "revocation_reason": "contract expired 2026-Q1; access no longer required.",
+            "state": "revoked",
             "endpoint_scope": "GET /api/use-data/sessions",
             "scope_summary": "expired contract · scope revoked",
             "grantor_email": email,
             "revoked_by_email": email,
             "revoke_reason_verbatim": "contract expired 2026-Q1; access no longer required.",
-            "state": "revoked",
             "created_at_iso": _now_iso(),
             "revoked_at_iso": _now_iso(),
             "is_sample": True,

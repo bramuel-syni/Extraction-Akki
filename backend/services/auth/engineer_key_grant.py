@@ -226,6 +226,21 @@ class EngineerKeyGrantRegistration(BaseModel):
         default=None,
         description="Free-text audit reason for revocation; required at revoke time.",
     )
+    # Tenancy sidecar (additive · D4b lifecycle-tolerance permits · UI-1-E iter23
+    # remediation 2026-08-02): older seeded fixtures and multi-instance test
+    # runs wrote an `instance_id` sidecar onto grant docs. The load-bearing
+    # wire-shape gate explicitly permits additive lifecycle fields (see
+    # test_lifecycle_field_additions_do_not_break_the_gate). Rather than
+    # rejecting the seeded corpus at load time, we admit the sidecar
+    # explicitly so `extra='forbid'` still catches unknown fields.
+    instance_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Multi-tenant instance sidecar written by seed/test fixtures. "
+            "Optional; not read by check_scope. Preserved on the wire for "
+            "audit-trail replay."
+        ),
+    )
 
 
 class EngineerKeyGrantRegistrationRequest(BaseModel):

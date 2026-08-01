@@ -1,0 +1,38 @@
+{
+  "summary": "UI-1-E iter24 re-verification against https://governance-scan-3.preview.emergentagent.com AFTER the critical fix from iter23. CRITICAL REGRESSION IS FIXED. All 13 iter24 live gates pass (backend/tests/test_ui1e_iter24_live.py). Full regression sweep: 22/22 pass across invariants (test_team_ui1e_gates.py · 12) + iter23 live (test_ui1e_iter23_live.py · 10, l8 now passes). UI verified via authenticated (localStorage rms.b1.auth.access_token) navigation. R1 verified: GET /api/engineer/key_grants (admin) → 200 with grants list (was 500 in iter23; instance_id: Optional[str] fix applied, plus _drop_sidecars strips Team-only sidecars pre-validate). R2 verified: querying ?grantee_email=<seeded-grantee> returns the sample-team-grant-active-* grant docs — the Team seeder now writes engineer-schema-compatible docs, and list_grants_for_grantee gracefully skips malformed legacy docs. P0 SINGLE-SOURCE ROUNDTRIP (Owner Message 610 D-2) verified end-to-end: (a) POST /api/team/access_register/grant returns grant_id; (b) GET /api/team/access_register shows it; (c) GET /api/engineer/key_grants?grantee_email=<probe> returns the SAME grant_id — proves single-source machinery; (d) POST /api/team/access_register/revoke → state=revoked; (e) engineer surface shows revoked_at + revocation_reason='iter24 revoke roundtrip'. P0 DPO break-in unchanged: POST grant → 403 auth_scope_insufficient; GET access_register → 200, can_read_all=true, can_grant=false, rows visible. UI-side DPO break-in: grant form REPLACED by team-access-grant-role-denial banner (count=1), zero revoke buttons rendered. P1 Approval Surface UI: 16 item cards render, 180 sample-testids, all 4 classes present in DOM (over_threshold_commission + source_addition_pending + access_grant_request + retention_window_extension), doctrine text 'consistently empty' + 'criteria are the instrument' both verbatim; decision endpoint returns 400 decision_reason_required on empty reason. P1 Constitutional Seats: dormant_honest present, HAZARD-STOP text present, 2 disabled buttons (both succession paths). P1 Parity: /api/readyz parity_count=36 expected_parity=36. Shell root /: all 6 module tiles rendered including Team LIT. Retired vocab check: 'Approval Queue' absent from all /team routes; 'Approval Surface' Canon vocab present on /team/approval-surface; 'Shape this objective', 'Ask Console', 'RMS Intelligence' absent throughout. HONEST NON-200 render (regression): unauth /team/approval-surface, /team/access-register, /team/constitutional-seats all render team-*-error-panel with data-status='401' — never silent.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ui1e_iter24_live.py",
+    "/app/backend/tests/test_ui1e_iter23_live.py",
+    "/app/backend/tests/invariants/test_team_ui1e_gates.py",
+    "/app/test_reports/pytest/ui1e_iter24.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "The iter24 fix is minimal and structurally sound: (a) instance_id: Optional[str] = None on EngineerKeyGrantRegistration turns a previously-unlisted extra field into an explicit-optional, preserving the extra='forbid' wire-shape pin; (b) _drop_sidecars() is the right pattern for tolerating adjacent-surface annotations (state, endpoint_scope, scope_summary, grantor_email) on the SAME doc without weakening validation on the core schema; (c) delegating /grant + /revoke in routers/team.py to services.auth.engineer_key_grant_service.register_grant + revoke_grant establishes the single-source seam Owner Message 608 required, so both surfaces now read/write through one machinery.",
+    "list_grants_for_grantee's ValidationError→skip fallback is defensible for legacy-doc tolerance but should log the skipped grant_id + reason so silent drift on old docs remains visible. Currently the risk is small (all seeded docs are now schema-conformant) but worth a log line for future forensics.",
+    "The engineer/key_grants surface returns grants for the CALLER's own email by default (self-service inspection); passing ?grantee_email= gates the read to admin/engineer authority. This is coherent, but the semantic is worth documenting in the endpoint docstring for future callers.",
+    "Team seeder now writes engineer-schema-compatible docs (key_class + path + floor + scope + justification + lawful_basis_ref + issued_at all present). Good — this closes the schema drift that caused the iter23 500."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ui1e_iter24_live.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 iter24 live + 12/12 invariants + 10/10 iter23 live · 35/35 total)",
+    "frontend": "100% on all Owner Message 610 UI bindings verified against the preview"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw; demo.dpo@demo.rms.example.com / demo-dpo-pw; demo.operator@demo.rms.example.com / demo-operator-pw (from /app/memory/test_credentials.md). Frontend token localStorage key: rms.b1.auth.access_token.",
+  "seed_data_creation": "Created 1 live grant→revoke roundtrip via team endpoints (grantee=iter24.probe.<8hex>@test.example.com, scope='GET /api/team/access_register', revoked with reason 'iter24 revoke roundtrip'). Safe residue that exercises the single-source seam idempotently.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "iter23 CRITICAL (Pydantic extra_forbidden on instance_id) is FIXED and verified. Single-source Team↔Engineer roundtrip works end-to-end (grant on team surface visible on engineer surface with same grant_id; revoke on team surface propagates revoked_at + revocation_reason to engineer surface). All 35 backend gates pass (13 iter24 + 12 invariants + 10 iter23 live). UI verified authenticated on all 3 team routes plus unauth 401 shape on all 3 error panels. If future iterations touch the engineer_key_grants schema, re-run test_ui1e_iter24_live.py::test_r1_engineer_key_grants_self_admin + test_r2_engineer_key_grants_by_seeded_grantee to catch schema-drift regressions early. The list_grants_for_grantee ValidationError→skip fallback is silent — consider adding a warn log if legacy docs remain a concern.",
+  "rca of the issue": "N/A · iter23 RCA (Pydantic extra_forbidden on instance_id at services/auth/engineer_key_grant_service.py:108) is closed by the iter24 fix (Optional[str] instance_id on EngineerKeyGrantRegistration + _drop_sidecars helper stripping Team-only sidecars before model_validate + seeder now writes engineer-schema-compatible docs). Verified by GET /api/engineer/key_grants → 200 (was 500) and full grant→engineer-visible→revoke→engineer-shows-revoked roundtrip in test_p0_team_grant_engineer_single_source_roundtrip."
+}

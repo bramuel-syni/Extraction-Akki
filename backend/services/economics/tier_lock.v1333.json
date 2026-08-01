@@ -1,0 +1,8 @@
+{
+  "rule_id": "tier_lock",
+  "locked": true,
+  "reason_note": "Path A ledger test \u2014 lock.",
+  "grantor_id": "6a6ba8e9c29ca2df857a2765",
+  "idempotency_key": "tier-lock-emit-71209d13",
+  "at": "2026-08-01T03:09:33.809152+00:00"
+}

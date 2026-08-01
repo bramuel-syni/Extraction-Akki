@@ -384,18 +384,40 @@ async def access_register(request: Request):
     rows: List[Dict[str, Any]] = []
     async for doc in cursor:
         doc.pop("_id", None)
+        # Normalise engineer-schema fields (issued_at, revoked_at, scope,
+        # grantor_id) with legacy Team-schema fields (created_at_iso,
+        # revoked_at_iso, endpoint_scope, grantor_email). Both surfaces
+        # co-exist on the same collection — the Team surface reads both.
+        state = doc.get("state") or (
+            "revoked" if doc.get("revoked_at") or doc.get("revoked_at_iso")
+            else "active"
+        )
+        # `when_created_iso` — prefer isoformat string; fall back to
+        # engineer's datetime-typed `issued_at`.
+        when_created = doc.get("created_at_iso")
+        if when_created is None and doc.get("issued_at") is not None:
+            issued = doc.get("issued_at")
+            when_created = issued.isoformat() if hasattr(issued, "isoformat") else str(issued)
+        when_revoked = doc.get("revoked_at_iso")
+        if when_revoked is None and doc.get("revoked_at") is not None:
+            rev = doc.get("revoked_at")
+            when_revoked = rev.isoformat() if hasattr(rev, "isoformat") else str(rev)
+        # `who_grantee_email` present on both schemas. Grantor: prefer email;
+        # fall back to grantor_id (engineer schema only carries id).
+        grantor_email = doc.get("grantor_email") or doc.get("grantor_id") or None
         # Every row: who · what scope · when · by whom · propagation state.
-        propagation = _propagation_state(doc)
+        propagation = _propagation_state({"state": state})
         rows.append({
             "grant_id": doc.get("grant_id"),
             "who_grantee_email": doc.get("grantee_email"),
             "what_scope": doc.get("endpoint_scope")
                 or doc.get("scope_summary")
+                or doc.get("scope")
                 or "unspecified",
-            "when_created_iso": doc.get("created_at_iso"),
-            "when_revoked_iso": doc.get("revoked_at_iso"),
-            "by_whom_grantor_email": doc.get("grantor_email"),
-            "state": doc.get("state") or "active",
+            "when_created_iso": when_created,
+            "when_revoked_iso": when_revoked,
+            "by_whom_grantor_email": grantor_email,
+            "state": state,
             "propagation_state_plain": propagation,
             "is_sample": bool(doc.get("is_sample", False)),
         })
@@ -441,16 +463,26 @@ def _propagation_state(doc: Dict[str, Any]) -> str:
 async def access_register_grant(request: Request):
     """Issue a new key-grant via the Team surface.
 
-    Wires to the same `services.auth.engineer_key_grant_service.register_grant`
-    used by `/api/engineer/key_grants` — single source. Role-gating per
-    Canon §3.2 (Owner Message 608 D-2 · break-in):
+    Delegates to `services.auth.engineer_key_grant_service.register_grant`
+    used by `/api/engineer/key_grants` — the single-source machinery
+    (Owner Message 608 · EE-R4 · closes UI-1-A retirement gap).
 
+    Role-gating per Canon §3.2 (Owner Message 610 D-2 · break-in):
       * master_admin/admin/engineer → allowed.
-      * DPO                         → auth_scope_insufficient (reads register but cannot grant).
+      * DPO                         → auth_scope_insufficient.
       * others                      → auth_scope_insufficient.
 
-    Body: {grantee_email, endpoint_scope, [scope_summary], [reason_verbatim]}
+    Body (minimal Team-surface envelope):
+      {grantee_email, endpoint_scope, [scope_summary], [reason_verbatim]}
+
+    The Team endpoint DERIVES the Canon-required fields (key_class,
+    path, floor, justification, lawful_basis_ref) from the Team-surface
+    envelope. Grants issued this way appear on BOTH the Team and
+    Engineer surfaces (single-source verified).
     """
+    from services.auth.engineer_key_grant import EngineerKeyGrantRegistrationRequest
+    from services.auth.engineer_key_grant_service import register_grant
+
     identity, denial = await _identity(request)
     if denial is not None:
         return denial
@@ -472,27 +504,34 @@ async def access_register_grant(request: Request):
             "reason": "missing_field",
             "detail": "grantee_email and endpoint_scope are required.",
         })
-    from server import db
-    grant_id = f"grant-team-{_now_iso()}-{grantee_email[:8]}"
-    grants_coll = db.get_collection("engineer_key_grants")
-    doc = {
-        "grant_id": grant_id,
-        "grantee_email": grantee_email,
-        "endpoint_scope": endpoint_scope,
-        "scope_summary": body.get("scope_summary") or endpoint_scope,
-        "grantor_email": identity.email,
-        "grantor_id": identity.user_id,
-        "state": "active",
-        "created_at_iso": _now_iso(),
-        "reason_verbatim": body.get("reason_verbatim") or "",
-        "is_sample": False,
-    }
-    await grants_coll.insert_one(dict(doc))
-    doc.pop("_id", None)
+    reason_verbatim = (body.get("reason_verbatim") or "").strip()
+    # Team surface derives Canon-required fields from the minimal envelope.
+    # These defaults are conservative (external · live_query · established_fact)
+    # so any Team-issued grant is safe to admit on the wire.
+    try:
+        req = EngineerKeyGrantRegistrationRequest(
+            grantee_email=grantee_email,
+            key_class="external",
+            path="live_query",
+            floor="established_fact",
+            scope=endpoint_scope,
+            justification=(reason_verbatim or
+                           f"Issued via Team surface by {identity.email}."),
+            lawful_basis_ref="team_surface_grant",
+        )
+    except Exception as e:
+        return JSONResponse(status_code=400, content={
+            "reason": "grant_field_validation_failed",
+            "detail": str(e),
+        })
+    grant = await register_grant(req=req, grantor_id=identity.user_id)
+    grant_dict = grant.model_dump(mode="json")
+    # Team surface synthesizes a display-only `state` field for the frontend.
+    grant_dict["state"] = "revoked" if grant.revoked_at else "active"
     return {
         "canon_ref": "Canon §3.2 · UI-1-E · B · grant",
-        "grant": doc,
-        "propagation_state_plain": _propagation_state(doc),
+        "grant": grant_dict,
+        "propagation_state_plain": _propagation_state({"state": "active"}),
     }
 
 
@@ -500,8 +539,13 @@ async def access_register_grant(request: Request):
 async def access_register_revoke(request: Request):
     """Revoke a grant via the Team surface.
 
-    Same role gating as `/grant` above. DPO cannot revoke.
+    Delegates to `services.auth.engineer_key_grant_service.revoke_grant`
+    — the same seam used by `/api/engineer/key_grants/{id}/revoke`.
+    DPO cannot revoke (Owner Message 610 D-2 role gating).
     """
+    from services.auth.engineer_key_grant import EngineerKeyGrantRevocationRequest
+    from services.auth.engineer_key_grant_service import revoke_grant
+
     identity, denial = await _identity(request)
     if denial is not None:
         return denial
@@ -522,35 +566,45 @@ async def access_register_revoke(request: Request):
             "reason": "missing_field",
             "detail": "grant_id and reason_verbatim are required for revocation.",
         })
-    from server import db
-    grants_coll = db.get_collection("engineer_key_grants")
-    doc = await grants_coll.find_one({"grant_id": grant_id})
-    if doc is None:
+    if len(reason) < 8:
+        return JSONResponse(status_code=400, content={
+            "reason": "reason_too_short",
+            "detail": "reason_verbatim must be at least 8 characters (audit trail).",
+        })
+    try:
+        req = EngineerKeyGrantRevocationRequest(reason=reason)
+        grant = await revoke_grant(grant_id=grant_id, req=req,
+                                   grantor_id=identity.user_id)
+    except LookupError:
         return JSONResponse(status_code=404, content={
             "reason": "grant_not_found",
             "detail": f"grant_id={grant_id!r} does not exist.",
         })
-    if doc.get("state") == "revoked":
-        return JSONResponse(status_code=409, content={
-            "reason": "grant_already_revoked",
-            "detail": f"grant_id={grant_id!r} is already revoked.",
-        })
-    await grants_coll.update_one(
-        {"grant_id": grant_id},
-        {"$set": {"state": "revoked",
-                  "revoked_at_iso": _now_iso(),
-                  "revoked_by_email": identity.email,
-                  "revoke_reason_verbatim": reason}},
-    )
-    doc.update({"state": "revoked",
-                "revoked_at_iso": _now_iso(),
-                "revoked_by_email": identity.email,
-                "revoke_reason_verbatim": reason})
-    doc.pop("_id", None)
+    except Exception as e:
+        # engineer_key_grant_service raises GrantNotFound / GrantAlreadyRevoked
+        # by name (not stdlib exception classes). Handle by class-name string.
+        cls = type(e).__name__
+        if cls == "GrantNotFound":
+            return JSONResponse(status_code=404, content={
+                "reason": "grant_not_found",
+                "detail": f"grant_id={grant_id!r} does not exist.",
+            })
+        if cls == "GrantAlreadyRevoked":
+            return JSONResponse(status_code=409, content={
+                "reason": "grant_already_revoked",
+                "detail": f"grant_id={grant_id!r} is already revoked.",
+            })
+        if isinstance(e, ValueError):
+            return JSONResponse(status_code=400, content={
+                "reason": "revoke_failed", "detail": str(e),
+            })
+        raise
+    grant_dict = grant.model_dump(mode="json")
+    grant_dict["state"] = "revoked"
     return {
         "canon_ref": "Canon §3.2 · UI-1-E · B · revoke",
-        "grant": doc,
-        "propagation_state_plain": _propagation_state(doc),
+        "grant": grant_dict,
+        "propagation_state_plain": _propagation_state({"state": "revoked"}),
     }
 
 

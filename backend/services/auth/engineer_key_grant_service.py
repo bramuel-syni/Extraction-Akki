@@ -99,22 +99,64 @@ async def register_grant(
     return grant
 
 
+# Sidecar fields written by adjacent surfaces (UI-1-E Team, seed fixtures,
+# multi-tenant instance ids). These are stripped before `model_validate` so
+# `extra='forbid'` on EngineerKeyGrantRegistration keeps its load-bearing
+# guarantee (never a silent extra on the wire) while adjacent surfaces
+# remain free to write context sidecars on the same document.
+_ENGINEER_SIDECAR_FIELDS = frozenset({
+    "state",
+    "endpoint_scope",
+    "scope_summary",
+    "grantor_email",
+    "requested_by_email",
+    "created_at_iso",
+    "revoked_at_iso",
+    "revoked_by_email",
+    "revoke_reason_verbatim",
+    "team_decision_event_id",
+    "team_decision_reason_verbatim",
+    "delegation_chain_length",
+    "is_sample",
+})
+
+
+def _drop_sidecars(doc: dict) -> dict:
+    """Remove Team/seed sidecar fields; keep only engineer wire shape."""
+    return {k: v for k, v in doc.items() if k not in _ENGINEER_SIDECAR_FIELDS}
+
+
 async def list_grants_for_grantee(grantee_email: str) -> List[EngineerKeyGrantRegistration]:
-    """Read all grants for a grantee — Engineer §4.1 grants panel data source."""
+    """Read all grants for a grantee — Engineer §4.1 grants panel data source.
+
+    Legacy/malformed docs (missing engineer wire-shape fields) are skipped
+    silently. This isolates the engineer surface from partial-shape rows
+    that adjacent surfaces (e.g. Team UI-1-E in early builds) may have
+    written; single-source engineer grants continue to render cleanly.
+    """
+    from pydantic import ValidationError
     cursor = db[COLLECTION].find({"grantee_email": grantee_email.lower()})
     out: List[EngineerKeyGrantRegistration] = []
     async for doc in cursor:
         doc.pop("_id", None)
-        out.append(EngineerKeyGrantRegistration.model_validate(doc))
+        try:
+            out.append(EngineerKeyGrantRegistration.model_validate(_drop_sidecars(doc)))
+        except ValidationError:
+            # Malformed legacy row — not visible on the engineer wire.
+            continue
     return out
 
 
 async def get_grant(grant_id: str) -> Optional[EngineerKeyGrantRegistration]:
+    from pydantic import ValidationError
     doc = await db[COLLECTION].find_one({"grant_id": grant_id})
     if doc is None:
         return None
     doc.pop("_id", None)
-    return EngineerKeyGrantRegistration.model_validate(doc)
+    try:
+        return EngineerKeyGrantRegistration.model_validate(_drop_sidecars(doc))
+    except ValidationError:
+        return None
 
 
 class GrantAlreadyRevoked(Exception):
