@@ -1,0 +1,44 @@
+{
+  "summary": "UI-1-D iter22 re-verification (Owner Message 606: page-level render gap + silent-swallow bug fixes). Backend: 17/17 UI-1-D invariant gates green (test_registry_prove_ui1d_gates.py including new test_d_p8 /prove/samples and test_d_p9 trace resolution). 9/9 live-preview HTTP gates green (new /app/backend/tests/test_ui1d_iter22_live.py) covering /prove/samples returns 4 shapes, every sample trace_id resolves via /prove/trace with 3 walk_layers [claim,reasoning,raw_facts], /prove/ask returns 401 with honest reason when unauth, all 4 seeded live shapes still return correctly, and cross-identity operator sees the same 4 sample shapes. Frontend rendered-DOM verification against https://governance-scan-3.preview.emergentagent.com: (1) UNAUTH /prove renders prove-samples-error-panel data-status=401 with reason 'Shape reference unavailable · auth_missing / Authentication required' — silent-swallow bug is FIXED. UNAUTH submit renders prove-ask-error-panel data-status=401 same honest text. (2) Admin default /prove render (no query submitted): all 4 sample cards present [prove-sample-card-answered, prove-sample-card-not_extracted_yet, prove-sample-card-evidence_cannot_support_it, prove-sample-card-something_broke], all 4 namespaced shape cards present [prove-shape-{answered,not-extracted-yet,evidence-cannot-support,something-broke}-sample], and all 4 sample banners carry data-sample-badge='true' [prove-{answer,not-extracted,evidence-cannot-support,something-broke}-sample-banner-sample] — the fourth (SomethingBroke sample banner) missing in iter21 is now RENDERED and badged. (3) Live-query outcomes verified for all 4 shapes: prove-shape-answered, prove-shape-not-extracted-yet (with prove-queue-this-gap-btn visible), prove-shape-evidence-cannot-support, prove-shape-something-broke — live and sample variants coexist on the page. (4) DB-2 visual invariant: fault card computed styles bg=rgb(22,48,79) border-left rgb(126,48,56) 6px MATCH for both live and sample variants; refusal sample bg=rgb(230,228,217) border-color rgb(176,124,42) 2px — visually distinct as required. (5) Walk-a-proof from answered sample card navigates to /prove/trace/trc-sample-0f7a043d179c, renders claim + reasoning layers, close button returns to /prove. (6) Cross-identity: demo.operator sees 4/4 sample cards. (7) /registry regression: 4/4 axes, 10 briefs, 24 gap CTAs, 45 sample badges, retired vocab absent. (8) Retired vocabulary ('Shape this objective', 'Ask Console', 'RMS Intelligence') absent from /prove DOM. Parity 36/36 live.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "/prove/trace/{id} walk-a-proof",
+        "issues": ["The 3rd walk layer is labelled with a rendered heading that does NOT include the substring 'raw_facts' or 'raw facts' (case-insensitive full-body scan returned False). The API contract layer key IS 'raw_facts' (verified via /api/prove/trace and test_d_p9); this is a display-label naming choice only and NOT a functional defect. Owner-preferred wording (e.g., 'Raw facts' with a space) should be confirmed. All 3 layers ARE rendered — this is a labelling nit, not a missing layer."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/invariants/test_registry_prove_ui1d_gates.py",
+    "/app/backend/tests/test_ui1d_iter22_live.py",
+    "/app/test_reports/pytest/ui1d_iter22.xml"
+  ],
+  "action_items": [
+    "OPTIONAL: verify walk-a-proof 3rd-layer heading text on /prove/trace/{id} matches Owner's preferred 'raw_facts' or 'Raw facts' wording — currently the heading text does not include either substring in the rendered DOM (all 3 layers ARE present functionally)."
+  ],
+  "critical_code_review_comments": [
+    "Iter22 fixes both Owner Message 606 defects at the correct architectural layer: (a) ProvePage.jsx useEffect fetches /api/prove/samples on mount and renders 4 badged sample cards below the input form, so the empty state is never blank for any authenticated identity; (b) both /prove/samples and /prove/ask now render honest error panels (prove-samples-error-panel · prove-ask-error-panel) with data-status carrying the actual HTTP code and reason verbatim from the response — the silent 'if (r.status===200) setEnvelope(...)' pattern is eliminated.",
+    "The `variant` prop pattern on shape cards (sample vs live, suffix `-sample` on testids) is a clean namespacing approach that permits both variants to coexist on the page without DOM collisions. Verified: prove-shape-answered and prove-shape-answered-sample both render simultaneously.",
+    "DB-2 paired break-in visual invariant is proven at TWO levels now — both sample and live SomethingBroke cards render with navy bg + oxblood 6px left border, while refusal cards (both variants) render with parchment bg + amber 2px border. The fault channel is unambiguously distinct in both variants.",
+    "Cross-identity sample seeding continues to work: operator, admin both see 4/4 sample shapes. Deterministic trace_ids (trc-sample-0f7a043d179c etc.) are consistent across the /prove/samples payload and /prove/trace resolution."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ui1d_iter22_live.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 invariant gates + 9/9 live HTTP gates)",
+    "frontend": "100% on Owner-flagged defects (page-level default render + honest non-200 error + live outcome coexistence + DB-2 visual + walk-a-proof + cross-identity + retired-vocab + registry regression all pass)"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw; demo.operator@demo.rms.example.com / demo-operator-pw (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None — used existing seeded fixtures via /api/prove/samples endpoint.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "UI-1-D iter22 CLOSED. Both Owner Message 606 defects (page-level render gap + silent-swallow of non-200) are FIXED and verified in rendered DOM against the standing preview. All 4 sample cards + 4 badges + 4 live variants render. Silent-swallow eliminated (prove-samples-error-panel · prove-ask-error-panel with data-status). DB-2 fault-vs-refusal visual distinction holds for both sample and live variants. Walk-a-proof descends from sample cards and returns to /prove. Cross-identity operator sees the same 4 sample cards. /registry has no regressions. Parity 36/36. Only nit: the walk-a-proof 3rd-layer heading text may not include the literal substring 'raw_facts' / 'raw facts' — needs a one-line label confirmation from Owner.",
+  "rca of the issue": "Owner Message 606 iter21 defect: (RC1) ProvePage lacked a useEffect calling /api/prove/samples on mount; page rendered only the input field for authenticated users → NO sample reference. (RC2) apiClient.proveAsk silently discarded non-200 responses via `if (r.status===200) setEnvelope(r.body)` → unauth or stale-token users saw a blank page after submit. Mitigation: (F1) added GET /api/prove/samples backend endpoint returning 4 seeded envelopes with deterministic trace_ids; (F2) added ProvePage useEffect + 'Sample shape reference' section with variant='sample' suffix on testids; (F3) both /samples and /ask now render honest error panels with data-status + reason verbatim on any non-200 response. Systemic gate strengthened: test_d_p8 + test_d_p9 (backend) and Jest cells 14+15 (frontend) now assert PAGE-LEVEL render path, not just component-level render on props."
+}

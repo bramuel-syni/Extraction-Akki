@@ -20,14 +20,47 @@ jest.mock('../../apiClient', () => {
     registryGapRegister: jest.fn(),
     registryQueueGap: jest.fn(),
     proveAsk: jest.fn(),
+    proveSamples: jest.fn(),
     proveTrace: jest.fn(),
   };
   return { __esModule: true, default: mock, api: mock };
 });
 import api from '../../apiClient';
 
+const SAMPLES_ENVELOPE_FOUR_SHAPES = {
+  canon_ref: 'Canon §9 · shape grammar reference',
+  count: 4,
+  samples: [
+    { shape: 'answered', trace_id: 'trc-sample-ans',
+      asked: 'How many Q1 partner rebate rows?',
+      claim: '487 rows meet the established-fact floor.',
+      defensibility_class: 'established_fact', is_sample: true },
+    { shape: 'not_extracted_yet', trace_id: 'trc-sample-ney',
+      asked: 'What extraction pass is needed for H2 cohort?',
+      wire_reason_verbatim: 'No extract in the corpus intersects this question.',
+      estimated_effort_plain: 'roughly one extraction pass.',
+      queue_offered: true, gap_id: 'gap-h2', is_sample: true },
+    { shape: 'evidence_cannot_support_it', trace_id: 'trc-sample-ecs',
+      asked: 'What Q3 enterprise-tier price?',
+      reason_code: 'no_defensibility_floor',
+      wire_reason_verbatim: 'The corpus holds a Q3 summary but no specific price.',
+      what_would_raise_it_plain: 'A board-minutes ingestion would raise it.',
+      queue_offered: false, is_sample: true },
+    { shape: 'something_broke', trace_id: 'trc-sample-sb',
+      asked: 'Show the raw archive for the March broker export.',
+      fault_channel_ref: 'fault-archive-reader-dormant',
+      fault_reason_plain: 'The archive reader capability is dormant.',
+      queue_offered: false, is_sample: true },
+  ],
+};
+
 beforeEach(() => {
   Object.values(api).forEach((f) => f.mockReset && f.mockReset());
+  // Default: /prove samples endpoint returns the 4 seeded shapes.
+  // Individual tests may override this before rendering.
+  if (api.proveSamples && api.proveSamples.mockResolvedValue) {
+    api.proveSamples.mockResolvedValue({ status: 200, body: SAMPLES_ENVELOPE_FOUR_SHAPES });
+  }
 });
 
 
@@ -540,3 +573,114 @@ describe('UI-1-D · gate_prove_db2_paired_break_in_fault_never_shares_refusal_st
     expect(screen.getByTestId('prove-fault-plain-reason').textContent).toMatch(/archive reader/i);
   });
 });
+
+
+/* =============================================================================
+   Cell 14 · gate_prove_page_default_render_four_seeded_sample_shape_cards
+   Owner UI-1-D re-verification 2026-08-02 · viewable-build standing:
+   the /prove page MUST render the 4 seeded shape sample cards by default
+   (page-level render path · not just component-level render on user action).
+   This closes the systemic gap the Owner flagged: Jest cards rendered fine
+   when handed props, but the page's own fetch/render path was silent.
+   ============================================================================= */
+describe('UI-1-D · gate_prove_page_default_render_four_seeded_sample_shape_cards', () => {
+  it('mounts ProvePage as admin → fetches samples → renders all 4 badged shape cards', async () => {
+    // Default mock (SAMPLES_ENVELOPE_FOUR_SHAPES) is primed in beforeEach.
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+
+    // The sample shape reference section is present.
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-sample-shape-reference')).toBeInTheDocument()
+    );
+
+    // One sample card per shape · ALL FOUR rendered (page-level path).
+    await waitFor(() => {
+      expect(screen.getByTestId('prove-sample-card-answered')).toBeInTheDocument();
+      expect(screen.getByTestId('prove-sample-card-not_extracted_yet')).toBeInTheDocument();
+      expect(screen.getByTestId('prove-sample-card-evidence_cannot_support_it')).toBeInTheDocument();
+      expect(screen.getByTestId('prove-sample-card-something_broke')).toBeInTheDocument();
+    });
+
+    // Each sample card carries its shape testid inside it (namespaced with `-sample`),
+    // AND its sample badge. (These are proof that the same card components fire on
+    // the page-level path.)
+    expect(screen.getByTestId('prove-shape-answered-sample')).toBeInTheDocument();
+    expect(screen.getByTestId('prove-shape-not-extracted-yet-sample')).toBeInTheDocument();
+    expect(screen.getByTestId('prove-shape-evidence-cannot-support-sample')).toBeInTheDocument();
+    expect(screen.getByTestId('prove-shape-something-broke-sample')).toBeInTheDocument();
+
+    // All four SAMPLE badges render on the page by default.
+    expect(screen.getByTestId('prove-answer-sample-banner-sample')).toBeInTheDocument();
+    expect(screen.getByTestId('prove-not-extracted-sample-banner-sample')).toBeInTheDocument();
+    expect(screen.getByTestId('prove-evidence-cannot-support-sample-banner-sample')).toBeInTheDocument();
+    expect(screen.getByTestId('prove-something-broke-sample-banner-sample')).toBeInTheDocument();
+
+    // Sanity: the SAMPLE badge dataset marker is set (systemic sample-marking discipline).
+    ['prove-answer-sample-banner-sample',
+     'prove-not-extracted-sample-banner-sample',
+     'prove-evidence-cannot-support-sample-banner-sample',
+     'prove-something-broke-sample-banner-sample'].forEach((testid) => {
+      expect(screen.getByTestId(testid).getAttribute('data-sample-badge')).toBe('true');
+    });
+  });
+
+  it('if the samples endpoint fails, page renders an HONEST error panel (never silent)', async () => {
+    api.proveSamples.mockResolvedValueOnce({ status: 401, body: { reason: 'auth_missing', detail: 'Please sign in.' } });
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-samples-error-panel')).toBeInTheDocument()
+    );
+    expect(screen.getByTestId('prove-samples-error-panel').getAttribute('data-status')).toBe('401');
+    expect(screen.getByTestId('prove-samples-error-panel').textContent).toMatch(/auth_missing/i);
+    // No shape sample cards render when the endpoint failed (honest empty).
+    expect(screen.queryByTestId('prove-sample-card-answered')).toBeNull();
+  });
+});
+
+
+/* =============================================================================
+   Cell 15 · gate_prove_ask_non_200_response_renders_honest_error_never_silent
+   Owner UI-1-D re-verification 2026-08-02 · silent-swallow bug fix:
+   submitting a question that returns 401/403/5xx MUST render an honest
+   error panel — never blank. The previous implementation only rendered
+   on status===200, so expired sessions and errors silently vanished.
+   ============================================================================= */
+describe('UI-1-D · gate_prove_ask_non_200_response_renders_honest_error_never_silent', () => {
+  it('401 on /prove/ask renders an honest inline error panel (not silent)', async () => {
+    api.proveAsk.mockResolvedValueOnce({
+      status: 401,
+      body: { reason: 'auth_missing', detail: 'Authentication required.' },
+    });
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    // Wait for samples to load first (default page render).
+    await waitFor(() => expect(screen.getByTestId('prove-sample-shape-reference')).toBeInTheDocument());
+    // Submit a question.
+    fireEvent.change(screen.getByTestId('prove-question-input'), { target: { value: 'expired-session' } });
+    fireEvent.click(screen.getByTestId('prove-ask-btn'));
+    // Error panel renders — honest, verbatim reason.
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-ask-error-panel')).toBeInTheDocument()
+    );
+    expect(screen.getByTestId('prove-ask-error-panel').getAttribute('data-status')).toBe('401');
+    expect(screen.getByTestId('prove-ask-error-panel').textContent).toMatch(/auth_missing/i);
+    // The 4 sample cards remain visible (page-level render path unaffected by ask failure).
+    expect(screen.getByTestId('prove-sample-card-answered')).toBeInTheDocument();
+  });
+
+  it('403 on /prove/ask also renders the error panel with the reason verbatim', async () => {
+    api.proveAsk.mockResolvedValueOnce({
+      status: 403,
+      body: { reason: 'access_control_denied', detail: 'Role not permitted.' },
+    });
+    render(<MemoryRouter><ProvePage /></MemoryRouter>);
+    await waitFor(() => expect(screen.getByTestId('prove-sample-shape-reference')).toBeInTheDocument());
+    fireEvent.change(screen.getByTestId('prove-question-input'), { target: { value: 'forbidden' } });
+    fireEvent.click(screen.getByTestId('prove-ask-btn'));
+    await waitFor(() =>
+      expect(screen.getByTestId('prove-ask-error-panel')).toBeInTheDocument()
+    );
+    expect(screen.getByTestId('prove-ask-error-panel').getAttribute('data-status')).toBe('403');
+    expect(screen.getByTestId('prove-ask-error-panel').textContent).toMatch(/access_control_denied/i);
+  });
+});
+

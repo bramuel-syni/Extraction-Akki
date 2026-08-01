@@ -182,9 +182,63 @@ async def seed_registry_prove_sample_fixtures_if_absent(operator_email_and_id: L
             "queue_offered": False,
             "is_sample": True,
         },
+        # NOT_EXTRACTED_YET shape example (refusal · offers queue).
+        # Owner UI-1-D re-verification note (2026-08-02): the 4 shapes MUST
+        # be visible by default on /prove for every identity. This entry
+        # gives us a deterministic NOT_EXTRACTED_YET sample envelope
+        # without relying on the "novel question" fall-through path.
+        {
+            "question_plain": (
+                "What extraction pass is needed to answer questions on "
+                "the H2 partner activation cohort?"
+            ),
+            "shape": "not_extracted_yet",
+            "wire_reason_verbatim": (
+                "No extract in the corpus intersects this question. The "
+                "H2 partner activation cohort has not yet been ingested "
+                "into any ring — queueing this gap will schedule the "
+                "first extraction pass on the declared source."
+            ),
+            "estimated_effort_plain": (
+                "roughly one extraction pass · single source · scoped to H2."
+            ),
+            "queue_offered": True,
+            # gap_id is minted by the endpoint on first ask; the sample
+            # showcase supplies a deterministic placeholder that the
+            # frontend renders honestly ("Queue this gap" primed).
+            "gap_id": "gap-sample-h2-partner-activation",
+            "is_sample": True,
+        },
     ]:
         qhash = _q_hash(entry["question_plain"])
         entry["question_hash"] = qhash
         entry["created_at_iso"] = _now_iso()
-        if await answers_coll.find_one({"question_hash": qhash}) is None:
+        # Seed a deterministic trace_id per sample so /prove/trace/{id}
+        # renders the walk without requiring a prior /prove/ask call.
+        # The trace is registered in `prove_traces` mirroring the ask path.
+        sample_trace_id = f"trc-sample-{qhash}"
+        entry["sample_trace_id"] = sample_trace_id
+        existing = await answers_coll.find_one({"question_hash": qhash})
+        if existing is None:
             await answers_coll.insert_one(entry)
+        elif existing.get("sample_trace_id") != sample_trace_id:
+            # Backfill the new field on already-seeded docs (idempotent).
+            await answers_coll.update_one(
+                {"question_hash": qhash},
+                {"$set": {"sample_trace_id": sample_trace_id}},
+            )
+        traces_coll = db.get_collection("prove_traces")
+        if await traces_coll.find_one({"trace_id": sample_trace_id}) is None:
+            # The envelope in the trace uses the same shape as the seeded
+            # sample; the presence of `is_sample` is preserved.
+            envelope_for_trace = {k: v for k, v in entry.items()
+                                  if k not in ("_id", "question_hash", "sample_trace_id")}
+            envelope_for_trace["trace_id"] = sample_trace_id
+            envelope_for_trace["asked"] = entry["question_plain"]
+            await traces_coll.insert_one({
+                "trace_id": sample_trace_id,
+                "envelope": envelope_for_trace,
+                "asked": entry["question_plain"],
+                "created_at_iso": entry["created_at_iso"],
+                "is_sample": True,
+            })

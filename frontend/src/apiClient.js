@@ -223,6 +223,10 @@ export const api = {
     client
       .post('/prove/ask', { question }, { validateStatus: (s) => s >= 200 && s < 500 })
       .then((r) => ({ status: r.status, body: r.data })),
+  proveSamples: () =>
+    client
+      .get('/prove/samples', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
   proveTrace: (traceId) =>
     client
       .get(`/prove/trace/${encodeURIComponent(traceId)}`, { validateStatus: (s) => s >= 200 && s < 500 })

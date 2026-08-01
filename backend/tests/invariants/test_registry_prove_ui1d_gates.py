@@ -314,6 +314,53 @@ async def test_d_p7_prove_trace_404_when_trace_absent():
     assert r.json()["reason"] == "trace_not_found"
 
 
+# ---------- gate_ui1d_prove_samples_endpoint_returns_all_four_shapes --------
+
+
+@pytest.mark.asyncio
+async def test_d_p8_prove_samples_endpoint_returns_all_four_seeded_shapes():
+    """Owner UI-1-D re-verification 2026-08-02 · viewable-build standing:
+    the /prove page renders the 4 shape samples by default. This gate
+    asserts the source-of-truth endpoint returns all 4 shapes, each with
+    is_sample=True and a resolvable trace_id.
+    """
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        tok = await _admin_token(ac)
+        r = await ac.get("/api/prove/samples",
+                         headers={"Authorization": f"Bearer {tok}"})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["count"] == 4, body
+    shapes = {s["shape"] for s in body["samples"]}
+    assert shapes == {"answered", "not_extracted_yet",
+                      "evidence_cannot_support_it", "something_broke"}
+    for s in body["samples"]:
+        assert s.get("is_sample") is True, s
+        assert s.get("trace_id"), f"missing trace_id on shape={s['shape']}"
+
+
+@pytest.mark.asyncio
+async def test_d_p9_prove_samples_trace_ids_resolve_via_prove_trace():
+    """Each seeded sample's trace_id resolves in /api/prove/trace/{id} —
+    Walk-a-Proof descends from the default page render without requiring
+    the user to compose a query.
+    """
+    async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as ac:
+        tok = await _admin_token(ac)
+        rs = await ac.get("/api/prove/samples",
+                          headers={"Authorization": f"Bearer {tok}"})
+        for s in rs.json()["samples"]:
+            trace_id = s["trace_id"]
+            rt = await ac.get(f"/api/prove/trace/{trace_id}",
+                              headers={"Authorization": f"Bearer {tok}"})
+            assert rt.status_code == 200, f"trace resolve failed for {trace_id}: {rt.text}"
+            body = rt.json()
+            assert body["trace_id"] == trace_id
+            assert "envelope" in body
+            assert body["envelope"]["shape"] == s["shape"]
+            assert len(body["walk_layers"]) == 3
+
+
 # ---------- gate_ui1d_sample_marking_present_on_seeded_rows -----------------
 
 

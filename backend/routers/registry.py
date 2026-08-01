@@ -341,6 +341,49 @@ def _map_refusal_shape(reason_code: str) -> str:
     return _REFUSAL_TO_SHAPE.get(reason_code, REFUSAL_SHAPE_EVIDENCE_CANNOT_SUPPORT)
 
 
+@prove_router.get("/samples")
+async def prove_samples(request: Request):
+    """Return the 4 seeded sample envelopes — one per response shape.
+
+    Owner UI-1-D re-verification (2026-08-02): the /prove page MUST
+    render the shape grammar by default without requiring the user
+    to compose a query. This endpoint feeds the "Sample shape
+    reference" section of the page (viewable-build standing).
+
+    Each envelope carries `is_sample=True` and a deterministic
+    `trace_id` (seeded by `sample_fixture_seeder.py`) so
+    Walk-a-Proof descent works from any of the 4 samples.
+    """
+    identity, denial = await _identity(request)
+    if denial is not None:
+        return denial
+    coll = db.get_collection("prove_sample_answers")
+    # Ordered emission by shape (Owner-visible grammar order).
+    order = [
+        "answered",
+        "not_extracted_yet",
+        "evidence_cannot_support_it",
+        "something_broke",
+    ]
+    envelopes: List[Dict[str, Any]] = []
+    for shape in order:
+        doc = await coll.find_one({"shape": shape, "is_sample": True})
+        if doc is None:
+            continue
+        doc.pop("_id", None)
+        # Compose the sample envelope in the shape /prove/ask emits.
+        envelope: Dict[str, Any] = {k: v for k, v in doc.items()
+                                    if k not in ("question_hash", "sample_trace_id")}
+        envelope["trace_id"] = doc.get("sample_trace_id", "")
+        envelope["asked"] = doc.get("question_plain", "")
+        envelopes.append(envelope)
+    return {
+        "canon_ref": "Canon §9 · shape grammar reference",
+        "samples": envelopes,
+        "count": len(envelopes),
+    }
+
+
 @prove_router.post("/ask")
 async def prove_ask(body: AskBody, request: Request):
     """Ask a question. Returns answer OR one of three shapes.
