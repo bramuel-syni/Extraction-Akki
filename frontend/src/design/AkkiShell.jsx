@@ -1,6 +1,16 @@
 import React from 'react';
 import { AKKI_V4_PALETTE, AKKI_V4_TYPOGRAPHY } from './akkiv4_design_system';
 
+/* Batch B1 (2026-08-01) — during the fidelity defect cycle, the new
+ * AkkiV4Shell provides the persistent 216px sidebar + 66px rich header
+ * per the file of record. Legacy pages still wrap themselves in this
+ * older AkkiShell; when nested inside AkkiV4Shell, we suppress the
+ * duplicated wordmark/header via context and render as a plain wrapper.
+ * Each module batch (B3–B8) will eventually retire its inner AkkiShell
+ * usage and use only the outer shell chrome.
+ */
+export const NestedInAkkiV4ShellContext = React.createContext(false);
+
 /* AkkiShell — wraps every Phase-3 sub-cycle-1 screen with the ratified
  * visual family (cream #F3F2E9 + Georgia wordmark + Helvetica labels).
  *
@@ -12,6 +22,56 @@ import { AKKI_V4_PALETTE, AKKI_V4_TYPOGRAPHY } from './akkiv4_design_system';
  * in headline position; refusal rendering in the answer position".
  */
 export function AkkiShell({ traceId, title, subtitle, children, right }) {
+  const nested = React.useContext(NestedInAkkiV4ShellContext);
+  if (nested) {
+    // Nested — the outer AkkiV4Shell owns the header + wordmark. Render
+    // only the inner title/subtitle (as section header) + content.
+    return (
+      <div data-testid="akki-shell" data-shell-mode="nested">
+        {(title || subtitle) && (
+          <div style={{ marginBottom: '20px' }}>
+            {title && (
+              <div
+                data-testid="akki-shell-title"
+                style={{
+                  fontFamily: AKKI_V4_TYPOGRAPHY.wordmark,
+                  fontSize: '1.35rem',
+                  color: AKKI_V4_PALETTE.ink,
+                }}
+              >
+                {title}
+              </div>
+            )}
+            {subtitle && (
+              <div
+                data-testid="akki-shell-subtitle"
+                style={{
+                  fontSize: '0.85rem', color: AKKI_V4_PALETTE.sage, marginTop: '2px',
+                }}
+              >
+                {subtitle}
+              </div>
+            )}
+          </div>
+        )}
+        {right && <div style={{ marginBottom: '12px' }}>{right}</div>}
+        {children}
+        {traceId && (
+          <div
+            data-testid="akki-shell-trace-rail"
+            style={{
+              marginTop: '32px', padding: '10px 0',
+              borderTop: `1px solid ${AKKI_V4_PALETTE.mist}`,
+              fontFamily: AKKI_V4_TYPOGRAPHY.monoLine,
+              fontSize: '0.75rem', color: AKKI_V4_PALETTE.sage,
+            }}
+          >
+            trace_id · {traceId}  ·  one trace thread (N-INV)
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div
       data-testid="akki-shell"

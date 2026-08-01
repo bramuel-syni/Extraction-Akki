@@ -1298,6 +1298,11 @@ video {
   font-style: italic;
 }
 
+.tabular-nums {
+  --tw-numeric-spacing: tabular-nums;
+  font-variant-numeric: var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction);
+}
+
 .leading-relaxed {
   line-height: 1.625;
 }
@@ -1427,6 +1432,10 @@ video {
 .underline {
   -webkit-text-decoration-line: underline;
           text-decoration-line: underline;
+}
+
+.outline {
+  outline-style: solid;
 }
 
 .ring {

@@ -33,10 +33,10 @@ const PROTOTYPE_SHA = '2ab55d9f0f317e1e8721fe1a598dc51522e45b6f9b42c2513c843e7a2
 
 // Canonical checklist (mirrors /app/docs/rulings/frontend_fidelity_audit_2026-08-01.md §6).
 const PARITY_CHECKLIST = Object.freeze([
-  // Landing / root
-  { module: 'Root', page: '/', section: 'Landing composition',                  verdict: 'FAIL',                       rework_track: 'A · CD §3 conformance (structural)' },
-  { module: 'Root', page: '/', section: 'Chrome (sidebar + rich header)',       verdict: 'FAIL',                       rework_track: 'A · CD §3 conformance (structural)' },
-  { module: 'Root', page: '/', section: 'Auth strip (live-data affordance)',    verdict: 'DEVIATION_LIVE_DATA_ONLY',   rework_track: null },
+  // Landing / root — B1 shell foundation landed 2026-08-01.
+  { module: 'Root', page: '/', section: 'Landing composition (redirect to /registry)',                  verdict: 'PASS' },
+  { module: 'Root', page: '/', section: 'Chrome (216px sidebar + 66px rich header)',                    verdict: 'PASS' },
+  { module: 'Root', page: '/', section: 'Auth strip (folded into role-switcher slot; live-data)',       verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
 
   // Connect
   { module: 'Connect', page: '/connect', section: 'Page title + summary',       verdict: 'PASS' },
@@ -47,14 +47,14 @@ const PARITY_CHECKLIST = Object.freeze([
   { module: 'Connect', page: '/connect', section: 'Config-lock notification',   verdict: 'PASS' },
   { module: 'Connect', page: '/connect', section: 'Palette + typography',       verdict: 'PASS' },
 
-  // Registry
+  // Registry — B2 landed 2026-08-01 (RegistryV4Page mounted at /registry).
   { module: 'Registry', page: '/registry', section: 'What You Hold hero',       verdict: 'PASS' },
-  { module: 'Registry', page: '/registry', section: 'Census idle/running',      verdict: 'PASS' },
+  { module: 'Registry', page: '/registry', section: 'Census idle/running',      verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
   { module: 'Registry', page: '/registry', section: 'Tabs (measure / record)',  verdict: 'PASS' },
   { module: 'Registry', page: '/registry', section: 'Measure stat strips',      verdict: 'PASS' },
   { module: 'Registry', page: '/registry', section: 'Composition grid 1.5fr:1fr', verdict: 'PASS' },
   { module: 'Registry', page: '/registry', section: 'Item-by-item table',       verdict: 'PASS' },
-  { module: 'Registry', page: '/registry/artifact/:id', section: 'Artifact detail', verdict: 'PASS' },
+  { module: 'Registry', page: '/registry/artifact/:id', section: 'Artifact detail (deferred to next Registry sub-batch)', verdict: 'FAIL', rework_track: 'B2.b · Registry artifact sub-batch (after Owner sign-off on B1+B2)' },
 
   // Use Data
   { module: 'Use Data', page: '/use-data', section: 'Use Your Data hero',       verdict: 'PASS' },

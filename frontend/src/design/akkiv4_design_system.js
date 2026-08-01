@@ -8,7 +8,63 @@
  * These tokens are the SINGLE source of truth for palette + typography
  * across every sub-cycle-1 screen. No screen may hardcode a color or
  * font — import from here.
+ *
+ * FIDELITY UPDATE 2026-08-01 (Owner ruling · defect cycle):
+ *   AKKI_V4_PROTO tokens below are the EXACT tokens extracted from the
+ *   Akki v4 Standalone HTML of record (SHA 2ab55d9f…). These are the
+ *   authoritative visual tokens for the new AkkiV4Shell + all v4-parity
+ *   pages built during batches B1–B10. Legacy AKKI_V4_PALETTE +
+ *   AKKI_V4_TYPOGRAPHY remain for pages not yet migrated.
  */
+export const AKKI_V4_PROTO = Object.freeze({
+  // Backgrounds
+  bodyBg:       '#F3F2E9',   // main body
+  cardBg:       '#FFFFFF',   // white cards / modals
+  sidebarBg:    '#EFEEE2',   // left rail
+  darkUi:       '#101E30',   // top-nav / CTAs (Ask Akki)
+  darkUiHover:  '#1A2C44',
+  paneLift:     '#FAF9F2',   // subtle lift under pills
+  // Ink
+  ink:          '#1A211D',   // primary text
+  ink2:         '#3E4642',   // secondary text
+  ink3:         '#6B7370',   // tertiary text
+  ink4:         '#8A918C',   // muted text / labels
+  ink5:         '#A0A69E',   // dormant caption
+  // Accents
+  wordmarkInk:  '#16304F',   // Akki wordmark color
+  heroInk:      '#131F30',   // hero display headings
+  navy:         '#1E3A5F',   // primary CTAs / active accents
+  navyHover:    '#16304F',
+  maroon:       '#7E3038',   // secondary CTAs / active link ink
+  maroonSoft:   '#E3CDC7',   // maroon underline
+  sage:         '#8A8F7C',   // labels + secondary
+  // Borders
+  borderCream:  '#E3E1D3',   // primary divider
+  borderWarm:   '#E7E4DC',   // card border
+  borderCool:   '#C9D2DF',   // hero underline
+  borderSoft:   '#F1EFE8',   // subtle inner divider
+  borderSlate:  '#ECE9E1',   // table row divider
+  // Semantic
+  success:      '#6B7C3E',
+  warn:         '#B07C2A',
+  refuse:       '#8C3A34',
+  dormant:      '#A0A69E',
+});
+
+export const AKKI_V4_PROTO_TYPE = Object.freeze({
+  // Font families (imported via Google Fonts stylesheet in index.html)
+  ui:     `'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif`,
+  hero:   `'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif`,
+  mono:   `'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace`,
+  // Semantic sizes (px)
+  wordmarkSize: '26px',
+  heroSize:     '34px',
+  bodySize:     '13px',
+  labelSize:    '11px',
+  microSize:    '10.5px',
+  metaSize:     '12px',
+});
+
 export const AKKI_V4_PALETTE = Object.freeze({
   cream:   '#F3F2E9',  // primary background
   navy:    '#16304F',  // primary text + access-control-denial visual

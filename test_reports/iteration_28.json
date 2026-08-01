@@ -1,0 +1,40 @@
+{
+  "summary": "Iteration 28 — Batch B1 (shell foundation) + B2 (Registry-as-default-landing) fidelity verification. Walked the full anon + signed-in flow via Playwright against the preview URL. 12/12 review items PASS. 90 individual assertions executed: 86 initial PASS, 4 initial 'FAIL' all re-verified as test-script artifacts (see notes below), not app defects. Backend health held at parity 36/36; sign-in and fresh registration both round-trip cleanly and land on /registry with the new AkkiV4Shell chrome. Registry V4 hero, tabs, stat strip, composition grid, item-by-item table, hatched-condition chip, run-census button, sample badges — all rendered per prototype. Sidebar nav routes all 6 modules without white screens; anon visits to auth-scoped modules render honest 'NOT AUTHORISED · auth_missing / Please sign in' inside the shell (not white). Retired-vocab gate clean on /, /registry, /connect, /govern, /prove, /team, /auth/login, /auth/register. Role literal 'ask_console_user' never leaks; fresh-registered viewer renders as 'VIEWER'.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "AkkiV4Header uses attribute name `data-testid-state` (kebab-case attribute) rather than a compound single attribute — works fine and query-selectable, but note the existing gate tests read it via getAttribute('data-testid-state'). Consistent across anon/checking/signed-in states.",
+    "RegistryV4Page fetches /api/registry/what_you_hold and /api/registry/opportunity_briefs on mount even for anon visitors; anon 401 response is swallowed silently and SAMPLE fixture is shown — Owner-compliant fallback, but produces console-noise 401s on anon /registry load (16 in one visit). Consider gating the fetch on identity !== false to reduce network noise and observability signal-to-noise.",
+    "AkkiV4Shell's Ask Akki CTA correctly disabled with title tooltip explaining B7; wordmark links to /registry (correct — Registry is the default landing per B2)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (Master admin) + fresh registered b1b2-verify-<ts>@example.com / verifypass123 (Viewer)",
+  "seed_data_creation": "One new registered user b1b2-verify-<timestamp>@example.com (role: ask_console_user → rendered as 'VIEWER') — for signup verification, Canon-safe.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "B1+B2 verified end-to-end and Owner-ready for review at the preview. Chrome (216px sidebar + 66px rich header) + Registry-as-landing all match prototype. Auth-strip anon/signed-in states + sidebar role tile + Sign out from both loci all work. Backend readyz 36/36 held constant. Owner hold: HOLD before B3–B10 proceed. When B3 lands, next agent should re-run the retired-vocab gate on any new pages, plus verify the AkkiV4Shell chrome remains the single outer shell (NestedInAkkiV4ShellContext suppression of legacy AkkiShell continues to work).",
+  "test_artifacts_investigated": {
+    "B1.tagline_initial_fail": "HTML source contains 'AI &amp; Data Use' (entity-encoded); test asserted against page.content() raw HTML. Re-verified via document.body.innerText — 'AI & DATA USE / OPERATING SYSTEM' renders correctly per screenshot. NOT a defect.",
+    "NAV.connect|use-data|govern_not_blank_initial_fail": "Test asserted innerText length >500 chars for anon module visits. These three modules honestly render 'NOT AUTHORISED · auth_missing / Please sign in to continue.' inside the AkkiV4Shell chrome (227/273/305 chars). Header and sidebar visible; NOT a white screen. Signed in as admin, same routes render 4596/8284/8775 chars of module content. Threshold >500 was too strict for anon; the behavior is correct role-gating within the shell."
+  },
+  "verified_checklist": {
+    "B1_shell_anon_root_redirect_to_registry": "PASS (/ → /registry)",
+    "B1_header_wordmark_tagline_breadcrumbs_census_ask_notif": "PASS (all 8 testids visible; wordmark='Akki'; tagline renders; census='Census #4 · Jul 21'; Ask Akki disabled with B7 tooltip)",
+    "B1_auth_strip_anon_signin_signup_links": "PASS (state='anon'; /auth/login and /auth/register hrefs correct)",
+    "B1_sidebar_216px_six_nav_items": "PASS (Connect · Registry · Use Data · Govern · Prove · Team all present + data-testid)",
+    "B1_signin_integrity_admin_round_trip": "PASS (admin@rms → /registry, state='signed-in', MASTER ADMIN label, sidebar role tile + signout button, no role literal leak, signout returns to anon)",
+    "B1_fresh_registration_viewer_role": "PASS (b1b2-verify-<ts>@example.com → /registry, VIEWER label, no 'ask_console_user' in DOM)",
+    "B1_sidebar_navigation_all_6_modules": "PASS (Connect → /connect · Registry → /registry · Use Data → /use-data · Govern → /govern · Prove → /prove · Team → /team; shell header persists; no white screens; anon-restricted modules render honest role-gating inside the shell)",
+    "B2_registry_v4_landing_hero": "PASS (registry-v4-page + hero exact text 'Milele Bank holds 86.4 TB across 12 sources — 78% measured, with 6 opportunities standing ready.'; helper line 'First census May 12, 2026 · Census #4 run Jul 21 by J. Mwangi · How the estate is measured'; Run census button on right)",
+    "B2_tabs_measure_record": "PASS (registry-tab-strip with two tabs; measure default active; clicking record shows table with hatched chip; back to measure works)",
+    "B2_measure_panel_stat_strip_composition_grid": "PASS (6 stat tiles Volume/Sources/Types/Rings/Rights/Measured; composition grid 1.5fr:1fr; view select present; What it can do CTAs 0 and 1 visible)",
+    "REGRESSION_retired_vocab_gate": "PASS (no retired terms on /, /registry, /connect, /use-data, /govern, /prove, /team, /auth/login, /auth/register)",
+    "REGRESSION_existing_routes_render_in_new_shell": "PASS (all 6 module routes render AkkiV4Shell chrome + module content without nested inner shell; anon-gated modules render honest 'Not authorised' panel)",
+    "REGRESSION_backend_health": "PASS (/api/health 200 ok; /api/readyz {status:ready, parity_count:36, expected_parity:36, db:ok})",
+    "REGRESSION_UI1E_access_register_sample_revoked": "PASS (as admin, /team/access-register shows 'revoked' + SAMPLE badges in first 60 rows)",
+    "REGRESSION_UI1E_registry_tile_in_sidebar": "PASS (akki-v4-nav-registry testid present + clickable)"
+  }
+}
