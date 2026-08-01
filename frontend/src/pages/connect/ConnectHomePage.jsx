@@ -12,7 +12,7 @@
  * Gate: NO governance content on this page. Connect LINKS, never duplicates.
  */
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../apiClient';
 import { AkkiShell } from '../../design/AkkiShell';
 import { AKKI_V4_PALETTE, AKKI_V4_TYPOGRAPHY } from '../../design/akkiv4_design_system';
@@ -271,6 +271,7 @@ function StateBadge({ state }) {
 
 
 function RecordTable({ rows }) {
+  const navigate = useNavigate();
   return (
     <section
       data-testid="connect-record-table"
@@ -313,7 +314,14 @@ function RecordTable({ rows }) {
               data-testid={`connect-source-row-${r.source_id}`}
               data-row-state={r.state}
               data-row-sample={r.is_sample ? 'true' : 'false'}
-              style={{ borderTop: `1px solid ${AKKI_V4_PALETTE.mist}` }}
+              onClick={(ev) => {
+                // Canon §4.1 · 'row click opens the source profile'.
+                // Ignore clicks that originate inside an inner <a> — that
+                // link handles its own navigation.
+                if (ev.target.closest && ev.target.closest('a')) return;
+                navigate(`/connect/source/${r.source_id}`);
+              }}
+              style={{ borderTop: `1px solid ${AKKI_V4_PALETTE.mist}`, cursor: 'pointer' }}
             >
               <td style={tdStyle}>
                 <Link
