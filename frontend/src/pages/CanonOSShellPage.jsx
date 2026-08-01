@@ -3,6 +3,9 @@
  * Canon §3.1 fixed nav order:
  *   Connect · Registry · Use Data · Govern · Prove · Team
  *
+ * All six modules light after UI-1-E (Team). The nav strip renders in
+ * Canon order (Connect first, Team last), retired vocabulary purged.
+ *
  * Rules honoured here:
  *   §3.1  — six-tile nav, one row, cream ground.
  *   §3.2  — role-gating; entries for not-yet-rebuilt modules render as
@@ -71,10 +74,10 @@ export const CANON_NAV = Object.freeze([
   {
     id: 'team',
     label: 'Team',
-    tagline: 'Access register · key-grant admin · role scoping.',
-    path: null,
-    state: 'dormant',
-    section: 'Canon §5 · UI-1-E fold',
+    tagline: 'Approval surface · access register · constitutional seats.',
+    path: '/team',
+    state: 'lit',
+    section: 'Canon §3.2 · UI-1-E',
   },
 ]);
 
@@ -244,9 +247,8 @@ export default function CanonOSShellPage() {
       >
         <strong style={{ color: AKKI_V4_PALETTE.navy }}>What this preview serves</strong> —
         the Canon OS shell (Owner ruling 2026-07-31 preview-hygiene · standing).
-        The root serves the new build only. Five modules are Canon-conformant
-        and reachable (Connect · Registry · Use Data · Govern · Prove);
-        Team renders dormant until UI-1-E lands.
+        The root serves the new build only. All six modules are Canon-conformant
+        and reachable (Connect · Registry · Use Data · Govern · Prove · Team).
         No legacy landing renders here.
       </p>
 

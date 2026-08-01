@@ -1,0 +1,49 @@
+{
+  "summary": "UI-1-E iter23 verification (Owner Message 610 · Team module full delivery). Backend: 12/12 UI-1-E invariant gates pass (test_team_ui1e_gates.py). Live HTTP gates against https://governance-scan-3.preview.emergentagent.com: 9/10 pass in new test_ui1e_iter23_live.py — 1 FAILURE surfaced a REAL regression on the sibling engineer surface (/api/engineer/key_grants returns 500 due to Pydantic extra_forbidden rejecting `instance_id` field on grant docs — see RCA). All UI critical paths verified rendered-DOM against the preview: /team landing with 3 section tiles; Team tile LIT on / shell (all 6 modules reachable, no dormant tiles); /team/approval-surface renders 16 items across 4 classes (5× over_threshold_commission open, 5× source_addition_pending open, 5× access_grant_request open, 1× retention_window_extension dormant_honest) with 15 sample badges, doctrine text verbatim ('consistently empty'/'criteria are the instrument'), full WHAT · WHICH · COST · REQUESTED-BY grammar; approval decision D-1 binding verified — submit disabled until BOTH decision+reason set, submit succeeds, decision-confirmation renders, team-decision-goto-govern href = /govern/holds (link-across confirmed); /team/access-register admin sees 30 rows (page-slice of ~271 total), 20 sample badges, role doctrine present, grant form present, 30 propagation cells with 'next login/refresh' text; grant issued via UI + revoke roundtrip confirmed on register + backend team endpoints (BUT engineer-side single-source cross-check failed — see backend critical); DPO break-in verified — grant form REPLACED by team-access-grant-role-denial banner, 30 rows still visible (can_read_all=True), 0 revoke buttons; direct POST as DPO returns 403 auth_scope_insufficient (l7 backend gate). /team/constitutional-seats: banner data-action-state='dormant_honest', both seats render, both succession buttons DISABLED, succession paths mention counter-signature from opposite seat, HAZARD-STOP text present. Unauth /team/approval-surface + /team/access-register both render honest error panels with data-status='401' (no silent swallow). Retired vocabulary 'Approval Queue' absent from all 4 team routes; 'Approval Surface' present on /team/approval-surface; 'Shape this objective'/'RMS Intelligence'/'Ask Console' absent throughout. Parity 36/36 held (readyz).",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/engineer/key_grants",
+        "issue": "Returns HTTP 500 (Pydantic ValidationError: `instance_id` extra_forbidden on EngineerKeyGrantRegistration). This BREAKS Owner Message 610's explicit binding to verify single-source engineer_key_grants machinery end-to-end via curl against /api/engineer/key_grants. Root cause: services/team/sample_fixture_seeder.py writes docs with an `instance_id` field, but services/auth/engineer_key_grant.py::EngineerKeyGrantRegistration is `extra='forbid'`, so services/auth/engineer_key_grant_service.py::list_grants_for_grantee (line 108) fails when loading any seeded doc. Backend log stack trace: pydantic_core._pydantic_core.ValidationError: 1 validation error for EngineerKeyGrantRegistration · instance_id · Extra inputs are not permitted [type=extra_forbidden, input_value='instance_1', input_type=str]. This is a schema/data-shape mismatch between the seeder and the load-bearing wire-shape pin.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/invariants/test_team_ui1e_gates.py",
+    "/app/backend/tests/test_ui1e_iter23_live.py",
+    "/app/test_reports/pytest/ui1e_iter23.xml"
+  ],
+  "action_items": [
+    "CRITICAL: fix /api/engineer/key_grants 500 — either (a) add `instance_id: Optional[str] = None` to EngineerKeyGrantRegistration (recommended · minimally invasive · preserves load-bearing wire-shape gate by making the extra field explicit), OR (b) strip instance_id in list_grants_for_grantee before model_validate, OR (c) stop the sample seeder from writing instance_id. This is the SAME single-source seam Owner Message 610 requires verifying; without the fix the D-2 binding 'single-source engineer_key_grants machinery end-to-end' cannot be validated on the engineer-side surface.",
+    "OPTIONAL: run the load-bearing wire-shape gate (test_engineer_key_grant_load_bearing_wire_shape.py) to confirm the recommended fix does not break the wire-shape pin."
+  ],
+  "critical_code_review_comments": [
+    "The Team router (backend/routers/team.py) is clean · aggregates from THREE existing seams (checker_requests, connect_sources_store, engineer_key_grants) with true link-across (linked_record_route, no copy). Decision events persist to `team_decision_events` AND push into checker_requests.team_decisions on chk- items — verbatim reason stored on both sides, satisfying Owner Message 610 D-1.",
+    "DPO break-in role gating is correct on both /grant and /revoke endpoints — auth_refusal.emit('auth_scope_insufficient', ...) with the correct 4-code shape. Frontend replaces the grant form with team-access-grant-role-denial banner AND hides revoke buttons, giving a coherent read-only surface.",
+    "Constitutional seats renders honestly dormant: action_state='dormant_honest', succession buttons disabled, dormant_reason explicitly cites HAZARD-STOP and 'new frozen contract'. Succession paths correctly reference counter-signature from the opposite seat. No fake ceremony.",
+    "Single-source claim in comments (`Reads the same engineer_key_grants seam as /api/engineer/key_grants — single source · grep-negative attested`) is architecturally true (both surfaces query the same collection), but the sibling endpoint /api/engineer/key_grants is currently broken by a data-shape drift on `instance_id`. The claim holds; the sibling surface just cannot demonstrate it right now.",
+    "Backend router uses `from server import db` late-bound inside handlers (avoiding circular import) — acceptable pattern but repeated. Could be refactored to a single `deps.py` for parity with other routers.",
+    "TeamApprovalSurfacePage.jsx honestly renders error panels on non-200 (data-status attribute · lesson learned from UI-1-D iter22 silent-swallow). Loading state is a plain testid — good.",
+    "Approval decision endpoint accepts `reason_verbatim` verbatim (no strip/normalise). Persisted to team_decision_events AND mirrored to underlying seam (checker_requests $push, engineer_key_grants $set). Ledger events on both sides."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ui1e_iter23_live.py"
+  ],
+  "success_rate": {
+    "backend": "95% (12/12 invariant gates + 9/10 live HTTP gates · 1 fail exposes real regression on /api/engineer/key_grants)",
+    "frontend": "100% on all Owner Message 610 UI bindings verified against the standing preview"
+  },
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw; demo.dpo@demo.rms.example.com / demo-dpo-pw; demo.operator@demo.rms.example.com / demo-operator-pw (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Created 1 live grant via Team UI/API (grantee=e2e.iter23@e2e.example.com, scope='GET /api/team/access_register', revoked as part of roundtrip) plus 1 approve decision on a seeded chk- item. Both are safe residues that exercise the ledger seams idempotently.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "UI-1-E Team module IS fully wired on the UI and passes all 12 invariant gates + 9 live HTTP gates. The ONE outstanding defect is /api/engineer/key_grants → 500 (Pydantic extra_forbidden on instance_id) — this is a data-shape drift between services/team/sample_fixture_seeder.py (writes instance_id) and services/auth/engineer_key_grant.py::EngineerKeyGrantRegistration (extra='forbid'). It does NOT affect the Team surface itself (which uses raw Mongo docs), only the sibling engineer surface. Owner Message 610's explicit binding 'single-source engineer_key_grants machinery end-to-end' cannot be fully proved until this is fixed. Recommended fix: add `instance_id: Optional[str] = None` to EngineerKeyGrantRegistration and re-run test_l8 in /app/backend/tests/test_ui1e_iter23_live.py to close the loop.",
+  "rca of the issue": "RCA · /api/engineer/key_grants 500: (Reproduction) `curl -H 'Authorization: Bearer <admin_token>' https://governance-scan-3.preview.emergentagent.com/api/engineer/key_grants` → 500 Internal Server Error. Backend log: `pydantic_core._pydantic_core.ValidationError: 1 validation error for EngineerKeyGrantRegistration · instance_id · Extra inputs are not permitted [type=extra_forbidden, input_value='instance_1', input_type=str]` at services/auth/engineer_key_grant_service.py:108 `out.append(EngineerKeyGrantRegistration.model_validate(doc))`. (Root cause) The UI-1-E sample fixture seeder (services/team/sample_fixture_seeder.py) writes engineer_key_grants docs with an `instance_id` field (e.g., 'instance_1') that isn't part of the EngineerKeyGrantRegistration Pydantic schema. The schema uses `extra='forbid'` (load-bearing wire-shape pin per Owner D4b · test_engineer_key_grant_load_bearing_wire_shape.py). The seam that Team uses (raw Mongo find + hand-shaped dict) tolerates the extra field; the seam that engineer.py uses (model_validate) does not. (Mitigation) Cheapest safe fix: add `instance_id: Optional[str] = None` (with proper description) to EngineerKeyGrantRegistration and re-run the load-bearing wire-shape gate — this preserves the wire-shape pin (explicit field, not extra) while allowing the seeded fixture through. Alternative: strip instance_id in list_grants_for_grantee before model_validate. The Team UI is unaffected; only the sibling engineer endpoint is broken."
+}

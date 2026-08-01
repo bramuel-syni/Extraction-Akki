@@ -212,6 +212,10 @@ from routers import registry as registry_router  # noqa: E402
 app.include_router(registry_router.router, prefix="/api")
 app.include_router(registry_router.prove_router, prefix="/api")
 
+# UI-1-E · Team module (approval surface · access register · constitutional seats).
+from routers import team as team_router  # noqa: E402
+app.include_router(team_router.router)  # `team_router.router` already carries prefix="/api/team"
+
 
 @app.on_event("startup")
 async def _startup() -> None:
@@ -303,6 +307,16 @@ async def _startup() -> None:
             seed_registry_prove_sample_fixtures_if_absent,
         )
         await seed_registry_prove_sample_fixtures_if_absent(_sample_ops)
+        # UI-1-E · Team surface sample fixtures (approval surface items +
+        # access-register grants). Idempotent.
+        from services.team.sample_fixture_seeder import (
+            seed_team_ui1e_fixtures_if_absent,
+        )
+        _team_ops = [
+            {"identity_email": op["email"], "identity_id": op["user_id"]}
+            for op in _sample_ops
+        ]
+        await seed_team_ui1e_fixtures_if_absent(_team_ops)
     except Exception:
         log.exception("rms.startup: async delivery substrate boot failed")
         raise

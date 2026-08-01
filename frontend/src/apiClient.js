@@ -231,6 +231,35 @@ export const api = {
     client
       .get(`/prove/trace/${encodeURIComponent(traceId)}`, { validateStatus: (s) => s >= 200 && s < 500 })
       .then((r) => ({ status: r.status, body: r.data })),
+  // UI-1-E · Team module (approval surface · access register · constitutional seats).
+  teamApprovalSurface: () =>
+    client
+      .get('/team/approval_surface', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  teamApprovalDecision: (itemId, decision, reasonVerbatim) =>
+    client
+      .post(`/team/approval_surface/${encodeURIComponent(itemId)}/decision`,
+        { decision, reason_verbatim: reasonVerbatim },
+        { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  teamAccessRegister: () =>
+    client
+      .get('/team/access_register', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  teamAccessGrant: (payload) =>
+    client
+      .post('/team/access_register/grant', payload, { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  teamAccessRevoke: (grantId, reasonVerbatim) =>
+    client
+      .post('/team/access_register/revoke',
+        { grant_id: grantId, reason_verbatim: reasonVerbatim },
+        { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
+  teamConstitutionalSeats: () =>
+    client
+      .get('/team/constitutional_seats', { validateStatus: (s) => s >= 200 && s < 500 })
+      .then((r) => ({ status: r.status, body: r.data })),
   // Phase 3 sub-cycle 2 — Memory Service + Registry (Owner ruling 2026-08-02).
   memoryListPlanes: () =>
     client

@@ -36,7 +36,7 @@ const RETIRED_TERMS = Object.freeze([
   'ask-first landing',
   'Objectives',
   'Ambitions',
-  'Approval Queue',
+  'Approval Queue',    // Owner UI-1-E: Canon vocab is "approval surface" / "Team"; "Approval Queue" as a NAME must not render.
   'Operator Home',
   'Engineer Register',
   'Extract',   // Owner R3: nav renders Use Data, not Extract.
@@ -80,19 +80,28 @@ describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
     expect(screen.getByTestId('canon-nav-label-team')).toHaveTextContent(/^Team$/);
   });
 
-  test('Team renders as DORMANT tile (state=dormant, no href) · Prove is LIT after UI-1-D', () => {
+  test('All six modules are REACHABLE after UI-1-E (no dormant tiles remain)', () => {
     renderShell();
-    const teamTile  = screen.getByTestId('canon-nav-tile-team');
-    // Team dormant tile is NOT wrapped in a `Link` — its testid variant is
-    // `canon-nav-tile-nolink-team`. The presence of that testid proves the
-    // tile is not reachable as a link from the shell.
-    expect(screen.getByTestId('canon-nav-tile-nolink-team')).toBeInTheDocument();
-    // The state pill declares dormant.
-    expect(teamTile.querySelector('[data-testid="canon-nav-state-dormant"]')).toBeTruthy();
-    // Prove was DORMANT pre-UI-1-D · it is LIT after UI-1-D · Owner directive.
-    const proveTile = screen.getByTestId('canon-nav-tile-prove');
-    expect(proveTile.querySelector('[data-testid="canon-nav-state-lit"]')).toBeTruthy();
-    expect(screen.queryByTestId('canon-nav-tile-nolink-prove')).toBeNull();
+    // All six module tiles are reachable Links (no nolink variants).
+    // Registry remains `partial` (Canon §8 sub-cycle 2) — reachable but not full.
+    // The other five are `lit`.
+    ['connect', 'registry', 'use-data', 'govern', 'prove', 'team'].forEach((id) => {
+      const tile = screen.getByTestId(`canon-nav-tile-${id}`);
+      expect(tile).toBeInTheDocument();
+      // Reachable: not a dormant nolink variant.
+      expect(screen.queryByTestId(`canon-nav-tile-nolink-${id}`)).toBeNull();
+      expect(tile.querySelector('[data-testid="canon-nav-state-dormant"]')).toBeNull();
+      // Either lit or partial (both are reachable states).
+      const isLitOrPartial =
+        tile.querySelector('[data-testid="canon-nav-state-lit"]') !== null ||
+        tile.querySelector('[data-testid="canon-nav-state-partial"]') !== null;
+      expect(isLitOrPartial).toBe(true);
+    });
+    // Only registry may be partial — the other five must be lit.
+    ['connect', 'use-data', 'govern', 'prove', 'team'].forEach((id) => {
+      const tile = screen.getByTestId(`canon-nav-tile-${id}`);
+      expect(tile.querySelector('[data-testid="canon-nav-state-lit"]')).toBeTruthy();
+    });
   });
 
   test('the Canon §11.1 verbatim binding line renders on the root', () => {
@@ -107,6 +116,6 @@ describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
     expect(strip).toBeInTheDocument();
     // Explicitly names Canon OS + lists the four lit modules.
     expect(strip).toHaveTextContent(/Canon OS shell/);
-    expect(strip).toHaveTextContent(/Connect · Registry · Use Data · Govern · Prove/);
+    expect(strip).toHaveTextContent(/Connect · Registry · Use Data · Govern · Prove · Team/);
   });
 });

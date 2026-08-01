@@ -31,6 +31,10 @@ import RegistryEstateMapPage from './pages/registry/RegistryEstateMapPage';
 import RegistryWhatYouHoldPage from './pages/registry/RegistryWhatYouHoldPage';
 import ProvePage from './pages/prove/ProvePage';
 import ProveWalkPage from './pages/prove/ProveWalkPage';
+import TeamLandingPage from './pages/team/TeamLandingPage';
+import TeamApprovalSurfacePage from './pages/team/TeamApprovalSurfacePage';
+import TeamAccessRegisterPage from './pages/team/TeamAccessRegisterPage';
+import TeamConstitutionalSeatsPage from './pages/team/TeamConstitutionalSeatsPage';
 // Phase 3 sub-cycle 3 — Govern module surfaces (Canon §7).
 import GovernHomePage from './pages/govern/GovernHomePage';
 import GovernRetentionPage from './pages/govern/GovernRetentionPage';
@@ -107,6 +111,11 @@ export default function App() {
           {/* Canon §9 · Prove — LIVE (UI-1-D 2026-08-02). */}
           <Route path="prove" element={<ProvePage />} />
           <Route path="prove/trace/:traceId" element={<ProveWalkPage />} />
+          {/* UI-1-E · Team surface routes (final UI-1 sub-cycle). */}
+          <Route path="team" element={<TeamLandingPage />} />
+          <Route path="team/approval-surface" element={<TeamApprovalSurfacePage />} />
+          <Route path="team/access-register" element={<TeamAccessRegisterPage />} />
+          <Route path="team/constitutional-seats" element={<TeamConstitutionalSeatsPage />} />
           {/* Canon §5 · Team — DORMANT (UI-1-E fold). */}
           <Route path="team" element={<TeamDormantPage />} />
           {/* Master Admin ceremony surfaces (kept live; reached from Govern for now). */}
