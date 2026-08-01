@@ -3,7 +3,25 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **UI-1-D FULLY CLOSED (iter22 · Owner Message 606 defect fixed) · Canon §5 Registry "What You Hold" + Canon §9 Prove built · Parity 36/36 · awaiting Owner independent re-verification**)
+## Current gate status (2026-08-02 · **UI-1 COMPLETE · UI-1-E CLOSED · SHELL FULLY LIT · Parity 36/36 · awaiting Owner independent verification of Team + carriage of UI-1 roll-up**)
+
+### UI-1-E close (2026-08-02) — Team module per Canon §3.2 + operating model A.5 (SLOT-3 fold-in)
+
+- **Section A · Approval Surface:** `/team/approval-surface` renders 4 item classes aggregated from 3 seams (checker_requests + connect_sources_store + engineer_key_grants) plus 1 dormant-honest class (retention_window_extension). Each item states WHAT · WHICH criterion · COST · WHO requested. Queue-length doctrine renders verbatim: *"Consistently empty → criteria may be too loose. Consistently full → too tight. The criteria are the instrument, the queue is its reading."*
+- **Approve/decline WITH REASON (Owner Message 610 D-1 · verbatim + link-across to Govern):** decision endpoint requires `reason_verbatim` (400 if missing); stores event in `team_decision_events` collection AND mirrors to `checker_requests.team_decisions[]` array (link-across, never copy). Frontend confirmation renders `Open the Govern record →` link.
+- **Section B · Access Register:** `/team/access-register` reads `engineer_key_grants` seam (single source per EE-R4). Grant/revoke endpoints DELEGATE to `services.auth.engineer_key_grant_service.register_grant + revoke_grant` — the SAME machinery `/api/engineer/key_grants/*` uses. Role gating per Canon §3.2: Master Admin R+Grants · DPO R · Operator/Analyst R (self). **UI-1-A retirement documented gap CLOSED.**
+- **Grant → login → propagation path verified end-to-end (Owner Message 610 explicit):** iter24 `test_p0_team_grant_engineer_single_source_roundtrip` proves Team-issued grants appear on `/api/engineer/key_grants?grantee_email=X` with same grant_id; revoke propagates revoked_at + revocation_reason to engineer surface.
+- **Section B · DPO break-in (Owner Message 610 D-2):** POST `/api/team/access_register/grant` as DPO returns 403 `auth_scope_insufficient` (correct auth-denial shape). Frontend replaces grant form with `team-access-grant-role-denial` banner for DPO. No revoke buttons render for DPO.
+- **Section C · Constitutional Seats:** `/team/constitutional-seats` renders Master Admin + DPO seats with holder emails. `action_state=dormant_honest`. Succession action buttons DISABLED; dormant reason mentions "HAZARD-STOP" and "new frozen contract" verbatim (adding a succession seam would require a new frozen contract → blocked). Succession-path narrative mentions counter-signature requirement.
+- **Team tile LIVE:** last dormant tile lit up. Canon OS shell fully lit (6 modules reachable · no nolink variants remain). Nav strip: `Connect · Registry · Use Data · Govern · Prove · Team`.
+- **Extended retired-vocab gate:** `"Approval Queue"` as NAME added to retired list. Canon vocab `"Approval Surface"` renders (positive assertion). All 4 team routes purge the retired name.
+- **Systemic sample-marking gate:** now covers 9 registered row-rendering surfaces (+2 Team: approval_surface + access_register) + 4 Prove action-required shapes.
+- **Seeded fixtures per identity:** 1 chk-* + 1 src-* + 1 pending grant + 2 active grants + 1 revoked grant · all `is_sample=True`. Engineer-schema-compatible so both Team and Engineer surfaces see them.
+- **Iter23 CRITICAL fix (regression on `/api/engineer/key_grants`):** 269 pre-existing docs had `instance_id` sidecar causing Pydantic `extra_forbidden`. Fixed via 3-layer: (1) Added `instance_id: Optional[str] = None` to `EngineerKeyGrantRegistration`; (2) `_drop_sidecars()` helper strips Team-only sidecars pre-validate; (3) `list_grants_for_grantee + get_grant` gracefully skip malformed legacy docs via `ValidationError`. Load-bearing wire-shape gate 8/8 pass. Iter24 verified 35/35 GREEN.
+- **SLOT-3 fold-in provenance:** `module_spec_06_team_module.md` never delivered. UI-1-E built to Canon §3.2 + operating model A.5 + Owner Message 604/610 dispatch. Filed in close report §SLOT-3. Owner disposition awaited.
+- **Backend pytest 1586 pass · 4 skip · 0 fail** (+16 UI-1-E cells since UI-1-D). **Frontend Jest 19 suites · 183 pass · 3 skipped · 0 fail** (+13 UI-1-E cells / 19 tests). **Parity 36/36 held constant.**
+- **Close report:** `/app/docs/rulings/ui1e_close_report_2026-08-02.md` (8 sections + WHAT-TO-LOOK-AT 12-step walk + FPR).
+- **UI-1 ROLL-UP:** `/app/docs/rulings/ui1_rollup_2026-08-02.md` (A · screens delivered · B · journeys walkable · C · gate totals · D · suite totals · E · stub vs wired per module · F · SLOT register state · G · open Owner items). Ready for Owner carriage.
 
 ### UI-1-D iter22 addendum (2026-08-02) — Owner Message 606 defect fix
 

@@ -53,14 +53,15 @@ On startup the backend idempotently seeds, per demo identity above (and permanen
 - **UI-1-B rule-change history** — two sample rows in `checker_requests`: `sample-rc-effective-retention` (effective · loosening_symmetric retention_windows 180d→365d), `sample-rc-suspended-source-standing` (suspended · tightening_unilateral canceled BEFORE effect · record preserved not deleted).
 - **UI-1-C connect fixtures** — 4 sample sources per identity (1 connected · 1 in_progress · 1 awaiting_credentials · 1 failed with honest plain-language reason) + 2 declared Class-D registries (sanctioned_partners · restricted_terms · empty + fail-closed).
 - **UI-1-D registry/prove fixtures (2026-08-02)** — per identity: 2 opportunity briefs (with `Put this to work` CTA), 3 gap-register rows (with `Queue this gap` CTA), 3 prove sample answers (one per response shape: answered · not_extracted_yet · evidence_cannot_support_it) + 1 fault fixture (something_broke).
+- **UI-1-E team fixtures (2026-08-02)** — per identity: 1 sample checker_requests row (over_threshold_commission · state=pending_master_admin), 1 sample connect_sources_store row (awaiting_credentials), 1 pending engineer-schema grant (pending_approval), 2 active engineer-schema grants, 1 revoked engineer-schema grant. All `is_sample=True`. Engineer-schema-compatible so both Team and Engineer surfaces see them.
 
 Every seeded row carries the sidecar `is_sample=true` flag on the persistence doc; surfaces render a prominent **SAMPLE** badge + wizard banner. **No unmarked fixtures.**
 
-## Backend health (UI-1-D · 2026-08-02)
+## Backend health (UI-1-E · 2026-08-02)
 - `/api/readyz` returns `{"status":"ready","parity_count":36,"expected_parity":36,"db":"ok"}`
 - `/api/system/build_info` returns `parity_count = 36`
-- Backend Pytest: **1544 passed · 2 skipped · 0 failed** (UI-1-D added 15 invariant gates).
-- Frontend Jest: **18 suites · 160 passed · 3 skipped-to-salvage · 0 failed** (UI-1-D added 13 gate cells / 19 tests).
+- Backend Pytest: **1586 passed · 4 skipped · 0 failed** (UI-1-E added 16 gates: 12 invariants + 4 iter23/24 live).
+- Frontend Jest: **19 suites · 183 passed · 3 skipped-to-salvage · 0 failed** (UI-1-E added 13 gate cells / 19 tests).
 
 ## Environment
 - Backend URL: `REACT_APP_BACKEND_URL` from `/app/frontend/.env` — used verbatim.
