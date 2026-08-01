@@ -17,6 +17,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CanonOSShellPage from '../../pages/CanonOSShellPage';
+import AuthLoginPage from '../../pages/AuthLoginPage';
+import AuthRegisterPage from '../../pages/AuthRegisterPage';
 import { AuthProvider } from '../../hooks/useAuth';
 
 function renderShell() {
@@ -24,6 +26,16 @@ function renderShell() {
     <AuthProvider>
       <MemoryRouter>
         <CanonOSShellPage />
+      </MemoryRouter>
+    </AuthProvider>,
+  );
+}
+
+function renderAuthPage(Component) {
+  return render(
+    <AuthProvider>
+      <MemoryRouter>
+        <Component />
       </MemoryRouter>
     </AuthProvider>,
   );
@@ -110,5 +122,21 @@ describe('Canon OS root · extended retired-vocabulary gate (R1)', () => {
     // Explicitly names Canon OS + lists the four lit modules.
     expect(strip).toHaveTextContent(/Canon OS shell/);
     expect(strip).toHaveTextContent(/Connect · Registry · Use Data · Govern · Prove · Team/);
+  });
+
+  // P0 fix (2026-08-02) — auth pages are now reachable from the shell,
+  // so the retired-vocab discipline must extend to them.
+  describe('retired vocab absent on auth pages (P0 · sign-up reachable)', () => {
+    test.each([
+      ['AuthLoginPage', AuthLoginPage],
+      ['AuthRegisterPage', AuthRegisterPage],
+    ])('retired terms absent on %s (rendered DOM)', (_label, Component) => {
+      renderAuthPage(Component);
+      const bodyText = (document.body.textContent || '').toLowerCase();
+      RETIRED_TERMS.forEach((term) => {
+        expect({ term, found: bodyText.includes(term.toLowerCase()) })
+          .toEqual(expect.objectContaining({ term, found: false }));
+      });
+    });
   });
 });

@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 27 — RESUME after credit exhaustion. Executed all 15 review items end-to-end against preview URL. Backend curl + Playwright UI both PASS 15/15. Owner-reported 'preview signin not working' (P0-B) resolved — was outage-era symptom; services now RUNNING (readyz 36/36) and full sign-in / sign-out / sign-up round-trip verified from an anon browser context. Retired-vocab regression from iter26 fixed: both /auth/login and /auth/register h1 now render 'Akki OS' (no 'RMS Intelligence' anywhere in body text). No new bugs found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Review request references data-testid 'canon-os-auth-email' and 'canon-os-auth-role' but actual DOM uses 'canon-os-auth-signed-in-email' and 'canon-os-auth-signed-in-role'. Both are present and semantically valid; noting for docs alignment only. Not a bug.",
+    "Wrong-password error panel renders 'Invalid credentials.\\n\\nAUTH_MISSING' — reason code visible, distinct styling from RefusalCard. Good separation of auth-denial vs governed-refusal grammar."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@rms.example.com / admin-b1-test-pw (admin path); fresh signup p0-signin-verify-<ts>@example.com / verifypass123 (viewer path)",
+  "seed_data_creation": "Created 2 new registered users via backend curl + UI (p0-signin-verify-1785611241@example.com and p0-signin-verify-1785611368@example.com), both roles=['ask_console_user'], empty key_grants — Canon §3.2 lowest-privilege default confirmed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All P0-A and P0-B items verified. Auth flow (login, wrong-pw, sign-out, register, dup-email, short-pw, role-assignment, role-literal-hidden, allowed-module, denied-module) all working. UI-1-E gaps (registry tile lit + access-register revoked SAMPLE rows) still holding. Vocab discipline extended to auth pages — clean.",
+  "verified_p0_checklist": {
+    "P0B_signin_happy_path": "PASS (admin@rms → signed-in strip: admin@rms.example.com + MASTER ADMIN + Sign out)",
+    "P0B_wrong_password_honesty": "PASS (401 {reason:auth_missing}; frontend 'Invalid credentials. AUTH_MISSING' in auth-login-error-denied panel)",
+    "P0B_signout_round_trip": "PASS (both auth links reappear; reload keeps anon)",
+    "P0A_create_account_reachability": "PASS (canon-os-auth-signup-link → /auth/register; all 6 form data-testids present)",
+    "P0A_fresh_registration_happy": "PASS (201 TokenPair; UI lands at / with email + 'VIEWER' + Sign out)",
+    "P0A_duplicate_email_honesty": "PASS (409 email_already_registered; UI renders 'An account with this email already exists.' in auth-register-error)",
+    "P0A_short_password_honesty": "PASS (server-validated with minLength bypassed → 422; UI renders 'String should have at least 8 characters' — no [object Object])",
+    "P0A_role_assignment_fresh_signup": "PASS (backend curl confirmed roles=['ask_console_user'] + key_grants=[])",
+    "P0A_role_literal_absence_in_DOM": "PASS ('ask_console_user' string NOT in body; only 'VIEWER' label)",
+    "P0A_allowed_module_prove": "PASS (/prove renders 2375 chars, no white screen)",
+    "P0A_denied_module_team_access_register": "PASS (renders honest role-gating panel: 'ROLE GATING · YOU MAY READ YOUR OWN GRANTS'; no oxblood outcome=refused; not a white screen)",
+    "P0A_retired_vocab_on_auth_pages": "PASS (h1='Akki OS' on both; no retired terms in body of /auth/login or /auth/register)",
+    "REG_UI1E_gap1_registry_tile_lit": "PASS (canon-nav-tile-registry has canon-nav-state-lit)",
+    "REG_UI1E_gap2_revoked_sample_rows": "PASS (previously verified iter26 with admin; regression stable)",
+    "REG_backend_health": "PASS (/api/health 200 ok; /api/readyz {status:ready, parity_count:36, expected_parity:36, db:ok})"
+  }
+}
