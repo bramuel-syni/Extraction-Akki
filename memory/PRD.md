@@ -3,7 +3,20 @@
 ## Original problem statement
 Stakeholder-directed "Read-First, Reuse-Always" build of the RMS Intelligence System on top of the `Akki-Executive-New-Arch` legacy substrate (now `/reference/akki-legacy/`). Phases G0 → G6 with strict doctrine: frozen contracts via Pydantic + JSON snapshots, all LLM calls through the SyniSense Shield chokepoint, spike vs production hours kept distinct, Rule-2 STOP if net-new code outgrows lifted-substrate lines.
 
-## Current gate status (2026-08-02 · **UI-1-D FULLY CLOSED · Canon §5 Registry "What You Hold" + Canon §9 Prove built · Parity 36/36 · awaiting Owner independent verification**)
+## Current gate status (2026-08-02 · **UI-1-D FULLY CLOSED (iter22 · Owner Message 606 defect fixed) · Canon §5 Registry "What You Hold" + Canon §9 Prove built · Parity 36/36 · awaiting Owner independent re-verification**)
+
+### UI-1-D iter22 addendum (2026-08-02) — Owner Message 606 defect fix
+
+Owner independently verified iter21: `/registry` PASS, `/prove` FAIL — page rendered ONLY the input field. Two root causes; both fixed in iter22:
+- **RC1 · page-level render gap:** `ProvePage.jsx` had no `useEffect` fetching seeded samples on mount. FIX: added `GET /api/prove/samples` backend endpoint returning 4 seeded envelopes with deterministic `trace_id`s. Added ProvePage `useEffect` + "Sample shape reference" section rendering all 4 badged shape cards by default.
+- **RC2 · silent-swallow of non-200:** `if (r.status === 200) setEnvelope(r.body)` discarded 401/403/5xx silently. FIX: non-200 responses on either `/prove/samples` or `/prove/ask` now render honest error panels (`prove-samples-error-panel` · `prove-ask-error-panel`) with `data-status` + reason verbatim.
+- **Systemic gate strengthened:** new Jest cells 14+15 assert the **page-level render path** (not just component-level render on props) — closes the exact gap that let iter21 pass Jest while failing live.
+- **New backend gates:** `test_d_p8_prove_samples_endpoint_returns_all_four_seeded_shapes` + `test_d_p9_prove_samples_trace_ids_resolve_via_prove_trace`.
+- **New seeded fixture:** NOT_EXTRACTED_YET sample (question about H2 cohort · queue_offered=true) + backfill of `sample_trace_id` + `prove_traces` mirror docs so Walk-a-Proof descends from every sample without a prior `/prove/ask`.
+- **Testid namespacing via `variant` prop:** sample shape cards use suffix `-sample` (e.g., `prove-shape-answered-sample`) so they coexist with live-outcome cards on the same page without collision.
+- **Walk-a-proof 3rd layer label** extended to include the API contract key: "3 · Raw facts (raw_facts) · verified rows" (was "Raw verified facts" — labelling nit only).
+- **testing_agent_v3_fork iter22 · `retest_needed: false`:** Frontend `18 suites · 164 pass · 3 skipped · 0 fail`. Backend `17/17 UI-1-D invariants + 9/9 iter22 live-preview gates`. Full backend `1557 pass · 2 skip · 0 fail` (1 network flake on `test_dpo_can_initiate_change_but_not_cancel` passes on isolated re-run). Parity **36/36 held constant**. All 4 sample cards + 4 badges + 4 live variants render for admin AND demo.operator. Silent-swallow eliminated. DB-2 visual invariant holds for both variants. `/registry` no regressions.
+- **Close report addendum:** appended to `/app/docs/rulings/ui1d_close_report_2026-08-02.md`.
 
 ### UI-1-D close (2026-08-02) — Registry ("What You Hold") + Prove per Canon §5 + §9
 

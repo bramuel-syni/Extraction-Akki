@@ -292,3 +292,41 @@ Sign in as **`admin@rms.example.com / admin-b1-test-pw`** at https://governance-
 - [x] Close report + journal + FPR rows + re-measured count.
 
 **UI-1-D ready for Owner independent verification before UI-1-E dispatch.**
+
+---
+
+## Addendum · Owner Message 606 defect fix (2026-08-02 iter22)
+
+Owner independently verified iter21 · **1/2 PASS**:
+- **PASS** — `/registry`: 4 axes + measured/unmeasured + `Put this to work` + `Queue this gap` + SAMPLE badges all rendered correctly.
+- **FAIL** — `/prove`: as admin, page rendered ONLY the input field. No seeded sample cards. Live query submission produced no rendered card either.
+
+**Root cause 1 (page-level render gap · systemic gate blindspot).** `ProvePage.jsx` had no `useEffect` fetching seeded samples on mount. The page rendered its input + a conditional "if envelope { … }" — never blank for componentry, but the **page-level fetch/render path** was silent. The systemic gate walked FIXTURE-CAPABLE row-rendering surfaces on mount; `/prove` is a query surface (action-required), so it was covered by 4 component-level cells in `ui1d_gates.test.js` — those asserted "shape card renders when handed props", not "page fetches and renders the shape reference on mount". Owner-visible surface presented as empty.
+
+**Root cause 2 (silent-swallow bug on non-200).** `if (r.status === 200) setEnvelope(r.body)` discarded 401/403/5xx responses silently. When a stale/absent token hit `/api/prove/ask`, the frontend received a 401 but rendered NOTHING — no outcome card, no error message. Same defect on `/api/prove/samples` fetch (if it had existed).
+
+**Fixes applied (iter22, all landed 2026-08-02):**
+
+1. **New backend endpoint** `GET /api/prove/samples` — returns 4 seeded envelopes (one per shape) with deterministic `trace_id`s (`trc-sample-{qhash}`). Backend cells `test_d_p8_prove_samples_endpoint_returns_all_four_seeded_shapes` and `test_d_p9_prove_samples_trace_ids_resolve_via_prove_trace` gate the contract.
+2. **New NOT_EXTRACTED_YET seeded sample** in `sample_fixture_seeder.py` (question about H2 partner activation cohort · queue_offered=true · deterministic gap_id). The seeder also backfills `sample_trace_id` onto already-seeded docs (idempotent) and mirrors each sample envelope into the `prove_traces` collection so `/api/prove/trace/{sample_trace_id}` resolves without a prior `/prove/ask`.
+3. **ProvePage default render** now includes a "Sample shape reference" section that fetches `/api/prove/samples` on mount and renders 4 badged shape cards below the input form. The 4 cards use `variant="sample"` prop, which suffixes their testids with `-sample` (e.g., `prove-shape-answered-sample`) to permit coexistence with the live-outcome card (variant=live · canonical testids).
+4. **Honest non-200 rendering** — non-200 responses on either `/prove/samples` or `/prove/ask` now render an inline error panel (`prove-samples-error-panel` · `prove-ask-error-panel`) with `data-status` carrying the actual HTTP code and reason verbatim from the response. **Silent-swallow eliminated.**
+5. **Systemic gate strengthened** — new Jest cells 14 (`gate_prove_page_default_render_four_seeded_sample_shape_cards`) and 15 (`gate_prove_ask_non_200_response_renders_honest_error_never_silent`) mount `ProvePage` as-is and assert the **page-level render path** — not just component-level render when handed props. This closes the exact gap Owner flagged.
+
+**Post-fix verification (testing_agent_v3_fork iter22 · `retest_needed: false`):**
+- Backend: 17/17 UI-1-D invariant gates green (+2 new: p8, p9) · 9/9 new live-preview HTTP gates green in `tests/test_ui1d_iter22_live.py`.
+- Frontend Jest: 18 suites · 164 pass · 3 skipped · 0 fail (+2 UI-1-D cells / 4 tests since iter21).
+- Frontend rendered-DOM (live preview):
+  - Admin default `/prove` render: **4/4 sample cards present · 4/4 shape testids namespaced with `-sample` · 4/4 sample banners with `data-sample-badge=true`** — the fault-channel sample banner (missing in iter21) now RENDERED and badged.
+  - Live-query outcomes verified for all 4 shapes: `prove-shape-answered`, `prove-shape-not-extracted-yet` (with `prove-queue-this-gap-btn`), `prove-shape-evidence-cannot-support`, `prove-shape-something-broke`.
+  - Live and sample variants **coexist** on the page.
+  - Unauth `/prove` renders `prove-samples-error-panel data-status=401` with reason "auth_missing / Authentication required" — never silent.
+  - Unauth submit renders `prove-ask-error-panel data-status=401` — never silent.
+  - **DB-2 visual invariant holds for BOTH sample and live variants** — fault card computed styles `bg=rgb(22,48,79) border-left rgb(126,48,56) 6px` vs refusal card `bg=parchment border rgb(176,124,42) 2px` — divergent.
+  - Walk-a-proof from ANSWERED sample card → `/prove/trace/trc-sample-0f7a043d179c` → 3 layers render → close returns to `/prove`.
+  - Cross-identity `demo.operator` sees 4/4 sample cards (per-identity seeding held).
+  - `/registry` regression: 4/4 axes · 10 briefs · 24 gap CTAs · 45 SAMPLE badges · retired vocab absent.
+  - Parity **36/36 live**.
+- **Micro-fix in this addendum:** walk-a-proof 3rd-layer label extended to include the API contract key: label now reads *"3 · Raw facts (raw_facts) · verified rows"* — the raw layer key is visible in the rendered heading (was previously "Raw verified facts" · a labelling nit only, never a functional defect).
+
+**Iter22 close verdict:** both Owner Message 606 defects fixed at the correct architectural layer. Systemic gate strengthened so this class of defect (page-level render vs component-level render) is caught by Jest going forward.

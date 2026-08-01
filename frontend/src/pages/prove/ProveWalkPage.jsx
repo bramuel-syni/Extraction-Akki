@@ -96,7 +96,7 @@ export default function ProveWalkPage() {
               color: AKKI_V4_PALETTE.sage, textTransform: 'uppercase',
               letterSpacing: '0.08em', marginBottom: '6px',
             }}>
-              {i + 1} · {layer.layer === 'claim' ? 'Claim' : layer.layer === 'reasoning' ? 'Reasoning' : 'Raw verified facts'}
+              {i + 1} · {layer.layer === 'claim' ? 'Claim' : layer.layer === 'reasoning' ? 'Reasoning' : 'Raw facts (raw_facts) · verified rows'}
             </div>
             <div style={{ fontSize: '0.95rem', color: AKKI_V4_PALETTE.ink, marginBottom: '8px' }}>
               {layer.text}
