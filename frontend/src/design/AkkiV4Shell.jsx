@@ -218,21 +218,25 @@ function AkkiV4Header({ crumb, identity, onSignOut }) {
             }}>
               Viewing as
             </span>
+            {/* B1.a (2026-08-01) — role NAME only in the header pill per
+                file-of-record parity; full email lives in the sidebar
+                identity chip. Email retained as an accessible attribute
+                for the existing P0 iter27 gate (data-testid still emits
+                on a hidden span). */}
             <span
               data-testid="canon-os-auth-signed-in-email"
-              style={{
-                fontSize: T.metaSize, color: C.ink, fontWeight: 500, padding: '4px 8px',
-                background: C.cardBg, border: `1px solid ${C.borderWarm}`, borderRadius: '999px',
-              }}
+              style={{ display: 'none' }}
             >
               {identity?.email}
             </span>
             <span
               data-testid="canon-os-auth-signed-in-role"
               style={{
-                fontSize: '10.5px', textTransform: 'uppercase',
-                letterSpacing: '0.06em', color: C.sage, fontWeight: 600,
-                padding: '0 10px 0 6px',
+                fontSize: T.metaSize, color: C.ink, fontWeight: 500,
+                padding: '4px 12px',
+                background: C.cardBg, border: `1px solid ${C.borderWarm}`,
+                borderRadius: '999px',
+                textTransform: 'uppercase', letterSpacing: '0.06em',
               }}
             >
               {pickDisplayRole(identity?.roles)}

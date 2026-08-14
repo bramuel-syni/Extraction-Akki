@@ -54,7 +54,15 @@ const PARITY_CHECKLIST = Object.freeze([
   { module: 'Registry', page: '/registry', section: 'Measure stat strips',      verdict: 'PASS' },
   { module: 'Registry', page: '/registry', section: 'Composition grid 1.5fr:1fr', verdict: 'PASS' },
   { module: 'Registry', page: '/registry', section: 'Item-by-item table',       verdict: 'PASS' },
-  { module: 'Registry', page: '/registry/artifact/:id', section: 'Artifact detail (deferred to next Registry sub-batch)', verdict: 'FAIL', rework_track: 'B2.b · Registry artifact sub-batch (after Owner sign-off on B1+B2)' },
+  { module: 'Registry', page: '/registry/artifact/:id', section: 'Artifact detail (B2.b prototype-parity)', verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
+
+  // Connect — B3 landed 2026-08-01 (ConnectV4Page mounted at /connect).
+  { module: 'Connect', page: '/connect', section: 'Hero row (srcPending / srcAllConnected)', verdict: 'PASS' },
+  { module: 'Connect', page: '/connect', section: 'Configuration-lock strip (dark navy)',    verdict: 'PASS' },
+  { module: 'Connect', page: '/connect', section: 'Deploy facts panel (togglable)',          verdict: 'PASS' },
+  { module: 'Connect', page: '/connect', section: '3-tile stat strip (Connections · Last sync · Egress)', verdict: 'PASS' },
+  { module: 'Connect', page: '/connect', section: "The record 4-col table (Source · Protocol · Cadence · State)", verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
+  { module: 'Connect', page: '/connect', section: 'Custody footer + Govern cross-link', verdict: 'PASS' },
 
   // Use Data
   { module: 'Use Data', page: '/use-data', section: 'Use Your Data hero',       verdict: 'PASS' },
@@ -92,9 +100,20 @@ const PARITY_CHECKLIST = Object.freeze([
 
   // Team
   { module: 'Team', page: '/team/users-simple', section: 'Manage Users table',  verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
-  { module: 'Team', page: '/team/approval-surface', section: 'Approval surface (UI-1-E extension)', verdict: 'DEVIATION_BEYOND_PROTOTYPE', rework_track: 'Owner-carried UI-1-E' },
-  { module: 'Team', page: '/team/access-register', section: 'Access register (UI-1-E extension)', verdict: 'DEVIATION_BEYOND_PROTOTYPE', rework_track: 'Owner-carried UI-1-E' },
-  { module: 'Team', page: '/team/constitutional-seats', section: 'Constitutional seats + succession', verdict: 'PLACEMENT_DELTA', rework_track: 'Awaiting Owner arbitration (Govern vs Team home)' },
+  // Connect — legacy sub-pages still under B3.b consideration (source-profile, new-source, rules, setup).
+  { module: 'Connect', page: '/connect/source/:id', section: 'Source profile drill-down',      verdict: 'FAIL', rework_track: 'B3.b · Connect sub-pages sub-batch (post-B3)' },
+  { module: 'Connect', page: '/connect/new',        section: 'New-source wizard',              verdict: 'FAIL', rework_track: 'B3.b · Connect sub-pages sub-batch (post-B3)' },
+  { module: 'Connect', page: '/connect/rules',      section: 'Connect-side rule table',        verdict: 'FAIL', rework_track: 'B3.b · Connect sub-pages sub-batch (post-B3)' },
+  { module: 'Connect', page: '/connect/setup',      section: 'Connect setup instructions',     verdict: 'FAIL', rework_track: 'B3.b · Connect sub-pages sub-batch (post-B3)' },
+
+  // Connect legacy landing wrapper (retained under /connect/legacy for salvage).
+  { module: 'Connect', page: '/connect/legacy',     section: 'Legacy Connect landing (salvage)', verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
+
+  // Placement rulings recorded 2026-08-01 (owner_rulings_ledger_2026-08-01_post_b1b2.md).
+  { module: 'Govern', page: '/govern/setup/succession', section: 'Succession seat (file governs placement · lands in B5/B6)', verdict: 'FAIL', rework_track: 'B5/B6 · Govern part 2 (rehome from /team/constitutional-seats)' },
+  { module: 'Team', page: '/team/approval-surface', section: 'Approval surface (Canon §9.2 retained under file+canon rule)',   verdict: 'PASS' },
+  { module: 'Team', page: '/team/access-register',  section: 'Access register (Canon §9.2 retained under file+canon rule)',    verdict: 'PASS' },
+  { module: 'Team', page: '/team/constitutional-seats', section: 'Constitutional seats (will redirect to /govern/setup/succession per placement ruling)', verdict: 'PLACEMENT_DELTA', rework_track: 'B5/B6 · Govern part 2 (redirect after Govern rehome)' },
 
   // Auth
   { module: 'Auth', page: '/auth/login', section: 'Login (no analog in prototype)', verdict: 'DEVIATION_LIVE_DATA_ONLY', rework_track: null },
@@ -151,9 +170,9 @@ describe('Frontend fidelity · per-page parity standing gate', () => {
     // /app/docs/rulings/frontend_fidelity_defect_cycle_audit_2026-08-01.md
     // and will be folded into this gate row-by-row across Batches B1–B10.
     expect(counts.PASS).toBeGreaterThanOrEqual(30);
-    expect(counts.FAIL).toBeLessThanOrEqual(8);
-    // Total row count must match the audit-doc's initial parity table.
-    expect(PARITY_CHECKLIST.length).toBe(51);
+    expect(counts.FAIL).toBeLessThanOrEqual(12);
+    // Total row count synchronised with the audit doc + B1.a/B2.b/B3 flips.
+    expect(PARITY_CHECKLIST.length).toBe(63);
   });
 });
 

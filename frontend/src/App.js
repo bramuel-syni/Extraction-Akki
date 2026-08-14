@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Legacy `/` visitors redirect to `/registry` (the prototype default).
 import AkkiV4ShellLayout from './design/AkkiV4ShellLayout';
 import RegistryV4Page from './pages/registry/RegistryV4Page';
+import RegistryArtifactV4Page from './pages/registry/RegistryArtifactV4Page';
+import ConnectV4Page from './pages/connect/ConnectV4Page';
 // Retired: CanonOSShellPage — kept as file for salvage until batch B10 close.
 // Do not import; the six-tile grid is off the live tree.
 import TraceReceiptPage from './pages/trace/TraceReceiptPage';
@@ -75,9 +77,11 @@ export default function App() {
             <Route path="registry" element={<RegistryV4Page />} />
             <Route path="registry/legacy" element={<RegistryWhatYouHoldPage />} />
             <Route path="registry/estate-map" element={<RegistryEstateMapPage />} />
+            <Route path="registry/artifact/:artifactId" element={<RegistryArtifactV4Page />} />
 
-            {/* Canon §4 · Connect. */}
-            <Route path="connect" element={<ConnectHomePage />} />
+            {/* Canon §4 · Connect. Prototype-parity page landed B3 2026-08-01. */}
+            <Route path="connect" element={<ConnectV4Page />} />
+            <Route path="connect/legacy" element={<ConnectHomePage />} />
             <Route path="connect/new" element={<ConnectNewSourcePage />} />
             <Route path="connect/rules" element={<ConnectRulesPage />} />
             <Route path="connect/source/:sourceId" element={<ConnectSourceProfilePage />} />
